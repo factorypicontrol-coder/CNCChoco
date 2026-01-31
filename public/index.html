@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CNC Chocolate Engraver</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background: linear-gradient(90deg, #e94560 0%, #0f3460 100%);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(233, 69, 96, 0.3);
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    nav {
+      background: rgba(15, 52, 96, 0.8);
+      padding: 10px 20px;
+      display: flex;
+      gap: 5px;
+    }
+
+    nav button {
+      background: transparent;
+      border: none;
+      color: #ecf0f1;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    nav button:hover, nav button.active {
+      background: #e94560;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .view {
+      display: none;
+      padding: 20px 0;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .card h2 {
+      margin-bottom: 20px;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .stat-card.success {
+      background: linear-gradient(135deg, rgba(17, 153, 142, 0.2) 0%, rgba(56, 239, 125, 0.2) 100%);
+      border-color: rgba(56, 239, 125, 0.3);
+    }
+
+    .stat-card.warning {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(251, 191, 36, 0.2) 100%);
+      border-color: rgba(251, 191, 36, 0.3);
+    }
+
+    .stat-card.danger {
+      background: linear-gradient(135deg, rgba(235, 51, 73, 0.2) 0%, rgba(244, 92, 67, 0.2) 100%);
+      border-color: rgba(244, 92, 67, 0.3);
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+    }
+
+    /* Queue Table */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+      background: rgba(0, 0, 0, 0.2);
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .status-badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-Pending {
+      background: linear-gradient(135deg, #f59e0b, #fbbf24);
+      color: #1a1a2e;
+    }
+
+    .status-Printing {
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
+      color: white;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .status-Completed {
+      background: linear-gradient(135deg, #10b981, #34d399);
+      color: white;
+    }
+
+    .status-Cancelled_by_User, .status-Cancelled_by_Admin {
+      background: linear-gradient(135deg, #ef4444, #f87171);
+      color: white;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      font-size: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    /* Config Styles */
+    .config-section {
+      margin-bottom: 30px;
+    }
+
+    .config-section h3 {
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+      color: #fff;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      padding: 12px 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .status-dot.connected {
+      background: #38ef7d;
+      box-shadow: 0 0 10px rgba(56, 239, 125, 0.5);
+    }
+
+    .status-dot.disconnected {
+      background: #ef4444;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar select {
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+    }
+
+    /* Bulk Actions */
+    .bulk-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .bulk-actions.hidden {
+      display: none;
+    }
+
+    .bulk-actions span {
+      font-weight: 500;
+    }
+
+    /* Live indicator */
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(16, 185, 129, 0.2);
+      border-radius: 20px;
+      font-size: 0.85rem;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Alert Messages */
+    .alert {
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.2));
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: #34d399;
+    }
+
+    .alert-error {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(248, 113, 113, 0.2));
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #f87171;
+    }
+
+    .alert-info {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(96, 165, 250, 0.2));
+      border: 1px solid rgba(59, 130, 246, 0.5);
+      color: #60a5fa;
+    }
+
+    #alertContainer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      max-width: 400px;
+    }
+
+    /* Checkbox styling */
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #667eea;
+    }
+
+    /* Print button in row */
+    .print-btn-cell {
+      white-space: nowrap;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="alertContainer"></div>
+
+  <header>
+    <h1>CNC Chocolate Engraver</h1>
+    <div class="header-buttons">
+      <button class="btn btn-success" onclick="printNext()" id="printNextBtn">Print Next</button>
+      <button class="btn btn-primary" onclick="showView('detail'); clearForm();">Create Job</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="active" onclick="showView('queue')">Queue</button>
+    <button onclick="showView('stats')">Statistics</button>
+    <button onclick="showView('config')">Configuration</button>
+    <button onclick="showView('apidocs')">API Docs</button>
+  </nav>
+
+  <div class="container">
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-indicator">
+        <span class="status-dot disconnected" id="connectionDot"></span>
+        <span id="connectionStatus">Disconnected</span>
+      </div>
+      <div id="deviceInfo"></div>
+      <button class="btn btn-secondary btn-sm" onclick="toggleConnection()" id="connectBtn">Connect</button>
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span>Live</span>
+      </div>
+    </div>
+
+    <!-- Queue View -->
+    <div id="queueView" class="view active">
+      <div class="card">
+        <h2>Job Queue</h2>
+        <div class="filter-bar">
+          <label>Filter:</label>
+          <select id="statusFilter" onchange="loadQueue()">
+            <option value="">All Jobs</option>
+            <option value="Pending">Pending</option>
+            <option value="Printing">Printing</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled_by_User">Cancelled by User</option>
+            <option value="Cancelled_by_Admin">Cancelled by Admin</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" onclick="loadQueue()">Refresh</button>
+        </div>
+
+        <div class="bulk-actions hidden" id="bulkActions">
+          <span><span id="selectedCount">0</span> selected</span>
+          <select id="bulkStatus">
+            <option value="">Change status to...</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled_by_User">Cancelled by User</option>
+            <option value="Cancelled_by_Admin">Cancelled by Admin</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="bulkUpdateStatus()">Apply</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearSelection()">Clear</button>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Message 1</th>
+                <th>Message 2</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="queueTable">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics View -->
+    <div id="statsView" class="view">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotalJobs">0</div>
+          <div class="stat-label">Total Jobs</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-value" id="statCompleted">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-value" id="statPending">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card danger">
+          <div class="stat-value" id="statCancelled">0</div>
+          <div class="stat-label">Cancelled</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statLines">0</div>
+          <div class="stat-label">Lines Printed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statChars">0</div>
+          <div class="stat-label">Characters</div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="card">
+          <h2>Jobs by Status</h2>
+          <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Daily Activity (Last 30 Days)</h2>
+          <div class="chart-container">
+            <canvas id="dailyChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Characters Printed (Last 30 Days)</h2>
+          <div class="chart-container">
+            <canvas id="charsChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Completion Rate</h2>
+          <div class="chart-container">
+            <canvas id="completionChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail View -->
+    <div id="detailView" class="view">
+      <div class="card">
+        <h2 id="detailTitle">Create New Job</h2>
+        <form id="jobForm" onsubmit="saveJob(event)">
+          <input type="hidden" id="jobId">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" name="first_name" required>
+            </div>
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" name="last_name" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="emailAddress">Email Address</label>
+              <input type="email" id="emailAddress" name="email_address">
+            </div>
+            <div class="form-group">
+              <label for="phoneNumber">Phone Number</label>
+              <input type="tel" id="phoneNumber" name="phone_number">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="question1">Question 1</label>
+            <textarea id="question1" name="question_1" rows="2"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="question2">Question 2</label>
+            <textarea id="question2" name="question_2" rows="2"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="question3">Question 3</label>
+            <textarea id="question3" name="question_3" rows="2"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bestContact">Best Contact in Your Company</label>
+              <input type="text" id="bestContact" name="best_contact">
+            </div>
+            <div class="form-group">
+              <label for="contactDetails">Contact Details</label>
+              <input type="text" id="contactDetails" name="contact_details">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reachOut">Do you mind if we reach out in the next month?</label>
+            <select id="reachOut" name="reach_out_next_month">
+              <option value="">Select...</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="message1">Message 1</label>
+              <input type="text" id="message1" name="message_1" maxlength="50">
+            </div>
+            <div class="form-group">
+              <label for="message2">Message 2</label>
+              <input type="text" id="message2" name="message_2" maxlength="50">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="agreement">Agreement</label>
+            <select id="agreement" name="agreement">
+              <option value="">Select...</option>
+              <option value="agreed">Agreed</option>
+              <option value="not_agreed">Not Agreed</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="statusGroup" style="display:none;">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+              <option value="Pending">Pending</option>
+              <option value="Printing">Printing</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled_by_User">Cancelled by User</option>
+              <option value="Cancelled_by_Admin">Cancelled by Admin</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-secondary" onclick="showView('queue')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Config View -->
+    <div id="configView" class="view">
+      <div class="card">
+        <h2>Configuration</h2>
+
+        <div class="config-section">
+          <h3>Chocolate Bar</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="barWidth">Bar Width (mm)</label>
+              <input type="number" id="barWidth" step="0.1" min="10" max="500">
+            </div>
+            <div class="form-group">
+              <label for="barHeight">Bar Height (mm)</label>
+              <input type="number" id="barHeight" step="0.1" min="10" max="500">
+            </div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <h3>Template</h3>
+          <div class="form-group">
+            <label for="templateText">Template Text</label>
+            <input type="text" id="templateText">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="templateFont">Font</label>
+              <select id="templateFont">
+                <option value="hershey">Hershey</option>
+                <option value="block">Block</option>
+                <option value="script">Script</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="templateFontSize">Font Size (mm)</label>
+              <input type="number" id="templateFontSize" step="0.1" min="1" max="50">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="templateAlignment">Alignment</label>
+            <select id="templateAlignment">
+              <option value="left">Left</option>
+              <option value="centered">Centered</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <h3>Messages</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="messageFont">Font</label>
+              <select id="messageFont">
+                <option value="hershey">Hershey</option>
+                <option value="block">Block</option>
+                <option value="script">Script</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="messageAlignment">Alignment</label>
+              <select id="messageAlignment">
+                <option value="left">Left</option>
+                <option value="centered">Centered</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="messageFontSize1Line">Font Size (1 line, mm)</label>
+              <input type="number" id="messageFontSize1Line" step="0.1" min="1" max="50">
+            </div>
+            <div class="form-group">
+              <label for="messageFontSize2Lines">Font Size (2 lines, mm)</label>
+              <input type="number" id="messageFontSize2Lines" step="0.1" min="1" max="50">
+            </div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <h3>Spacing</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="gapTemplateToMessage">Gap: Template to Message (mm)</label>
+              <input type="number" id="gapTemplateToMessage" step="0.1" min="0" max="50">
+            </div>
+            <div class="form-group">
+              <label for="gapBetweenLines">Gap: Between Lines (mm)</label>
+              <input type="number" id="gapBetweenLines" step="0.1" min="0" max="50">
+            </div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <h3>CNC Settings</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="zSafeHeight">Z Safe Height (mm)</label>
+              <input type="number" id="zSafeHeight" step="0.1" min="0" max="50">
+            </div>
+            <div class="form-group">
+              <label for="zEngraveDepth">Z Engrave Depth (mm)</label>
+              <input type="number" id="zEngraveDepth" step="0.1" min="-10" max="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="feedRate">Feed Rate (mm/min)</label>
+            <input type="number" id="feedRate" step="1" min="10" max="2000">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
+          <button type="button" class="btn btn-secondary" onclick="loadConfig()">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- API Docs View -->
+    <div id="apidocsView" class="view">
+      <div class="card" style="padding: 0; overflow: hidden; height: calc(100vh - 200px);">
+        <iframe id="swaggerFrame" src="/api-docs" style="width: 100%; height: 100%; border: none;"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // API base URL
+    const API = '/api';
+
+    // Global state
+    let isPrinting = false;
+    let selectedJobs = new Set();
+    let liveUpdateInterval = null;
+    let charts = {};
+
+    // Show view
+    function showView(viewName) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewName + 'View').classList.add('active');
+
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      if (viewName === 'queue') {
+        document.querySelector('nav button:nth-child(1)').classList.add('active');
+        loadQueue();
+        startLiveUpdates();
+      } else if (viewName === 'stats') {
+        document.querySelector('nav button:nth-child(2)').classList.add('active');
+        loadStats();
+        stopLiveUpdates();
+      } else if (viewName === 'config') {
+        document.querySelector('nav button:nth-child(3)').classList.add('active');
+        loadConfig();
+        stopLiveUpdates();
+      } else if (viewName === 'apidocs') {
+        document.querySelector('nav button:nth-child(4)').classList.add('active');
+        stopLiveUpdates();
+        // Reload iframe to ensure fresh Swagger UI
+        const iframe = document.getElementById('swaggerFrame');
+        iframe.src = iframe.src;
+      } else {
+        stopLiveUpdates();
+      }
+    }
+
+    // Live updates
+    function startLiveUpdates() {
+      if (liveUpdateInterval) return;
+      liveUpdateInterval = setInterval(loadQueueLive, 3000);
+    }
+
+    function stopLiveUpdates() {
+      if (liveUpdateInterval) {
+        clearInterval(liveUpdateInterval);
+        liveUpdateInterval = null;
+      }
+    }
+
+    async function loadQueueLive() {
+      try {
+        const filter = document.getElementById('statusFilter').value;
+        const response = await fetch(`${API}/queue/live`);
+        const data = await response.json();
+
+        if (data.success) {
+          isPrinting = data.isPrinting;
+          updatePrintButtons();
+          renderQueue(data.jobs, filter);
+        }
+      } catch (err) {
+        console.error('Live update error:', err);
+      }
+    }
+
+    // Show alert message
+    function showAlert(message, type = 'info') {
+      const container = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      container.appendChild(alert);
+      setTimeout(() => alert.remove(), 5000);
+    }
+
+    // Load queue
+    async function loadQueue() {
+      try {
+        const filter = document.getElementById('statusFilter').value;
+        const url = filter ? `${API}/getqueue?status=${filter}` : `${API}/getqueue`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.success) {
+          renderQueue(data.jobs, filter);
+        }
+
+        // Also check printing status
+        const statusRes = await fetch(`${API}/queue/live`);
+        const statusData = await statusRes.json();
+        if (statusData.success) {
+          isPrinting = statusData.isPrinting;
+          updatePrintButtons();
+        }
+      } catch (err) {
+        showAlert('Error loading queue: ' + err.message, 'error');
+      }
+    }
+
+    function renderQueue(jobs, filter) {
+      const tbody = document.getElementById('queueTable');
+      const filteredJobs = filter ? jobs.filter(j => j.status === filter) : jobs;
+
+      tbody.innerHTML = '';
+
+      if (filteredJobs.length > 0) {
+        filteredJobs.forEach(job => {
+          const isSelected = selectedJobs.has(job.id);
+          const canPrint = job.status === 'Pending' && !isPrinting;
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><input type="checkbox" class="job-checkbox" data-id="${job.id}" ${isSelected ? 'checked' : ''} onchange="toggleJobSelection(${job.id})"></td>
+            <td>${job.id}</td>
+            <td onclick="editJob(${job.id})" style="cursor:pointer">${job.first_name || ''} ${job.last_name || ''}</td>
+            <td onclick="editJob(${job.id})" style="cursor:pointer">${job.message_1 || ''}</td>
+            <td onclick="editJob(${job.id})" style="cursor:pointer">${job.message_2 || ''}</td>
+            <td><span class="status-badge status-${job.status}">${job.status.replace(/_/g, ' ')}</span></td>
+            <td>${formatDate(job.created_at)}</td>
+            <td class="print-btn-cell">
+              ${job.status === 'Pending' ? `<button class="btn btn-success btn-sm print-job-btn" onclick="printJob(${job.id})" ${canPrint ? '' : 'disabled'}>Print</button>` : ''}
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 40px;">No jobs found</td></tr>';
+      }
+
+      updateBulkActionsBar();
+    }
+
+    function updatePrintButtons() {
+      const printNextBtn = document.getElementById('printNextBtn');
+      printNextBtn.disabled = isPrinting;
+
+      document.querySelectorAll('.print-job-btn').forEach(btn => {
+        btn.disabled = isPrinting;
+      });
+    }
+
+    // Format Unix timestamp
+    function formatDate(timestamp) {
+      if (!timestamp) return '';
+      return new Date(timestamp * 1000).toLocaleString();
+    }
+
+    // Selection handling
+    function toggleJobSelection(id) {
+      if (selectedJobs.has(id)) {
+        selectedJobs.delete(id);
+      } else {
+        selectedJobs.add(id);
+      }
+      updateBulkActionsBar();
+    }
+
+    function toggleSelectAll() {
+      const selectAll = document.getElementById('selectAll');
+      const checkboxes = document.querySelectorAll('.job-checkbox');
+
+      checkboxes.forEach(cb => {
+        const id = parseInt(cb.dataset.id);
+        if (selectAll.checked) {
+          selectedJobs.add(id);
+          cb.checked = true;
+        } else {
+          selectedJobs.delete(id);
+          cb.checked = false;
+        }
+      });
+
+      updateBulkActionsBar();
+    }
+
+    function clearSelection() {
+      selectedJobs.clear();
+      document.querySelectorAll('.job-checkbox').forEach(cb => cb.checked = false);
+      document.getElementById('selectAll').checked = false;
+      updateBulkActionsBar();
+    }
+
+    function updateBulkActionsBar() {
+      const bar = document.getElementById('bulkActions');
+      const count = document.getElementById('selectedCount');
+
+      if (selectedJobs.size > 0) {
+        bar.classList.remove('hidden');
+        count.textContent = selectedJobs.size;
+      } else {
+        bar.classList.add('hidden');
+      }
+    }
+
+    async function bulkUpdateStatus() {
+      const status = document.getElementById('bulkStatus').value;
+      if (!status) {
+        showAlert('Please select a status', 'error');
+        return;
+      }
+
+      if (selectedJobs.size === 0) {
+        showAlert('No jobs selected', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API}/updatejobs/bulk`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ids: Array.from(selectedJobs),
+            status: status
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert(`${data.changes} jobs updated to ${status.replace(/_/g, ' ')}`, 'success');
+          clearSelection();
+          loadQueue();
+        } else {
+          showAlert(data.error || 'Error updating jobs', 'error');
+        }
+      } catch (err) {
+        showAlert('Error updating jobs: ' + err.message, 'error');
+      }
+    }
+
+    // Clear form
+    function clearForm() {
+      document.getElementById('jobForm').reset();
+      document.getElementById('jobId').value = '';
+      document.getElementById('detailTitle').textContent = 'Create New Job';
+      document.getElementById('statusGroup').style.display = 'none';
+    }
+
+    // Edit job
+    async function editJob(id) {
+      try {
+        const response = await fetch(`${API}/getjob/${id}`);
+        const data = await response.json();
+
+        if (data.success && data.job) {
+          const job = data.job;
+          document.getElementById('jobId').value = job.id;
+          document.getElementById('firstName').value = job.first_name || '';
+          document.getElementById('lastName').value = job.last_name || '';
+          document.getElementById('emailAddress').value = job.email_address || '';
+          document.getElementById('phoneNumber').value = job.phone_number || '';
+          document.getElementById('question1').value = job.question_1 || '';
+          document.getElementById('question2').value = job.question_2 || '';
+          document.getElementById('question3').value = job.question_3 || '';
+          document.getElementById('bestContact').value = job.best_contact || '';
+          document.getElementById('contactDetails').value = job.contact_details || '';
+          document.getElementById('reachOut').value = job.reach_out_next_month || '';
+          document.getElementById('message1').value = job.message_1 || '';
+          document.getElementById('message2').value = job.message_2 || '';
+          document.getElementById('agreement').value = job.agreement || '';
+          document.getElementById('status').value = job.status || 'Pending';
+
+          document.getElementById('detailTitle').textContent = 'Edit Job #' + job.id;
+          document.getElementById('statusGroup').style.display = 'block';
+          showView('detail');
+        }
+      } catch (err) {
+        showAlert('Error loading job: ' + err.message, 'error');
+      }
+    }
+
+    // Save job
+    async function saveJob(event) {
+      event.preventDefault();
+
+      const jobId = document.getElementById('jobId').value;
+      const formData = {
+        first_name: document.getElementById('firstName').value,
+        last_name: document.getElementById('lastName').value,
+        email_address: document.getElementById('emailAddress').value,
+        phone_number: document.getElementById('phoneNumber').value,
+        question_1: document.getElementById('question1').value,
+        question_2: document.getElementById('question2').value,
+        question_3: document.getElementById('question3').value,
+        best_contact: document.getElementById('bestContact').value,
+        contact_details: document.getElementById('contactDetails').value,
+        reach_out_next_month: document.getElementById('reachOut').value,
+        message_1: document.getElementById('message1').value,
+        message_2: document.getElementById('message2').value,
+        agreement: document.getElementById('agreement').value
+      };
+
+      if (jobId) {
+        formData.status = document.getElementById('status').value;
+      }
+
+      try {
+        const url = jobId ? `${API}/updatejobs/${jobId}` : `${API}/createjob`;
+        const method = jobId ? 'PATCH' : 'POST';
+
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert(jobId ? 'Job updated successfully' : 'Job created successfully', 'success');
+          showView('queue');
+        } else {
+          showAlert(data.error || 'Error saving job', 'error');
+        }
+      } catch (err) {
+        showAlert('Error saving job: ' + err.message, 'error');
+      }
+    }
+
+    // Load config
+    async function loadConfig() {
+      try {
+        const response = await fetch(`${API}/getConfig`);
+        const data = await response.json();
+
+        if (data.success && data.config) {
+          const config = data.config;
+          document.getElementById('barWidth').value = config.bar_width;
+          document.getElementById('barHeight').value = config.bar_height;
+          document.getElementById('templateText').value = config.template_text;
+          document.getElementById('templateFont').value = config.template_font;
+          document.getElementById('templateFontSize').value = config.template_font_size;
+          document.getElementById('templateAlignment').value = config.template_alignment;
+          document.getElementById('messageFont').value = config.message_font;
+          document.getElementById('messageFontSize1Line').value = config.message_font_size_1_line;
+          document.getElementById('messageFontSize2Lines').value = config.message_font_size_2_lines;
+          document.getElementById('messageAlignment').value = config.message_alignment;
+          document.getElementById('gapTemplateToMessage').value = config.gap_template_to_message;
+          document.getElementById('gapBetweenLines').value = config.gap_between_lines;
+          document.getElementById('zSafeHeight').value = config.z_safe_height;
+          document.getElementById('zEngraveDepth').value = config.z_engrave_depth;
+          document.getElementById('feedRate').value = config.feed_rate;
+        }
+      } catch (err) {
+        showAlert('Error loading config: ' + err.message, 'error');
+      }
+    }
+
+    // Save config
+    async function saveConfig() {
+      const configData = {
+        bar_width: document.getElementById('barWidth').value,
+        bar_height: document.getElementById('barHeight').value,
+        template_text: document.getElementById('templateText').value,
+        template_font: document.getElementById('templateFont').value,
+        template_font_size: document.getElementById('templateFontSize').value,
+        template_alignment: document.getElementById('templateAlignment').value,
+        message_font: document.getElementById('messageFont').value,
+        message_font_size_1_line: document.getElementById('messageFontSize1Line').value,
+        message_font_size_2_lines: document.getElementById('messageFontSize2Lines').value,
+        message_alignment: document.getElementById('messageAlignment').value,
+        gap_template_to_message: document.getElementById('gapTemplateToMessage').value,
+        gap_between_lines: document.getElementById('gapBetweenLines').value,
+        z_safe_height: document.getElementById('zSafeHeight').value,
+        z_engrave_depth: document.getElementById('zEngraveDepth').value,
+        feed_rate: document.getElementById('feedRate').value
+      };
+
+      try {
+        const response = await fetch(`${API}/updateConfig`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(configData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert('Configuration saved successfully', 'success');
+        } else {
+          showAlert(data.error || 'Error saving config', 'error');
+        }
+      } catch (err) {
+        showAlert('Error saving config: ' + err.message, 'error');
+      }
+    }
+
+    // Print next job
+    async function printNext() {
+      try {
+        const response = await fetch(`${API}/print`);
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert('Print job started: Job #' + data.jobId, 'success');
+          isPrinting = true;
+          updatePrintButtons();
+          loadQueue();
+        } else {
+          showAlert(data.error || 'Error starting print', 'error');
+        }
+      } catch (err) {
+        showAlert('Error starting print: ' + err.message, 'error');
+      }
+    }
+
+    // Print specific job
+    async function printJob(id) {
+      try {
+        const response = await fetch(`${API}/print/${id}`);
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert('Print job started: Job #' + data.jobId, 'success');
+          isPrinting = true;
+          updatePrintButtons();
+          loadQueue();
+        } else {
+          showAlert(data.error || 'Error starting print', 'error');
+        }
+      } catch (err) {
+        showAlert('Error starting print: ' + err.message, 'error');
+      }
+    }
+
+    // Statistics
+    async function loadStats() {
+      try {
+        const response = await fetch(`${API}/stats`);
+        const data = await response.json();
+
+        if (data.success) {
+          // Update stat cards
+          const totals = data.totals;
+          const counts = data.statusCounts;
+
+          document.getElementById('statTotalJobs').textContent = totals.total_jobs_created || 0;
+          document.getElementById('statCompleted').textContent = totals.total_jobs_completed || 0;
+          document.getElementById('statPending').textContent = counts.Pending || 0;
+          document.getElementById('statCancelled').textContent = totals.total_jobs_cancelled || 0;
+          document.getElementById('statLines').textContent = totals.total_lines_printed || 0;
+          document.getElementById('statChars').textContent = totals.total_chars_printed || 0;
+
+          // Render charts
+          renderStatusChart(counts);
+          renderDailyChart(data.dailyStats);
+          renderCharsChart(data.dailyStats);
+          renderCompletionChart(totals, counts);
+        }
+      } catch (err) {
+        showAlert('Error loading statistics: ' + err.message, 'error');
+      }
+    }
+
+    function renderStatusChart(counts) {
+      const ctx = document.getElementById('statusChart').getContext('2d');
+
+      if (charts.status) charts.status.destroy();
+
+      charts.status = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Pending', 'Printing', 'Completed', 'Cancelled'],
+          datasets: [{
+            data: [
+              counts.Pending || 0,
+              counts.Printing || 0,
+              counts.Completed || 0,
+              (counts.Cancelled_by_User || 0) + (counts.Cancelled_by_Admin || 0)
+            ],
+            backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#fff' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderDailyChart(dailyStats) {
+      const ctx = document.getElementById('dailyChart').getContext('2d');
+
+      if (charts.daily) charts.daily.destroy();
+
+      const labels = dailyStats.map(d => d.date);
+      const created = dailyStats.map(d => d.jobs_created || 0);
+      const completed = dailyStats.map(d => d.jobs_completed || 0);
+
+      charts.daily = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Created',
+              data: created,
+              borderColor: '#667eea',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Completed',
+              data: completed,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: { color: '#999' },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            },
+            y: {
+              ticks: { color: '#999' },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#fff' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCharsChart(dailyStats) {
+      const ctx = document.getElementById('charsChart').getContext('2d');
+
+      if (charts.chars) charts.chars.destroy();
+
+      const labels = dailyStats.map(d => d.date);
+      const chars = dailyStats.map(d => d.chars_printed || 0);
+
+      charts.chars = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Characters',
+            data: chars,
+            backgroundColor: 'rgba(233, 69, 96, 0.6)',
+            borderColor: '#e94560',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: { color: '#999' },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            },
+            y: {
+              ticks: { color: '#999' },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#fff' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCompletionChart(totals, counts) {
+      const ctx = document.getElementById('completionChart').getContext('2d');
+
+      if (charts.completion) charts.completion.destroy();
+
+      const total = totals.total_jobs_created || 1;
+      const completed = totals.total_jobs_completed || 0;
+      const cancelled = totals.total_jobs_cancelled || 0;
+      const pending = (counts.Pending || 0) + (counts.Printing || 0);
+
+      charts.completion = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Completed', 'Cancelled', 'In Progress'],
+          datasets: [{
+            data: [completed, cancelled, pending],
+            backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#fff' }
+            }
+          }
+        }
+      });
+    }
+
+    // Get connection status
+    async function updateConnectionStatus() {
+      try {
+        const response = await fetch(`${API}/status`);
+        const data = await response.json();
+
+        const dot = document.getElementById('connectionDot');
+        const statusText = document.getElementById('connectionStatus');
+        const deviceInfo = document.getElementById('deviceInfo');
+        const connectBtn = document.getElementById('connectBtn');
+
+        if (data.status && data.status.connected) {
+          dot.classList.remove('disconnected');
+          dot.classList.add('connected');
+          statusText.textContent = 'Connected';
+          deviceInfo.textContent = 'Device: ' + data.status.port;
+          connectBtn.textContent = 'Disconnect';
+        } else {
+          dot.classList.remove('connected');
+          dot.classList.add('disconnected');
+          statusText.textContent = 'Disconnected';
+          deviceInfo.textContent = data.availableDevices?.length
+            ? 'Available: ' + data.availableDevices.map(d => d.path).join(', ')
+            : 'No devices found';
+          connectBtn.textContent = 'Connect';
+        }
+      } catch (err) {
+        console.error('Error getting status:', err);
+      }
+    }
+
+    // Toggle connection
+    async function toggleConnection() {
+      const btn = document.getElementById('connectBtn');
+      const isConnected = btn.textContent === 'Disconnect';
+
+      try {
+        if (isConnected) {
+          await fetch(`${API}/disconnect`, { method: 'POST' });
+          showAlert('Disconnected from CNC', 'info');
+        } else {
+          const response = await fetch(`${API}/connect`, { method: 'POST' });
+          const data = await response.json();
+          if (data.success) {
+            showAlert('Connected to CNC at ' + data.path, 'success');
+          } else {
+            showAlert(data.error || 'Failed to connect', 'error');
+          }
+        }
+        updateConnectionStatus();
+      } catch (err) {
+        showAlert('Error: ' + err.message, 'error');
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadQueue();
+      updateConnectionStatus();
+      setInterval(updateConnectionStatus, 5000);
+      startLiveUpdates();
+    });
+  </script>
+</body>
+</html>

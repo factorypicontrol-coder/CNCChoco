@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CNC Chocolate Engraver - Technical Specification</title>
+  <style>
+    body {
+      font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 8.5in;
+      margin: 0 auto;
+      padding: 1in;
+      color: #333;
+      font-size: 11pt;
+    }
+    h1 {
+      color: #1a5276;
+      border-bottom: 3px solid #1a5276;
+      padding-bottom: 10px;
+      font-size: 24pt;
+    }
+    h2 {
+      color: #2874a6;
+      border-bottom: 2px solid #2874a6;
+      padding-bottom: 5px;
+      margin-top: 30px;
+      font-size: 18pt;
+    }
+    h3 {
+      color: #3498db;
+      margin-top: 25px;
+      font-size: 14pt;
+    }
+    h4 {
+      color: #5dade2;
+      margin-top: 20px;
+      font-size: 12pt;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 15px 0;
+      font-size: 10pt;
+    }
+    th, td {
+      border: 1px solid #bdc3c7;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #2874a6;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    code {
+      background-color: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 10pt;
+    }
+    pre {
+      background-color: #f4f4f4;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 9pt;
+    }
+    .cover-page {
+      text-align: center;
+      margin-top: 3in;
+      page-break-after: always;
+    }
+    .cover-title {
+      font-size: 32pt;
+      color: #1a5276;
+      margin-bottom: 20px;
+    }
+    .cover-subtitle {
+      font-size: 18pt;
+      color: #5dade2;
+      margin-bottom: 40px;
+    }
+    .cover-info {
+      font-size: 12pt;
+      color: #666;
+      margin-top: 100px;
+    }
+    .toc {
+      page-break-after: always;
+    }
+    .toc ul {
+      list-style: none;
+      padding-left: 20px;
+    }
+    .toc li {
+      margin: 8px 0;
+    }
+    .toc a {
+      text-decoration: none;
+      color: #2874a6;
+    }
+    .diagram-placeholder {
+      border: 2px dashed #bdc3c7;
+      padding: 40px;
+      text-align: center;
+      background-color: #f8f9fa;
+      margin: 20px 0;
+      color: #7f8c8d;
+    }
+    .note {
+      background-color: #e8f6f3;
+      border-left: 4px solid #1abc9c;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .warning {
+      background-color: #fef9e7;
+      border-left: 4px solid #f39c12;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .section-number {
+      color: #7f8c8d;
+      margin-right: 10px;
+    }
+    @media print {
+      body { padding: 0.5in; }
+      h1, h2 { page-break-after: avoid; }
+      table, pre { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Cover Page -->
+<div class="cover-page">
+  <div class="cover-title">CNC Chocolate Engraver</div>
+  <div class="cover-subtitle">Functional, Technical & Architectural Specification</div>
+  <div style="margin-top: 50px;">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Crect fill='%231a5276' width='150' height='150' rx='20'/%3E%3Ctext x='75' y='85' text-anchor='middle' fill='white' font-size='60' font-family='Arial'%3ECNC%3C/text%3E%3C/svg%3E" alt="CNC Logo">
+  </div>
+  <div class="cover-info">
+    <p><strong>Version:</strong> 1.0</p>
+    <p><strong>Date:</strong> January 2026</p>
+    <p><strong>Project:</strong> FactoryPiCNC / CNCChoco</p>
+    <p><strong>Integration:</strong> SAP BTP via Cloud Connector</p>
+  </div>
+</div>
+
+<!-- Table of Contents -->
+<div class="toc">
+  <h1>Table of Contents</h1>
+  <ul>
+    <li><a href="#exec-summary">1. Executive Summary</a></li>
+    <li><a href="#functional-spec">2. Functional Specification</a>
+      <ul>
+        <li><a href="#func-overview">2.1 System Overview</a></li>
+        <li><a href="#func-features">2.2 Feature List</a></li>
+        <li><a href="#func-user-stories">2.3 User Stories</a></li>
+        <li><a href="#func-workflows">2.4 Business Workflows</a></li>
+      </ul>
+    </li>
+    <li><a href="#technical-spec">3. Technical Specification</a>
+      <ul>
+        <li><a href="#tech-stack">3.1 Technology Stack</a></li>
+        <li><a href="#tech-api">3.2 API Specification</a></li>
+        <li><a href="#tech-database">3.3 Database Schema</a></li>
+        <li><a href="#tech-gcode">3.4 G-code Generation</a></li>
+      </ul>
+    </li>
+    <li><a href="#architecture">4. Architecture</a>
+      <ul>
+        <li><a href="#arch-system">4.1 System Architecture</a></li>
+        <li><a href="#arch-component">4.2 Component Architecture</a></li>
+        <li><a href="#arch-data">4.3 Data Flow</a></li>
+        <li><a href="#arch-sap">4.4 SAP BTP Integration</a></li>
+      </ul>
+    </li>
+    <li><a href="#deployment">5. Deployment</a></li>
+    <li><a href="#security">6. Security Considerations</a></li>
+    <li><a href="#appendix">7. Appendix</a></li>
+  </ul>
+</div>
+
+<!-- Executive Summary -->
+<h1 id="exec-summary"><span class="section-number">1.</span> Executive Summary</h1>
+
+<p>The CNC Chocolate Engraver is a specialized automation system designed to engrave personalized messages on chocolate bars using a GRBL-controlled CNC router. The system provides a complete end-to-end solution from customer data capture through to physical engraving.</p>
+
+<h3>Key Capabilities</h3>
+<ul>
+  <li><strong>Job Queue Management</strong> - Create, track, and manage engraving jobs with full lifecycle support</li>
+  <li><strong>Real-time Monitoring</strong> - Live dashboard with statistics and status updates</li>
+  <li><strong>SAP Integration</strong> - Designed for seamless integration with SAP BTP via Cloud Connector</li>
+  <li><strong>Configurable Templates</strong> - Flexible text templates with multiple font options</li>
+  <li><strong>Hardware Control</strong> - Direct serial communication with GRBL CNC controllers</li>
+</ul>
+
+<h3>Business Value</h3>
+<ul>
+  <li>Automates personalized chocolate engraving for events and marketing campaigns</li>
+  <li>Captures customer data for CRM integration</li>
+  <li>Provides real-time visibility into production queue</li>
+  <li>Enables remote job submission via SAP BTP</li>
+</ul>
+
+<!-- Functional Specification -->
+<h1 id="functional-spec"><span class="section-number">2.</span> Functional Specification</h1>
+
+<h2 id="func-overview">2.1 System Overview</h2>
+
+<p>The CNC Chocolate Engraver system consists of three main functional areas:</p>
+
+<table>
+  <tr>
+    <th>Area</th>
+    <th>Description</th>
+    <th>Users</th>
+  </tr>
+  <tr>
+    <td><strong>Job Management</strong></td>
+    <td>Create, view, edit, and track engraving jobs through their lifecycle</td>
+    <td>Operators, Administrators, SAP Users</td>
+  </tr>
+  <tr>
+    <td><strong>Production Control</strong></td>
+    <td>Trigger printing, monitor queue, manage CNC connection</td>
+    <td>Operators</td>
+  </tr>
+  <tr>
+    <td><strong>Configuration</strong></td>
+    <td>Set template text, fonts, bar dimensions, CNC parameters</td>
+    <td>Administrators</td>
+  </tr>
+</table>
+
+<h2 id="func-features">2.2 Feature List</h2>
+
+<h3>2.2.1 Job Management Features</h3>
+<table>
+  <tr>
+    <th>Feature ID</th>
+    <th>Feature Name</th>
+    <th>Description</th>
+    <th>Priority</th>
+  </tr>
+  <tr>
+    <td>JM-001</td>
+    <td>Create Job</td>
+    <td>Create new engraving job with customer details and messages</td>
+    <td>Critical</td>
+  </tr>
+  <tr>
+    <td>JM-002</td>
+    <td>View Queue</td>
+    <td>Display list of all jobs with filtering by status</td>
+    <td>Critical</td>
+  </tr>
+  <tr>
+    <td>JM-003</td>
+    <td>Edit Job</td>
+    <td>Modify job attributes including status</td>
+    <td>High</td>
+  </tr>
+  <tr>
+    <td>JM-004</td>
+    <td>Bulk Update</td>
+    <td>Select multiple jobs and change status simultaneously</td>
+    <td>Medium</td>
+  </tr>
+  <tr>
+    <td>JM-005</td>
+    <td>Live Updates</td>
+    <td>Auto-refresh queue display every 3 seconds</td>
+    <td>High</td>
+  </tr>
+</table>
+
+<h3>2.2.2 Production Features</h3>
+<table>
+  <tr>
+    <th>Feature ID</th>
+    <th>Feature Name</th>
+    <th>Description</th>
+    <th>Priority</th>
+  </tr>
+  <tr>
+    <td>PR-001</td>
+    <td>Print Next</td>
+    <td>Trigger printing of next pending job in queue</td>
+    <td>Critical</td>
+  </tr>
+  <tr>
+    <td>PR-002</td>
+    <td>Print Specific</td>
+    <td>Trigger printing of a specific pending job by ID</td>
+    <td>High</td>
+  </tr>
+  <tr>
+    <td>PR-003</td>
+    <td>CNC Connection</td>
+    <td>Connect/disconnect from CNC controller</td>
+    <td>Critical</td>
+  </tr>
+  <tr>
+    <td>PR-004</td>
+    <td>USB Auto-detect</td>
+    <td>Automatically scan for USB serial devices</td>
+    <td>High</td>
+  </tr>
+</table>
+
+<h3>2.2.3 Statistics Features</h3>
+<table>
+  <tr>
+    <th>Feature ID</th>
+    <th>Feature Name</th>
+    <th>Description</th>
+    <th>Priority</th>
+  </tr>
+  <tr>
+    <td>ST-001</td>
+    <td>Total Counts</td>
+    <td>Display total jobs, completed, cancelled, lines, characters</td>
+    <td>Medium</td>
+  </tr>
+  <tr>
+    <td>ST-002</td>
+    <td>Status Chart</td>
+    <td>Doughnut chart showing job status distribution</td>
+    <td>Medium</td>
+  </tr>
+  <tr>
+    <td>ST-003</td>
+    <td>Daily Activity</td>
+    <td>Line chart showing jobs created/completed over 30 days</td>
+    <td>Low</td>
+  </tr>
+  <tr>
+    <td>ST-004</td>
+    <td>Character Chart</td>
+    <td>Bar chart showing characters printed per day</td>
+    <td>Low</td>
+  </tr>
+</table>
+
+<h2 id="func-user-stories">2.3 User Stories</h2>
+
+<h4>US-001: Create Job from SAP</h4>
+<p><em>As a</em> SAP Fiori user, <em>I want to</em> submit a chocolate engraving job from my SAP screen, <em>so that</em> I can personalize chocolates for event attendees.</p>
+
+<h4>US-002: Monitor Queue</h4>
+<p><em>As an</em> operator, <em>I want to</em> see a live-updating queue of all jobs, <em>so that</em> I can monitor production status in real-time.</p>
+
+<h4>US-003: Bulk Cancel</h4>
+<p><em>As an</em> administrator, <em>I want to</em> select multiple jobs and cancel them at once, <em>so that</em> I can quickly clear outdated jobs.</p>
+
+<h4>US-004: View Statistics</h4>
+<p><em>As a</em> manager, <em>I want to</em> see production statistics and charts, <em>so that</em> I can track performance and throughput.</p>
+
+<h4>US-005: Configure Template</h4>
+<p><em>As an</em> administrator, <em>I want to</em> change the template text and fonts, <em>so that</em> I can customize branding for different events.</p>
+
+<h2 id="func-workflows">2.4 Business Workflows</h2>
+
+<h3>2.4.1 Job Lifecycle</h3>
+
+<div class="diagram-placeholder">
+  <strong>Job State Diagram</strong><br><br>
+  [Created] --&gt; <strong>Pending</strong> --&gt; <strong>Printing</strong> --&gt; <strong>Completed</strong><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Cancelled_by_User</strong> / <strong>Cancelled_by_Admin</strong><br><br>
+  <em>Note: Jobs can be moved back to Pending from any status except Printing</em>
+</div>
+
+<table>
+  <tr>
+    <th>Status</th>
+    <th>Description</th>
+    <th>Allowed Transitions</th>
+  </tr>
+  <tr>
+    <td><strong>Pending</strong></td>
+    <td>Job is waiting in queue to be printed</td>
+    <td>Printing, Cancelled_by_User, Cancelled_by_Admin</td>
+  </tr>
+  <tr>
+    <td><strong>Printing</strong></td>
+    <td>Job is currently being engraved</td>
+    <td>Completed (automatic)</td>
+  </tr>
+  <tr>
+    <td><strong>Completed</strong></td>
+    <td>Job has been successfully engraved</td>
+    <td>Pending (re-print)</td>
+  </tr>
+  <tr>
+    <td><strong>Cancelled_by_User</strong></td>
+    <td>Job was cancelled by the customer</td>
+    <td>Pending (reinstate)</td>
+  </tr>
+  <tr>
+    <td><strong>Cancelled_by_Admin</strong></td>
+    <td>Job was cancelled by an administrator</td>
+    <td>Pending (reinstate)</td>
+  </tr>
+</table>
+
+<h3>2.4.2 Print Workflow</h3>
+
+<ol>
+  <li>Operator triggers "Print Next" or selects specific job to print</li>
+  <li>System checks if any job is currently printing (only one at a time)</li>
+  <li>System retrieves job data and current configuration</li>
+  <li>G-code is generated from template + messages using selected fonts</li>
+  <li>G-code is sent to GRBL controller via serial port</li>
+  <li>Job status is updated to "Printing"</li>
+  <li>Upon completion signal, job status is updated to "Completed"</li>
+  <li>Statistics are updated (lines printed, characters printed)</li>
+</ol>
+
+<!-- Technical Specification -->
+<h1 id="technical-spec"><span class="section-number">3.</span> Technical Specification</h1>
+
+<h2 id="tech-stack">3.1 Technology Stack</h2>
+
+<table>
+  <tr>
+    <th>Layer</th>
+    <th>Technology</th>
+    <th>Version</th>
+    <th>Purpose</th>
+  </tr>
+  <tr>
+    <td>Runtime</td>
+    <td>Node.js</td>
+    <td>18+</td>
+    <td>JavaScript server runtime</td>
+  </tr>
+  <tr>
+    <td>Framework</td>
+    <td>Express.js</td>
+    <td>5.x</td>
+    <td>REST API framework</td>
+  </tr>
+  <tr>
+    <td>Database</td>
+    <td>SQLite</td>
+    <td>3.x</td>
+    <td>Local embedded database</td>
+  </tr>
+  <tr>
+    <td>Serial</td>
+    <td>serialport</td>
+    <td>13.x</td>
+    <td>USB serial communication</td>
+  </tr>
+  <tr>
+    <td>Frontend</td>
+    <td>Vanilla JS + Chart.js</td>
+    <td>4.x</td>
+    <td>Web UI with charts</td>
+  </tr>
+  <tr>
+    <td>CNC Protocol</td>
+    <td>GRBL</td>
+    <td>1.1</td>
+    <td>CNC motion control</td>
+  </tr>
+</table>
+
+<h3>3.1.1 File Structure</h3>
+<pre>
+CNCChoco/
+├── cncserver.js        # Main entry point
+├── api.js              # REST API endpoints
+├── database.js         # SQLite operations
+├── config.js           # Configuration management
+├── engine.js           # Queue processing & serial
+├── gcode.js            # G-code generation
+├── fontHershey.js      # Hershey stroke font
+├── fontBlock.js        # Block geometric font
+├── fontScript.js       # Script cursive font
+├── public/
+│   └── index.html      # Web UI (SPA)
+├── docs/
+│   ├── architecture.drawio
+│   └── CNC_Chocolate_Engraver_Specification.html
+├── package.json
+├── CLAUDE.md
+└── README.md
+</pre>
+
+<h2 id="tech-api">3.2 API Specification</h2>
+
+<h3>3.2.1 Base URL</h3>
+<pre>http://localhost:3000/api</pre>
+
+<h3>3.2.2 Job Endpoints</h3>
+
+<h4>POST /api/createjob</h4>
+<p>Creates a new engraving job.</p>
+<table>
+  <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+  <tr><td>first_name</td><td>string</td><td>Yes</td><td>Customer first name</td></tr>
+  <tr><td>last_name</td><td>string</td><td>Yes</td><td>Customer last name</td></tr>
+  <tr><td>email_address</td><td>string</td><td>No</td><td>Customer email</td></tr>
+  <tr><td>phone_number</td><td>string</td><td>No</td><td>Customer phone</td></tr>
+  <tr><td>question_1</td><td>string</td><td>No</td><td>Survey question 1</td></tr>
+  <tr><td>question_2</td><td>string</td><td>No</td><td>Survey question 2</td></tr>
+  <tr><td>question_3</td><td>string</td><td>No</td><td>Survey question 3</td></tr>
+  <tr><td>best_contact</td><td>string</td><td>No</td><td>Best company contact</td></tr>
+  <tr><td>contact_details</td><td>string</td><td>No</td><td>Contact details</td></tr>
+  <tr><td>reach_out_next_month</td><td>string</td><td>No</td><td>"yes" or "no"</td></tr>
+  <tr><td>message_1</td><td>string</td><td>No</td><td>First message line (max 50 chars)</td></tr>
+  <tr><td>message_2</td><td>string</td><td>No</td><td>Second message line (max 50 chars)</td></tr>
+  <tr><td>agreement</td><td>string</td><td>No</td><td>"agreed" or "not_agreed"</td></tr>
+</table>
+
+<p><strong>Response:</strong></p>
+<pre>
+{
+  "success": true,
+  "id": 123,
+  "message": "Job created successfully"
+}
+</pre>
+
+<h4>GET /api/getqueue</h4>
+<p>Retrieves all jobs with optional status filter.</p>
+<table>
+  <tr><th>Query Param</th><th>Type</th><th>Description</th></tr>
+  <tr><td>status</td><td>string</td><td>Filter by status (Pending, Printing, Completed, Cancelled_by_User, Cancelled_by_Admin)</td></tr>
+</table>
+
+<h4>GET /api/getjob/:id</h4>
+<p>Retrieves a single job by ID.</p>
+
+<h4>PATCH /api/updatejobs/:id</h4>
+<p>Updates a job's attributes.</p>
+
+<h4>PATCH /api/updatejobs/bulk</h4>
+<p>Bulk updates multiple jobs.</p>
+<pre>
+{
+  "ids": [1, 2, 3],
+  "status": "Cancelled_by_Admin"
+}
+</pre>
+
+<h4>GET /api/print</h4>
+<p>Triggers printing of the next pending job.</p>
+
+<h4>GET /api/print/:id</h4>
+<p>Triggers printing of a specific job.</p>
+
+<h3>3.2.3 Configuration Endpoints</h3>
+
+<h4>GET /api/getConfig</h4>
+<p>Retrieves all configuration values.</p>
+
+<h4>PATCH /api/updateConfig</h4>
+<p>Updates configuration values.</p>
+<pre>
+{
+  "template_text": "KPMG",
+  "template_font": "hershey",
+  "bar_width": 100
+}
+</pre>
+
+<h3>3.2.4 Statistics Endpoints</h3>
+
+<h4>GET /api/stats</h4>
+<p>Retrieves all statistics including totals, status counts, and daily data.</p>
+
+<h4>GET /api/queue/live</h4>
+<p>Retrieves live queue data for real-time updates.</p>
+
+<h3>3.2.5 CNC Control Endpoints</h3>
+
+<h4>GET /api/status</h4>
+<p>Gets CNC connection status and available devices.</p>
+
+<h4>POST /api/connect</h4>
+<p>Connects to CNC device.</p>
+
+<h4>POST /api/disconnect</h4>
+<p>Disconnects from CNC device.</p>
+
+<h4>POST /api/command</h4>
+<p>Sends raw G-code command.</p>
+
+<h2 id="tech-database">3.3 Database Schema</h2>
+
+<h3>3.3.1 Jobs Table</h3>
+<pre>
+CREATE TABLE jobs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  first_name TEXT,
+  last_name TEXT,
+  email_address TEXT,
+  phone_number TEXT,
+  question_1 TEXT,
+  question_2 TEXT,
+  question_3 TEXT,
+  best_contact TEXT,
+  contact_details TEXT,
+  reach_out_next_month TEXT,
+  message_1 TEXT,
+  message_2 TEXT,
+  agreement TEXT,
+  status TEXT DEFAULT 'Pending',
+  created_at INTEGER,
+  completed_at INTEGER
+);
+</pre>
+
+<h3>3.3.2 Config Table</h3>
+<pre>
+CREATE TABLE config (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
+</pre>
+
+<h3>3.3.3 Statistics Table</h3>
+<pre>
+CREATE TABLE statistics (
+  key TEXT PRIMARY KEY,
+  value INTEGER DEFAULT 0
+);
+</pre>
+
+<h3>3.3.4 Daily Stats Table</h3>
+<pre>
+CREATE TABLE daily_stats (
+  date TEXT PRIMARY KEY,
+  jobs_created INTEGER DEFAULT 0,
+  jobs_completed INTEGER DEFAULT 0,
+  jobs_cancelled INTEGER DEFAULT 0,
+  lines_printed INTEGER DEFAULT 0,
+  chars_printed INTEGER DEFAULT 0
+);
+</pre>
+
+<h2 id="tech-gcode">3.4 G-code Generation</h2>
+
+<h3>3.4.1 Output Format</h3>
+<p>The system generates standard GRBL-compatible G-code:</p>
+<pre>
+; CNC Chocolate Engraver
+; Job ID: 123
+G21 ; Set units to millimeters
+G90 ; Absolute positioning
+G92 X0 Y0 Z0 ; Set origin
+G0 Z5 ; Safe height
+
+; Template: KPMG
+G0 Z5
+G0 X10.000 Y35.000
+G1 Z-0.5 F200
+G1 X12.000 Y35.000 F200
+...
+
+; End of job
+G0 Z5
+G0 X0 Y0
+M2
+</pre>
+
+<h3>3.4.2 Available Fonts</h3>
+<table>
+  <tr>
+    <th>Font</th>
+    <th>Style</th>
+    <th>Best For</th>
+  </tr>
+  <tr>
+    <td>Hershey</td>
+    <td>Single-stroke, classic</td>
+    <td>General purpose, readable text</td>
+  </tr>
+  <tr>
+    <td>Block</td>
+    <td>Geometric, straight lines</td>
+    <td>Modern, clean appearance</td>
+  </tr>
+  <tr>
+    <td>Script</td>
+    <td>Cursive, flowing</td>
+    <td>Elegant branding, signatures</td>
+  </tr>
+</table>
+
+<!-- Architecture -->
+<h1 id="architecture"><span class="section-number">4.</span> Architecture</h1>
+
+<h2 id="arch-system">4.1 System Architecture</h2>
+
+<div class="diagram-placeholder">
+  <strong>System Architecture Diagram</strong><br><br>
+  See: <code>docs/architecture.drawio</code> (System Architecture page)<br><br>
+  <pre style="text-align: left; display: inline-block;">
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              SAP BTP Cloud                                   │
+│  ┌──────────────┐    ┌──────────────┐                                       │
+│  │  SAP Fiori   │───▶│ BTP Destination│                                      │
+│  │  Web App     │    │              │                                       │
+│  └──────────────┘    └──────┬───────┘                                       │
+└────────────────────────────────┼────────────────────────────────────────────┘
+                                 │ HTTPS
+                       ┌─────────▼─────────┐
+                       │  SAP Cloud        │
+                       │  Connector        │
+                       └─────────┬─────────┘
+                                 │ HTTP :3000
+┌────────────────────────────────┼────────────────────────────────────────────┐
+│                    On-Premise Network                                        │
+│  ┌─────────────────────────────▼─────────────────────────────────┐          │
+│  │                     CNC Server (Node.js)                       │          │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐               │          │
+│  │  │ Express.js │  │  api.js    │  │ database.js│──▶ SQLite     │          │
+│  │  │ REST API   │  │ Endpoints  │  │            │               │          │
+│  │  └────────────┘  └────────────┘  └────────────┘               │          │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐               │          │
+│  │  │ engine.js  │  │ gcode.js   │  │  Fonts     │               │          │
+│  │  │ Queue Mgmt │──│ Generator  │──│ Hershey... │               │          │
+│  │  └─────┬──────┘  └────────────┘  └────────────┘               │          │
+│  └────────┼──────────────────────────────────────────────────────┘          │
+│           │ Serial /dev/ttyUSB0                                              │
+│  ┌────────▼──────┐     ┌────────────┐     ┌────────────┐                    │
+│  │ GRBL          │────▶│ CNC Router │────▶│ Chocolate  │                    │
+│  │ Controller    │     │ Machine    │     │ Bar        │                    │
+│  └───────────────┘     └────────────┘     └────────────┘                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+  </pre>
+</div>
+
+<h2 id="arch-component">4.2 Component Architecture</h2>
+
+<div class="diagram-placeholder">
+  <strong>Component Diagram</strong><br><br>
+  See: <code>docs/architecture.drawio</code> (Component Diagram page)<br><br>
+  <table style="margin: auto; text-align: center;">
+    <tr>
+      <td colspan="3" style="background: #dae8fc;"><strong>cncserver.js</strong><br>Main Entry Point</td>
+    </tr>
+    <tr>
+      <td style="background: #d5e8d4;">api.js<br>REST Endpoints</td>
+      <td style="background: #d5e8d4;">engine.js<br>Queue & Serial</td>
+      <td style="background: #d5e8d4;">database.js<br>SQLite ORM</td>
+    </tr>
+    <tr>
+      <td style="background: #fff2cc;">config.js</td>
+      <td style="background: #fff2cc;">gcode.js</td>
+      <td style="background: #f8cecc;">fonts/*.js</td>
+    </tr>
+    <tr>
+      <td colspan="2" style="background: #e1d5e7;">serialport (npm)</td>
+      <td style="background: #e1d5e7;">sqlite3 (npm)</td>
+    </tr>
+  </table>
+</div>
+
+<h3>4.2.1 Component Responsibilities</h3>
+
+<table>
+  <tr>
+    <th>Component</th>
+    <th>Responsibility</th>
+    <th>Dependencies</th>
+  </tr>
+  <tr>
+    <td>cncserver.js</td>
+    <td>Application bootstrap, middleware setup, graceful shutdown</td>
+    <td>express, api, database, engine</td>
+  </tr>
+  <tr>
+    <td>api.js</td>
+    <td>Define REST endpoints, request validation, response formatting</td>
+    <td>database, config, engine</td>
+  </tr>
+  <tr>
+    <td>engine.js</td>
+    <td>Job queue processing, serial communication, USB scanning</td>
+    <td>serialport, database, config, gcode</td>
+  </tr>
+  <tr>
+    <td>database.js</td>
+    <td>SQLite CRUD operations, schema management</td>
+    <td>sqlite3</td>
+  </tr>
+  <tr>
+    <td>config.js</td>
+    <td>Configuration validation, type conversion</td>
+    <td>database</td>
+  </tr>
+  <tr>
+    <td>gcode.js</td>
+    <td>Convert text to G-code using fonts and config</td>
+    <td>fontHershey, fontBlock, fontScript</td>
+  </tr>
+  <tr>
+    <td>font*.js</td>
+    <td>Define character stroke paths for CNC engraving</td>
+    <td>None</td>
+  </tr>
+</table>
+
+<h2 id="arch-data">4.3 Data Flow</h2>
+
+<div class="diagram-placeholder">
+  <strong>Data Flow Diagram</strong><br><br>
+  See: <code>docs/architecture.drawio</code> (Data Flow page)<br><br>
+  <pre style="text-align: left; display: inline-block;">
+User Input ──▶ POST /createjob ──▶ SQLite DB ──▶ Job Queue
+                                                    │
+GET /print ◀────────────────────────────────────────┘
+    │
+    ▼
+Engine.js ──▶ gcode.js ──▶ Serial Port ──▶ GRBL ──▶ CNC ──▶ Chocolate
+    │
+    ▼
+Update DB ──▶ Statistics ──▶ GET /stats ──▶ Dashboard
+  </pre>
+</div>
+
+<h2 id="arch-sap">4.4 SAP BTP Integration</h2>
+
+<h3>4.4.1 Integration Architecture</h3>
+
+<p>The CNC Chocolate Engraver integrates with SAP BTP through the following components:</p>
+
+<table>
+  <tr>
+    <th>Component</th>
+    <th>Location</th>
+    <th>Purpose</th>
+  </tr>
+  <tr>
+    <td><strong>SAP Fiori App</strong></td>
+    <td>SAP BTP Cloud</td>
+    <td>User interface for job submission</td>
+  </tr>
+  <tr>
+    <td><strong>SAP BTP Destination</strong></td>
+    <td>SAP BTP Cloud</td>
+    <td>Route HTTP requests to Cloud Connector</td>
+  </tr>
+  <tr>
+    <td><strong>SAP Cloud Connector</strong></td>
+    <td>On-Premise DMZ</td>
+    <td>Secure tunnel between cloud and on-premise</td>
+  </tr>
+  <tr>
+    <td><strong>SAP JDK</strong></td>
+    <td>On-Premise (same machine)</td>
+    <td>Java runtime for Cloud Connector</td>
+  </tr>
+  <tr>
+    <td><strong>CNC Server</strong></td>
+    <td>On-Premise</td>
+    <td>REST API on port 3000</td>
+  </tr>
+</table>
+
+<h3>4.4.2 Cloud Connector Configuration</h3>
+
+<div class="note">
+  <strong>Cloud Connector Settings:</strong>
+  <ul>
+    <li><strong>Virtual Host:</strong> cnc-chocolate-engraver</li>
+    <li><strong>Virtual Port:</strong> 3000</li>
+    <li><strong>Internal Host:</strong> localhost</li>
+    <li><strong>Internal Port:</strong> 3000</li>
+    <li><strong>Protocol:</strong> HTTP</li>
+    <li><strong>Path:</strong> /api (expose only API endpoints)</li>
+  </ul>
+</div>
+
+<h3>4.4.3 BTP Destination Configuration</h3>
+
+<pre>
+Name: CNC_CHOCOLATE_ENGRAVER
+Type: HTTP
+URL: http://cnc-chocolate-engraver:3000
+Proxy Type: OnPremise
+Authentication: NoAuthentication
+Location ID: [Your Cloud Connector Location ID]
+</pre>
+
+<h3>4.4.4 SAP Fiori Integration Example</h3>
+
+<pre>
+// SAP UI5 / Fiori example
+sap.ui.define([
+  "sap/ui/core/mvc/Controller",
+  "sap/ui/model/json/JSONModel"
+], function(Controller, JSONModel) {
+  "use strict";
+
+  return Controller.extend("com.example.ChocolateEngraver", {
+    onCreateJob: function() {
+      var oData = this.getView().getModel("job").getData();
+
+      $.ajax({
+        url: "/destinations/CNC_CHOCOLATE_ENGRAVER/api/createjob",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(oData),
+        success: function(response) {
+          sap.m.MessageToast.show("Job created: #" + response.id);
+        },
+        error: function(error) {
+          sap.m.MessageBox.error("Failed to create job");
+        }
+      });
+    }
+  });
+});
+</pre>
+
+<!-- Deployment -->
+<h1 id="deployment"><span class="section-number">5.</span> Deployment</h1>
+
+<h2>5.1 Hardware Requirements</h2>
+
+<table>
+  <tr>
+    <th>Component</th>
+    <th>Requirement</th>
+  </tr>
+  <tr>
+    <td>Computer</td>
+    <td>Linux system (Raspberry Pi, Ubuntu, etc.)</td>
+  </tr>
+  <tr>
+    <td>Memory</td>
+    <td>512MB minimum, 1GB recommended</td>
+  </tr>
+  <tr>
+    <td>Storage</td>
+    <td>100MB for application, additional for database</td>
+  </tr>
+  <tr>
+    <td>USB Port</td>
+    <td>USB 2.0 or higher for CNC connection</td>
+  </tr>
+  <tr>
+    <td>Network</td>
+    <td>Ethernet or WiFi for SAP integration</td>
+  </tr>
+</table>
+
+<h2>5.2 Software Requirements</h2>
+
+<table>
+  <tr>
+    <th>Software</th>
+    <th>Version</th>
+  </tr>
+  <tr>
+    <td>Node.js</td>
+    <td>18.x or higher</td>
+  </tr>
+  <tr>
+    <td>npm</td>
+    <td>9.x or higher</td>
+  </tr>
+  <tr>
+    <td>SAP Cloud Connector</td>
+    <td>2.x (for SAP integration)</td>
+  </tr>
+  <tr>
+    <td>SAP JDK</td>
+    <td>11 or higher (for Cloud Connector)</td>
+  </tr>
+</table>
+
+<h2>5.3 Installation Steps</h2>
+
+<pre>
+# 1. Clone repository
+git clone &lt;repository&gt;
+cd CNCChoco
+
+# 2. Install dependencies
+npm install
+
+# 3. Start server
+npm start
+
+# 4. Access web interface
+# Open http://localhost:3000 in browser
+</pre>
+
+<h2>5.4 Running as a Service</h2>
+
+<pre>
+# Create systemd service file
+sudo nano /etc/systemd/system/cnc-chocolate.service
+
+[Unit]
+Description=CNC Chocolate Engraver
+After=network.target
+
+[Service]
+Type=simple
+User=cnccomputer
+WorkingDirectory=/home/cnccomputer/CNCChoco
+ExecStart=/usr/bin/node cncserver.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+# Enable and start
+sudo systemctl enable cnc-chocolate
+sudo systemctl start cnc-chocolate
+</pre>
+
+<!-- Security -->
+<h1 id="security"><span class="section-number">6.</span> Security Considerations</h1>
+
+<h2>6.1 Current Implementation</h2>
+
+<div class="warning">
+  <strong>Note:</strong> The current implementation does not include authentication. It is intended for use within a secured network environment, accessed through SAP Cloud Connector which provides security at the network level.
+</div>
+
+<h2>6.2 Network Security</h2>
+
+<ul>
+  <li><strong>Firewall:</strong> Only port 3000 should be accessible, and only from Cloud Connector</li>
+  <li><strong>Cloud Connector:</strong> Provides secure tunnel with TLS encryption</li>
+  <li><strong>No External Access:</strong> CNC server should not be directly accessible from internet</li>
+</ul>
+
+<h2>6.3 Recommendations for Production</h2>
+
+<ul>
+  <li>Implement API key or JWT authentication</li>
+  <li>Add rate limiting to prevent abuse</li>
+  <li>Enable HTTPS with valid certificates</li>
+  <li>Implement input validation for G-code commands</li>
+  <li>Add audit logging for all operations</li>
+  <li>Regular database backups</li>
+</ul>
+
+<!-- Appendix -->
+<h1 id="appendix"><span class="section-number">7.</span> Appendix</h1>
+
+<h2>7.1 Configuration Reference</h2>
+
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Type</th>
+    <th>Default</th>
+    <th>Description</th>
+  </tr>
+  <tr><td>template_text</td><td>string</td><td>"KPMG"</td><td>Template text to engrave</td></tr>
+  <tr><td>template_font</td><td>enum</td><td>"hershey"</td><td>hershey, block, or script</td></tr>
+  <tr><td>template_font_size</td><td>number</td><td>12</td><td>Template font size (mm)</td></tr>
+  <tr><td>template_alignment</td><td>enum</td><td>"centered"</td><td>left, centered, or right</td></tr>
+  <tr><td>bar_width</td><td>number</td><td>100</td><td>Chocolate bar width (mm)</td></tr>
+  <tr><td>bar_height</td><td>number</td><td>40</td><td>Chocolate bar height (mm)</td></tr>
+  <tr><td>message_font</td><td>enum</td><td>"hershey"</td><td>Message font</td></tr>
+  <tr><td>message_font_size_1_line</td><td>number</td><td>10</td><td>Font size for single message</td></tr>
+  <tr><td>message_font_size_2_lines</td><td>number</td><td>7</td><td>Font size for two messages</td></tr>
+  <tr><td>message_alignment</td><td>enum</td><td>"centered"</td><td>left or centered</td></tr>
+  <tr><td>gap_template_to_message</td><td>number</td><td>5</td><td>Gap between template and messages (mm)</td></tr>
+  <tr><td>gap_between_lines</td><td>number</td><td>3</td><td>Gap between message lines (mm)</td></tr>
+  <tr><td>z_safe_height</td><td>number</td><td>5</td><td>Z height for travel moves (mm)</td></tr>
+  <tr><td>z_engrave_depth</td><td>number</td><td>-0.5</td><td>Z depth for engraving (mm)</td></tr>
+  <tr><td>feed_rate</td><td>number</td><td>200</td><td>Engraving feed rate (mm/min)</td></tr>
+</table>
+
+<h2>7.2 Error Codes</h2>
+
+<table>
+  <tr>
+    <th>HTTP Code</th>
+    <th>Meaning</th>
+    <th>Common Causes</th>
+  </tr>
+  <tr><td>200</td><td>Success</td><td>Request completed successfully</td></tr>
+  <tr><td>400</td><td>Bad Request</td><td>Invalid parameters, missing required fields</td></tr>
+  <tr><td>404</td><td>Not Found</td><td>Job ID not found</td></tr>
+  <tr><td>500</td><td>Server Error</td><td>Database error, serial port error</td></tr>
+</table>
+
+<h2>7.3 GRBL Commands Reference</h2>
+
+<table>
+  <tr>
+    <th>Command</th>
+    <th>Description</th>
+  </tr>
+  <tr><td>G0</td><td>Rapid move (travel)</td></tr>
+  <tr><td>G1</td><td>Linear move (engraving)</td></tr>
+  <tr><td>G21</td><td>Set units to millimeters</td></tr>
+  <tr><td>G90</td><td>Absolute positioning</td></tr>
+  <tr><td>G92</td><td>Set position (define origin)</td></tr>
+  <tr><td>M2</td><td>End program</td></tr>
+  <tr><td>$H</td><td>Home machine</td></tr>
+  <tr><td>?</td><td>Query status</td></tr>
+</table>
+
+<h2>7.4 Document History</h2>
+
+<table>
+  <tr>
+    <th>Version</th>
+    <th>Date</th>
+    <th>Author</th>
+    <th>Changes</th>
+  </tr>
+  <tr>
+    <td>1.0</td>
+    <td>January 2026</td>
+    <td>Claude</td>
+    <td>Initial release</td>
+  </tr>
+</table>
+
+<hr style="margin-top: 50px;">
+<p style="text-align: center; color: #999; font-size: 10pt;">
+  CNC Chocolate Engraver - Technical Specification v1.0<br>
+  Generated: January 2026
+</p>
+
+</body>
+</html>
