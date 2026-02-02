@@ -1,4 +1,5 @@
 // CNC Engine - Job queue processing and serial communication
+
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 const database = require('./database');
@@ -25,6 +26,7 @@ async function scanForDevice() {
       console.log('Found USB devices:', usbPorts.map(p => p.path));
       return usbPorts[0].path;
     }
+
     console.log('No USB serial devices found');
     return null;
   } catch (err) {
@@ -42,6 +44,7 @@ async function connect(devicePath = null) {
 
   try {
     const path = devicePath || await scanForDevice();
+
     if (!path) {
       return { success: false, error: 'No USB device found' };
     }
@@ -52,6 +55,7 @@ async function connect(devicePath = null) {
     });
 
     parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
+
     parser.on('data', (data) => {
       console.log('GRBL:', data);
       handleGrblResponse(data);
@@ -117,9 +121,13 @@ function sendCommand(command) {
       reject(new Error('Not connected to GRBL'));
       return;
     }
+
     port.write(command + '\n', (err) => {
-      if (err) reject(err);
-      else resolve();
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
     });
   });
 }
@@ -140,16 +148,19 @@ async function sendGcode(gcodeString) {
 
 // Print next job in queue
 async function printNext() {
+  // Check if already printing
   const isPrinting = await database.isAnyJobPrinting();
-  if (isPrinting) return { success: false, error: 'A job is already printing' };
+  if (isPrinting) {
+    return { success: false, error: 'A job is already printing' };
+  }
 
+  // Get next pending job (oldest first)
   const job = await database.getNextPendingJob();
-  if (!job) return { success: false, error: 'No pending jobs in queue' };
+  if (!job) {
+    return { success: false, error: 'No pending jobs in queue' };
+  }
 
-      const configData = await config.getConfig();
-    const gcodeString = gcode.generateGcode(job, configData);
-     console.log('G-code:\n', gcodeString);
-     
+  // Ensure we're connected
   if (!isConnected) {
     const connectResult = await connect();
     if (!connectResult.success) {
@@ -157,23 +168,29 @@ async function printNext() {
     }
   }
 
+  // Update job status to Printing
   await database.updateJob(job.id, { status: 'Printing' });
   currentJobId = job.id;
 
   try {
+    // Get config and generate G-code
     const configData = await config.getConfig();
     const gcodeString = gcode.generateGcode(job, configData);
 
-    const linesPrinted = (job.message_1 ? 1 : 0) + (job.message_2 ? 1 : 0) + 1;
+    // Calculate statistics
+    const linesPrinted = (job.message_1 ? 1 : 0) + (job.message_2 ? 1 : 0) + 1; // +1 for template
     const charsPrinted = (configData.template_text || '').length +
-      (job.message_1 || '').length +
-      (job.message_2 || '').length;
+                         (job.message_1 || '').length +
+                         (job.message_2 || '').length;
 
     console.log('Starting print job:', job.id);
     console.log('G-code:\n', gcodeString);
 
+    // Send G-code to CNC
     await sendGcode(gcodeString);
 
+    // For now, mark as completed after 10 seconds (placeholder)
+    // This will be updated later when we know the actual completion signal
     setTimeout(async () => {
       await completeJob(job.id, linesPrinted, charsPrinted);
     }, 10000);
@@ -187,6 +204,7 @@ async function printNext() {
     };
   } catch (err) {
     console.error('Print error:', err);
+    // Revert to pending status on error
     await database.updateJob(job.id, { status: 'Pending' });
     currentJobId = null;
     return { success: false, error: err.message };
@@ -195,13 +213,23 @@ async function printNext() {
 
 // Print a specific job by ID
 async function printJob(jobId) {
+  // Check if already printing
   const isPrinting = await database.isAnyJobPrinting();
-  if (isPrinting) return { success: false, error: 'A job is already printing' };
+  if (isPrinting) {
+    return { success: false, error: 'A job is already printing' };
+  }
 
+  // Get the specific job
   const job = await database.getJobById(jobId);
-  if (!job) return { success: false, error: 'Job not found' };
-  if (job.status !== 'Pending') return { success: false, error: 'Job is not in Pending status' };
+  if (!job) {
+    return { success: false, error: 'Job not found' };
+  }
 
+  if (job.status !== 'Pending') {
+    return { success: false, error: 'Job is not in Pending status' };
+  }
+
+  // Ensure we're connected
   if (!isConnected) {
     const connectResult = await connect();
     if (!connectResult.success) {
@@ -209,23 +237,28 @@ async function printJob(jobId) {
     }
   }
 
+  // Update job status to Printing
   await database.updateJob(job.id, { status: 'Printing' });
   currentJobId = job.id;
 
   try {
+    // Get config and generate G-code
     const configData = await config.getConfig();
     const gcodeString = gcode.generateGcode(job, configData);
 
+    // Calculate statistics
     const linesPrinted = (job.message_1 ? 1 : 0) + (job.message_2 ? 1 : 0) + 1;
     const charsPrinted = (configData.template_text || '').length +
-      (job.message_1 || '').length +
-      (job.message_2 || '').length;
+                         (job.message_1 || '').length +
+                         (job.message_2 || '').length;
 
     console.log('Starting print job:', job.id);
     console.log('G-code:\n', gcodeString);
 
+    // Send G-code to CNC
     await sendGcode(gcodeString);
 
+    // For now, mark as completed after 10 seconds (placeholder)
     setTimeout(async () => {
       await completeJob(job.id, linesPrinted, charsPrinted);
     }, 10000);
@@ -248,8 +281,12 @@ async function printJob(jobId) {
 // Mark job as completed and update statistics
 async function completeJob(jobId, linesPrinted = 0, charsPrinted = 0) {
   const completedAt = Math.floor(Date.now() / 1000);
-  await database.updateJob(jobId, { status: 'Completed', completed_at: completedAt });
+  await database.updateJob(jobId, {
+    status: 'Completed',
+    completed_at: completedAt
+  });
 
+  // Update statistics
   await database.incrementStat('total_jobs_completed');
   await database.incrementStat('total_lines_printed', linesPrinted);
   await database.incrementStat('total_chars_printed', charsPrinted);
@@ -263,7 +300,11 @@ async function completeJob(jobId, linesPrinted = 0, charsPrinted = 0) {
 
 // Get connection status
 function getStatus() {
-  return { connected: isConnected, port: port ? port.path : null, currentJobId: currentJobId };
+  return {
+    connected: isConnected,
+    port: port ? port.path : null,
+    currentJobId: currentJobId
+  };
 }
 
 // Get available USB devices

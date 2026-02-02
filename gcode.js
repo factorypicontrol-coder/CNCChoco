@@ -2,9 +2,11 @@
 // Updated: font glyphs provide full G-code per character (including G2/G3 with I/J).
 
 const fontPristina = require('./fontPristina'); 
+const fontLogo = require('./fontLogo'); 
 
 const fonts = {
-  pristina: fontPristina
+  pristina: fontPristina,
+  logo: fontLogo
   // you can add block/script fonts later if they implement the same API
 };
 
@@ -134,7 +136,7 @@ function generateGcode(job, config) {
 // Each glyph gcode is transformed by scale + (xOffset, yOffset).
 function renderTextAsGlyphGcode(font, text, fontSize, startX, startY, glyphOpts) {
   const lines = [];
-  const scale = fontSize / font.CHAR_HEIGHT; // uses fontH.CHAR_HEIGHT
+  const scale = fontSize / font.CHAR_HEIGHT;
   let cursorX = startX;
 
   for (const ch of text) {
