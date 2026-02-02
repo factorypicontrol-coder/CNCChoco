@@ -1,0 +1,343 @@
+<mxfile host="app.diagrams.net" modified="2026-01-31T00:00:00.000Z" agent="Claude" version="21.0.0">
+  <diagram id="system-architecture" name="System Architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- SAP BTP Cloud -->
+        <mxCell id="sap-cloud" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;opacity=50;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="280" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="sap-cloud-label" value="SAP BTP Cloud" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="120" y="50" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="sap-fiori" value="SAP Fiori&#xa;Web Application" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="80" y="90" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="sap-btp-api" value="SAP BTP&#xa;Destination" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="200" y="90" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="sap-user" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="115" y="170" width="30" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Cloud Connector -->
+        <mxCell id="cloud-connector" value="SAP Cloud&#xa;Connector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="380" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- On-Premise Network -->
+        <mxCell id="onprem" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;opacity=50;" vertex="1" parent="1">
+          <mxGeometry x="560" y="40" width="500" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="onprem-label" value="On-Premise Network (CNC Machine)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="680" y="50" width="260" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- CNC Server -->
+        <mxCell id="cnc-server" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;opacity=70;" vertex="1" parent="1">
+          <mxGeometry x="580" y="90" width="220" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="cnc-server-label" value="CNC Server (Node.js)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="610" y="100" width="160" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="express" value="Express.js&#xa;REST API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="600" y="130" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="api-module" value="api.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="700" y="130" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="engine" value="engine.js&#xa;Queue Manager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="600" y="200" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="gcode" value="gcode.js&#xa;Generator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="700" y="200" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="config" value="config.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="600" y="270" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="fonts" value="Fonts&#xa;(Hershey, Block, Script)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="700" y="270" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="webui" value="Web UI&#xa;(public/)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="650" y="320" width="80" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- SQLite Database -->
+        <mxCell id="sqlite" value="SQLite&#xa;Database&#xa;(cncchoco.db)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="830" y="160" width="80" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Serial Port -->
+        <mxCell id="serial" value="Serial Port&#xa;(/dev/ttyUSB0)&#xa;115200 baud" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="830" y="280" width="100" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- GRBL CNC -->
+        <mxCell id="grbl" value="GRBL&#xa;Controller" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="970" y="180" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cnc-machine" value="CNC Router&#xa;Machine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="970" y="280" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="chocolate" value="Chocolate&#xa;Bar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4a574;strokeColor=#8B4513;" vertex="1" parent="1">
+          <mxGeometry x="970" y="360" width="80" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows -->
+        <mxCell id="arrow1" value="" style="endArrow=classic;startArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="sap-btp-api" target="cloud-connector">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow1-label" value="HTTPS" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="arrow1">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="arrow2" value="" style="endArrow=classic;startArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="cloud-connector" target="express">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow2-label" value="HTTP :3000" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="arrow2">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="arrow3" value="" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1" source="api-module" target="sqlite">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arrow4" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="engine" target="serial">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arrow5" value="" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1" source="serial" target="grbl">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow5-label" value="G-code" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="arrow5">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="arrow6" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="grbl" target="cnc-machine">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arrow7" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="cnc-machine" target="chocolate">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow7-label" value="Engrave" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="arrow7">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="arrow8" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="sap-fiori" target="sap-btp-api">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="data-flow" name="Data Flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Data Flow Diagram -->
+        <mxCell id="df-title" value="Data Flow Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="450" y="20" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- User Input -->
+        <mxCell id="df-user" value="User Input&#xa;(Web Form / SAP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Create Job -->
+        <mxCell id="df-create" value="POST /api/createjob" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="220" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Database -->
+        <mxCell id="df-db" value="SQLite Database" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="420" y="90" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Queue -->
+        <mxCell id="df-queue" value="Job Queue&#xa;(Pending Jobs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="580" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Print Trigger -->
+        <mxCell id="df-print" value="GET /api/print&#xa;(Trigger)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="580" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Engine Process -->
+        <mxCell id="df-engine" value="Engine.js&#xa;Process Job" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="420" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- G-code Gen -->
+        <mxCell id="df-gcode" value="G-code&#xa;Generator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="260" y="220" width="100" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Config -->
+        <mxCell id="df-config" value="Config&#xa;(Template, Fonts)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="260" y="320" width="100" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Serial Output -->
+        <mxCell id="df-serial" value="Serial Port&#xa;Output" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="100" y="220" width="100" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- GRBL -->
+        <mxCell id="df-grbl" value="GRBL&#xa;Controller" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="100" y="320" width="100" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Complete -->
+        <mxCell id="df-complete" value="Mark Complete&#xa;Update Stats" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="420" y="320" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Statistics -->
+        <mxCell id="df-stats" value="Statistics&#xa;Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="580" y="320" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows -->
+        <mxCell id="dfa1" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-user" target="df-create">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa2" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-create" target="df-db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa3" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-db" target="df-queue">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa4" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-print" target="df-engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa5" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-queue" target="df-engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa6" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-engine" target="df-gcode">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa7" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-config" target="df-gcode">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa8" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-gcode" target="df-serial">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa9" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-serial" target="df-grbl">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa10" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-engine" target="df-complete">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa11" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-complete" target="df-stats">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dfa12" style="endArrow=classic;html=1;" edge="1" parent="1" source="df-complete" target="df-db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="component-diagram" name="Component Diagram">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="comp-title" value="Component Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="450" y="20" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Main Server -->
+        <mxCell id="comp-main" value="cncserver.js&#xa;(Main Entry)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="480" y="80" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- API -->
+        <mxCell id="comp-api" value="api.js&#xa;(REST Endpoints)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="280" y="180" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Engine -->
+        <mxCell id="comp-engine" value="engine.js&#xa;(Queue &amp; Serial)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="480" y="180" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Database -->
+        <mxCell id="comp-db" value="database.js&#xa;(SQLite ORM)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="680" y="180" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Config -->
+        <mxCell id="comp-config" value="config.js&#xa;(Validation)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="180" y="300" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- G-code -->
+        <mxCell id="comp-gcode" value="gcode.js&#xa;(Generator)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="340" y="300" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Fonts -->
+        <mxCell id="comp-fonts" value="fontHershey.js&#xa;fontBlock.js&#xa;fontScript.js" style="shape=component;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="500" y="300" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- SerialPort -->
+        <mxCell id="comp-serial" value="serialport&#xa;(npm package)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="660" y="300" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- SQLite3 -->
+        <mxCell id="comp-sqlite" value="sqlite3&#xa;(npm package)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="800" y="300" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Web UI -->
+        <mxCell id="comp-web" value="public/index.html&#xa;(Web UI + Chart.js)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="180" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Connections -->
+        <mxCell id="c1" style="endArrow=open;html=1;endFill=0;" edge="1" parent="1" source="comp-main" target="comp-api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" style="endArrow=open;html=1;endFill=0;" edge="1" parent="1" source="comp-main" target="comp-engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" style="endArrow=open;html=1;endFill=0;" edge="1" parent="1" source="comp-main" target="comp-db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" style="endArrow=open;html=1;endFill=0;" edge="1" parent="1" source="comp-api" target="comp-config">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" style="endArrow=open;html=1;endFill=0;" edge="1" parent="1" source="comp-engine" target="comp-gcode">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" style="endArrow=open;html=1;endFill=0;" edge="1" parent="1" source="comp-gcode" target="comp-fonts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" style="endArrow=open;html=1;endFill=0;" edge="1" parent="1" source="comp-engine" target="comp-serial">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" style="endArrow=open;html=1;endFill=0;" edge="1" parent="1" source="comp-db" target="comp-sqlite">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" style="endArrow=open;html=1;endFill=0;" edge="1" parent="1" source="comp-main" target="comp-web">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
