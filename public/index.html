@@ -988,6 +988,9 @@
             <td class="print-btn-cell">
               ${job.status === 'Pending' ? `<button class="btn btn-success btn-sm print-job-btn" onclick="printJob(${job.id})" ${canPrint ? '' : 'disabled'}>Print</button>` : ''}
             </td>
+            <td class="printScript-btn-cell">
+              ${job.status === 'Pending' ? `<button class="btn btn-success btn-sm print-job-btn" onclick="printJobScript(${job.id})" ${canPrint ? '' : 'disabled'}>Script</button>` : ''}
+            </td>
           `;
           tbody.appendChild(row);
         });
@@ -1288,6 +1291,22 @@
         }
       } catch (err) {
         showAlert('Error starting print: ' + err.message, 'error');
+      }
+    }
+
+        // Print specific job script
+    async function printJobScript(id) {
+      try {
+        const response = await fetch(`${API}/script/${id}`);
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert('Script Saved to script.txt' , 'success');
+        } else {
+          showAlert(data.error || 'Error getting script', 'error');
+        }
+      } catch (err) {
+        showAlert('Error getting script: ' + err.message, 'error');
       }
     }
 

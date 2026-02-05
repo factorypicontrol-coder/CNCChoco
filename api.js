@@ -498,6 +498,22 @@ router.get('/print/:id', async (req, res) => {
   }
 });
 
+router.get('/script/:id', async (req, res) => {
+  try {
+    const jobId = parseInt(req.params.id);
+    const result = await engine.printScript(jobId);
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error('Error scripting job:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
 // ============================================
 // Config APIs
 // ============================================

@@ -383,6 +383,25 @@ async function printJob(jobId) {
   }
 }
 
+// Print only the gcode of a print job to script.txt
+async function printScript(jobId) {
+  // Get the specific job
+  const job = await database.getJobById(jobId);
+  if (!job) {
+    return { success: false, error: 'Job not found' };
+  }
+
+  const configData = await config.getConfig();
+  const gcodeString = gcode.generateGcode(job, configData);
+  const fs = require('fs');
+  fs.writeFileSync("script.txt", gcodeString.toString(), 'utf8');
+      return {
+      success: true,
+      jobId: job.id,
+      message: 'Script Saved',
+    };
+}
+
 // Mark job as completed and update statistics
 async function completeJob(jobId, linesPrinted = 0, charsPrinted = 0) {
   const completedAt = Math.floor(Date.now() / 1000);
@@ -435,6 +454,7 @@ module.exports = {
   sendGcode,
   printNext,
   printJob,
+  printScript,
   completeJob,
   getStatus,
   listDevices

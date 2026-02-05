@@ -7080,5 +7080,5 @@ module.exports = {
   getCharacter,
   getTextWidth,
   renderCharGcode,
-  name: 'pristina'
+  name: 'calibri'
 };
