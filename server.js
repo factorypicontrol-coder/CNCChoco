@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 const app = express();
@@ -128,5 +128,14 @@ app.post('/cnc/home', (req, res) => {
   });
 });
 
-connectGRBL();
-app.listen(3000, () => console.log('CNC server on http://localhost:3000'));
+//connectGRBL();
+//app.listen(3000, () => console.log('CNC server on http://localhost:3000'));
+
+app.listen(3000, (err) => {
+  if (err) {
+    console.error('Listen error:', err);
+    return;
+  }
+  console.log(`Server is running on port: ${port}`);
+});
+

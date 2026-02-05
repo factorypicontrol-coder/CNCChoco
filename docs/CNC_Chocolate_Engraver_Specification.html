@@ -1131,9 +1131,311 @@ sudo systemctl start cnc-chocolate
   </tr>
 </table>
 
+<h2>7.5 Development Prompts</h2>
+
+<p>This section documents the chronological progression of user requirements that defined the CNC Chocolate Engraver project. Each entry includes the original prompt and a refactored version that clarifies intent and improves technical precision.</p>
+
+<div class="note">
+  <strong>Purpose:</strong> This appendix serves as a development history, capturing the evolution of project requirements and providing context for design decisions throughout the specification.
+</div>
+
+<h3>7.5.1 Prompt #1: Initial Prox Engine Requirements</h3>
+<p><strong>Date:</strong> January 2026<br>
+<strong>Context:</strong> Project inception and core architecture definition</p>
+
+<h4>Original Prompt:</h4>
+<div style="background-color: #f4f4f4; padding: 15px; border-left: 4px solid #999; margin: 10px 0;">
+Build a "prox engine" for CNC chocolate engraver. APIs for web data integration. Database storage for jobs. Job queue management. G-code generation from templates/messages. Serial communication to GRBL CNC.
+</div>
+
+<h4>Refactored Prompt:</h4>
+<div style="background-color: #e8f6f3; padding: 15px; border-left: 4px solid #1abc9c; margin: 10px 0;">
+<strong>Objective:</strong> Develop a processing engine ("prox engine") for a CNC chocolate engraver system that handles the complete workflow from job creation to physical engraving.
+
+<strong>Required Capabilities:</strong>
+<ol>
+  <li><strong>Web API Integration:</strong> Implement RESTful API endpoints for external systems to submit and manage engraving jobs.</li>
+  <li><strong>Database Persistence:</strong> Establish database storage to maintain job records, configuration settings, and operational state.</li>
+  <li><strong>Queue Management:</strong> Create a job queue system that manages the lifecycle of engraving jobs from submission through completion.</li>
+  <li><strong>G-code Generation:</strong> Develop functionality to generate GRBL-compatible G-code from predefined templates combined with user-provided messages.</li>
+  <li><strong>CNC Communication:</strong> Implement serial port communication to interface with GRBL-based CNC controllers for executing engraving operations.</li>
+</ol>
+
+<strong>Expected Outcome:</strong> A fully functional backend system that accepts job requests via API, stores them persistently, generates appropriate G-code, and controls physical hardware to execute engravings.
+</div>
+
+<h3>7.5.2 Prompt #2: API Field Definitions</h3>
+<p><strong>Date:</strong> January 2026<br>
+<strong>Context:</strong> Detailed API schema specification for job management</p>
+
+<h4>Original Prompt:</h4>
+<div style="background-color: #f4f4f4; padding: 15px; border-left: 4px solid #999; margin: 10px 0;">
+Create Job API with fields: First Name, Last Name, Email Address, Phone Number, Question 1-3, Best Contact, Contact Details, Reach Out Next Month, Message 1, Message 2, Agreement. GetJobs, UpdateJobs, Print API endpoints. Status values: Pending, Printing, Completed, Cancelled_by_User, Cancelled_by_Admin.
+</div>
+
+<h4>Refactored Prompt:</h4>
+<div style="background-color: #e8f6f3; padding: 15px; border-left: 4px solid #1abc9c; margin: 10px 0;">
+<strong>Objective:</strong> Define the complete API specification for job management, including data schema, endpoints, and status workflow.
+
+<strong>Job Data Schema - Required Fields:</strong>
+<table style="font-size: 9pt; margin-top: 10px;">
+  <tr><th>Field Name</th><th>Data Type</th><th>Purpose</th></tr>
+  <tr><td>first_name</td><td>string</td><td>Customer first name</td></tr>
+  <tr><td>last_name</td><td>string</td><td>Customer last name</td></tr>
+  <tr><td>email_address</td><td>string</td><td>Customer email address</td></tr>
+  <tr><td>phone_number</td><td>string</td><td>Customer phone number</td></tr>
+  <tr><td>question_1</td><td>string</td><td>Survey question 1 response</td></tr>
+  <tr><td>question_2</td><td>string</td><td>Survey question 2 response</td></tr>
+  <tr><td>question_3</td><td>string</td><td>Survey question 3 response</td></tr>
+  <tr><td>best_contact</td><td>string</td><td>Best company contact method</td></tr>
+  <tr><td>contact_details</td><td>string</td><td>Additional contact information</td></tr>
+  <tr><td>reach_out_next_month</td><td>string</td><td>Customer consent for future contact</td></tr>
+  <tr><td>message_1</td><td>string</td><td>First line of personalized message</td></tr>
+  <tr><td>message_2</td><td>string</td><td>Second line of personalized message</td></tr>
+  <tr><td>agreement</td><td>string</td><td>Terms and conditions agreement status</td></tr>
+</table>
+
+<strong>Required API Endpoints:</strong>
+<ol>
+  <li><strong>CreateJob:</strong> POST endpoint to create new engraving jobs with the schema defined above</li>
+  <li><strong>GetJobs:</strong> GET endpoint to retrieve job queue with optional filtering by status</li>
+  <li><strong>UpdateJobs:</strong> PATCH endpoint to modify job attributes and status</li>
+  <li><strong>Print:</strong> GET/POST endpoint to trigger engraving execution for pending jobs</li>
+</ol>
+
+<strong>Job Status State Machine:</strong><br>
+Define the following status values and their valid transitions:
+<ul>
+  <li><strong>Pending:</strong> Job created and awaiting execution</li>
+  <li><strong>Printing:</strong> Job currently being engraved</li>
+  <li><strong>Completed:</strong> Job successfully engraved</li>
+  <li><strong>Cancelled_by_User:</strong> Job cancelled by customer request</li>
+  <li><strong>Cancelled_by_Admin:</strong> Job cancelled by system administrator</li>
+</ul>
+</div>
+
+<h3>7.5.3 Prompt #3: Template and Configuration Requirements</h3>
+<p><strong>Date:</strong> January 2026<br>
+<strong>Context:</strong> Configuration system and template customization capabilities</p>
+
+<h4>Original Prompt:</h4>
+<div style="background-color: #f4f4f4; padding: 15px; border-left: 4px solid #999; margin: 10px 0;">
+SQLite database. Template stored in DB with config screen. Fonts: Hershey, Block, Script. Bar size: 40mm x 100mm. Configurable: template text, fonts, sizes, alignments, gaps, Z heights, feed rates. USB device auto-scan.
+</div>
+
+<h4>Refactored Prompt:</h4>
+<div style="background-color: #e8f6f3; padding: 15px; border-left: 4px solid #1abc9c; margin: 10px 0;">
+<strong>Objective:</strong> Implement a flexible configuration system that allows administrators to customize engraving parameters without code modifications.
+
+<strong>Database Technology:</strong>
+<ul>
+  <li>Use SQLite for embedded database storage (no external database server required)</li>
+  <li>Store all configuration values in a dedicated configuration table</li>
+  <li>Implement configuration versioning and validation</li>
+</ul>
+
+<strong>Font Library Requirements:</strong><br>
+Implement three distinct stroke-based fonts suitable for CNC engraving:
+<ol>
+  <li><strong>Hershey Font:</strong> Classic single-stroke font for general-purpose text</li>
+  <li><strong>Block Font:</strong> Geometric font with straight lines for modern aesthetic</li>
+  <li><strong>Script Font:</strong> Cursive/flowing font for elegant branding</li>
+</ol>
+
+<strong>Physical Constraints:</strong>
+<ul>
+  <li>Standard chocolate bar dimensions: 40mm height × 100mm width</li>
+  <li>All coordinate calculations must respect these boundaries</li>
+</ul>
+
+<strong>Configurable Parameters:</strong><br>
+Create a configuration interface allowing modification of:
+<ul>
+  <li><strong>Template Settings:</strong> Template text content, font selection, font size, horizontal alignment (left/center/right)</li>
+  <li><strong>Message Settings:</strong> Message font selection, font sizes for single-line vs. two-line messages, alignment</li>
+  <li><strong>Layout Parameters:</strong> Gap between template and messages, gap between message lines</li>
+  <li><strong>CNC Parameters:</strong> Z-axis safe height for travel moves, Z-axis engraving depth (negative value), feed rate for engraving operations (mm/min)</li>
+</ul>
+
+<strong>Hardware Detection:</strong>
+<ul>
+  <li>Implement automatic USB device scanning to detect available serial ports</li>
+  <li>Display available devices to user for selection</li>
+  <li>Handle connection/disconnection events gracefully</li>
+</ul>
+</div>
+
+<h3>7.5.4 Prompt #4: Statistics and UI Enhancement Requests</h3>
+<p><strong>Date:</strong> January 2026<br>
+<strong>Context:</strong> Dashboard enhancements and real-time monitoring capabilities</p>
+
+<h4>Original Prompt:</h4>
+<div style="background-color: #f4f4f4; padding: 15px; border-left: 4px solid #999; margin: 10px 0;">
+Statistics page with graphs (Chart.js). Bulk selection and status change. Per-job print buttons (disabled when another job printing). Live updates (3-second polling).
+</div>
+
+<h4>Refactored Prompt:</h4>
+<div style="background-color: #e8f6f3; padding: 15px; border-left: 4px solid #1abc9c; margin: 10px 0;">
+<strong>Objective:</strong> Enhance the web interface with real-time monitoring, bulk operations, and visual analytics to improve operational visibility and efficiency.
+
+<strong>Statistics Dashboard Requirements:</strong>
+<ol>
+  <li><strong>Visualization Library:</strong> Integrate Chart.js for creating interactive, responsive charts</li>
+  <li><strong>Key Metrics to Display:</strong>
+    <ul>
+      <li>Total jobs created, completed, cancelled</li>
+      <li>Total lines engraved and characters printed</li>
+      <li>Current queue depth by status</li>
+    </ul>
+  </li>
+  <li><strong>Chart Types Required:</strong>
+    <ul>
+      <li>Doughnut chart: Job status distribution (Pending, Printing, Completed, Cancelled)</li>
+      <li>Line chart: Daily activity showing jobs created vs. completed over 30-day period</li>
+      <li>Bar chart: Characters printed per day for productivity tracking</li>
+    </ul>
+  </li>
+</ol>
+
+<strong>Bulk Operations Feature:</strong>
+<ul>
+  <li>Implement checkbox selection for multiple jobs in the queue view</li>
+  <li>Provide "Select All" and "Deselect All" functionality</li>
+  <li>Enable bulk status changes for selected jobs (e.g., bulk cancel, bulk reinstate)</li>
+  <li>Display confirmation dialog before executing bulk operations</li>
+</ul>
+
+<strong>Per-Job Print Control:</strong>
+<ul>
+  <li>Add individual "Print" button for each job in the queue</li>
+  <li>Implement mutex logic: disable all print buttons when any job is actively printing</li>
+  <li>Re-enable buttons automatically when printing completes</li>
+  <li>Provide visual feedback for the currently printing job</li>
+</ul>
+
+<strong>Live Updates Implementation:</strong>
+<ul>
+  <li>Implement client-side polling mechanism with 3-second interval</li>
+  <li>Update queue display without full page refresh</li>
+  <li>Update statistics and charts in real-time</li>
+  <li>Highlight recently changed jobs for operator awareness</li>
+  <li>Minimize network overhead by only fetching changed data when possible</li>
+</ul>
+</div>
+
+<h3>7.5.5 Prompt #5: SAP BTP Integration</h3>
+<p><strong>Date:</strong> January 2026<br>
+<strong>Context:</strong> Enterprise integration requirements for SAP Business Technology Platform</p>
+
+<h4>Original Prompt:</h4>
+<div style="background-color: #f4f4f4; padding: 15px; border-left: 4px solid #999; margin: 10px 0;">
+Integration via SAP Cloud Connector. SAP JDK on same machine as CNC server. REST API accessible on port 3000.
+</div>
+
+<h4>Refactored Prompt:</h4>
+<div style="background-color: #e8f6f3; padding: 15px; border-left: 4px solid #1abc9c; margin: 10px 0;">
+<strong>Objective:</strong> Enable secure integration with SAP Business Technology Platform (BTP) to allow SAP Fiori applications to submit and manage chocolate engraving jobs remotely.
+
+<strong>Integration Architecture:</strong>
+<ol>
+  <li><strong>SAP Cloud Connector:</strong>
+    <ul>
+      <li>Deploy SAP Cloud Connector as secure tunnel between SAP BTP Cloud and on-premise CNC server</li>
+      <li>Configure virtual host mapping for the CNC server endpoints</li>
+      <li>Expose only /api paths to maintain security boundary</li>
+    </ul>
+  </li>
+  <li><strong>Java Runtime Requirements:</strong>
+    <ul>
+      <li>Install SAP JDK on the same machine hosting the CNC server</li>
+      <li>Ensure Java version compatibility with Cloud Connector requirements</li>
+      <li>Configure Java environment variables appropriately</li>
+    </ul>
+  </li>
+  <li><strong>REST API Exposure:</strong>
+    <ul>
+      <li>Ensure CNC server REST API listens on port 3000</li>
+      <li>Configure API to accept requests from Cloud Connector proxy</li>
+      <li>Maintain HTTP protocol for internal network communication (TLS handled by Cloud Connector)</li>
+    </ul>
+  </li>
+</ol>
+
+<strong>Network Configuration:</strong>
+<ul>
+  <li>CNC server must be accessible from Cloud Connector on localhost:3000</li>
+  <li>No direct internet exposure required or recommended</li>
+  <li>All external access routed through SAP BTP security layer</li>
+</ul>
+
+<strong>Expected Integration Flow:</strong><br>
+SAP Fiori App (BTP Cloud) → BTP Destination → Cloud Connector → CNC Server (port 3000)
+</div>
+
+<h3>7.5.6 Prompt #6: Documentation Requirements</h3>
+<p><strong>Date:</strong> January 2026<br>
+<strong>Context:</strong> Technical documentation and API specification delivery</p>
+
+<h4>Original Prompt:</h4>
+<div style="background-color: #f4f4f4; padding: 15px; border-left: 4px solid #999; margin: 10px 0;">
+Swagger/OpenAPI documentation with testable UI. Specification document with draw.io diagrams.
+</div>
+
+<h4>Refactored Prompt:</h4>
+<div style="background-color: #e8f6f3; padding: 15px; border-left: 4px solid #1abc9c; margin: 10px 0;">
+<strong>Objective:</strong> Provide comprehensive technical documentation to support development, integration, and maintenance of the CNC Chocolate Engraver system.
+
+<strong>Interactive API Documentation:</strong>
+<ol>
+  <li><strong>Swagger/OpenAPI Specification:</strong>
+    <ul>
+      <li>Create complete OpenAPI 3.0 specification document for all REST endpoints</li>
+      <li>Include detailed parameter descriptions, request/response schemas, and example payloads</li>
+      <li>Document all status codes and error responses</li>
+    </ul>
+  </li>
+  <li><strong>Swagger UI Integration:</strong>
+    <ul>
+      <li>Embed Swagger UI within the application for interactive API exploration</li>
+      <li>Enable "Try it out" functionality for testing endpoints directly from documentation</li>
+      <li>Provide authentication testing capabilities if applicable</li>
+    </ul>
+  </li>
+</ol>
+
+<strong>Technical Specification Document:</strong>
+<ol>
+  <li><strong>Architecture Diagrams:</strong>
+    <ul>
+      <li>Create draw.io diagrams illustrating system architecture, component relationships, and data flows</li>
+      <li>Include separate diagrams for: System Architecture, Component Architecture, Data Flow, SAP BTP Integration</li>
+      <li>Export diagrams in both editable (.drawio) and image formats</li>
+    </ul>
+  </li>
+  <li><strong>Document Structure:</strong>
+    <ul>
+      <li>Produce a professional HTML specification document with proper sectioning</li>
+      <li>Include: Executive Summary, Functional Specification, Technical Specification, Architecture, Deployment Guide, Security Considerations</li>
+      <li>Provide Table of Contents with navigation links</li>
+      <li>Format for both screen viewing and print output</li>
+    </ul>
+  </li>
+</ol>
+
+<strong>Documentation Deliverables:</strong>
+<ul>
+  <li>OpenAPI specification file (YAML or JSON)</li>
+  <li>Embedded Swagger UI accessible via web interface</li>
+  <li>HTML specification document with embedded CSS</li>
+  <li>draw.io architecture diagram file</li>
+  <li>Exported diagram images (PNG/SVG)</li>
+</ul>
+</div>
+
 <hr style="margin-top: 50px;">
 <p style="text-align: center; color: #999; font-size: 10pt;">
   CNC Chocolate Engraver - Technical Specification v1.0<br>
+  Last Updated: January 31, 2026<br>
   Generated: January 2026
 </p>
 
