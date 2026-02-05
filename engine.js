@@ -116,6 +116,9 @@ function disconnect() {
 
 // Send G-code command
 function sendCommand(command) {
+        const fs = require('fs');
+      fs.appendFileSync('sent_gcode.txt', command + '\n', 'utf8');
+      /*
   return new Promise((resolve, reject) => {
     if (!port || !isConnected) {
       reject(new Error('Not connected to GRBL'));
@@ -130,6 +133,7 @@ function sendCommand(command) {
       }
     });
   });
+  */
 }
 
 // Send G-code line by line with small delay
@@ -142,7 +146,7 @@ async function sendGcode(gcodeString) {
   for (const line of lines) {
     await sendCommand(line);
     // Small delay between commands for GRBL buffer
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
 }
 
@@ -229,7 +233,16 @@ async function printJob(jobId) {
     return { success: false, error: 'Job is not in Pending status' };
   }
 
+  //Testing
+  const configData = await config.getConfig();
+  const gcodeString = gcode.generateGcode(job, configData);
+  console.log('G-code:\n', gcodeString);
+  const fs = require('fs');
+  fs.writeFileSync("output.txt", gcodeString.toString(), 'utf8');
+  //End testing
+
   // Ensure we're connected
+  /*
   if (!isConnected) {
     const connectResult = await connect();
     if (!connectResult.success) {
@@ -240,7 +253,7 @@ async function printJob(jobId) {
   // Update job status to Printing
   await database.updateJob(job.id, { status: 'Printing' });
   currentJobId = job.id;
-
+  */
   try {
     // Get config and generate G-code
     const configData = await config.getConfig();

@@ -1,17 +1,26 @@
 // G-code generation module for CNC chocolate engraving
 // Updated: font glyphs provide full G-code per character (including G2/G3 with I/J).
 
+const fontHershey = require('./fontHershey'); 
+const fontBlock = require('./fontBlock'); 
+const fontScript = require('./fontScript'); 
+
 const fontPristina = require('./fontPristina'); 
 const fontLogo = require('./fontLogo'); 
+const fontCalibri = require('./fontCalibri')
 
 const fonts = {
+  hershey: fontHershey,
+  block: fontBlock,
+  script: fontScript,
   pristina: fontPristina,
-  logo: fontLogo
+  logo: fontLogo,
+  calibri: fontCalibri
   // you can add block/script fonts later if they implement the same API
 };
 
 function getFont(fontName) {
-  return fonts[fontName] || fonts.pristina;
+  return fonts[fontName] || fonts.pristina; //sets the default font
 }
 
 function calculateAlignment(textWidth, barWidth, alignment) {

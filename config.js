@@ -1,7 +1,7 @@
 const database = require('./database');
 
 // Available fonts
-const AVAILABLE_FONTS = ['hershey', 'block', 'script','pristina','logo'];
+const AVAILABLE_FONTS = ['hershey', 'block', 'script','pristina','logo','calibri'];
 
 // Available alignments
 const TEMPLATE_ALIGNMENTS = ['left', 'centered', 'right'];
