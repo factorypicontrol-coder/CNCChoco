@@ -68,13 +68,14 @@ function generateGcode(job, config) {
   out.push('; CNC Chocolate Engraver');
   out.push('; Job ID: ' + job.id);
   out.push('; Template: ' + config.template_text);
-  out.push('; Message 1: ' + (job.message_1 || ''));
+  out.push('; Message 1: ' + (job.message_1 || ''));  
   out.push('; Message 2: ' + (job.message_2 || ''));
   out.push('');
   out.push('G21 ; Set units to millimeters');
   out.push('G90 ; Absolute positioning');
   out.push('G92 X0 Y0 Z0 ; Set current position as origin');
   out.push(`G0 Z${Number(zSafe).toFixed(decimals)} ; Raise to safe height`);
+  out.push(`M3 S500`);
   out.push('');
 
   // Options for glyph transformation
@@ -136,6 +137,7 @@ function generateGcode(job, config) {
   out.push('; End of job');
   out.push(`G0 Z${Number(zSafe).toFixed(decimals)} ; Raise to safe height`);
   out.push('G0 X0 Y0 ; Return to origin');
+  out.push('M5 ; Stop Spindle');
   out.push('M2 ; End program');
 
   return out.join('\n');
