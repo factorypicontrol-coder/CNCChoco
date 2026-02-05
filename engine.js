@@ -10,6 +10,8 @@ let port = null;
 let parser = null;
 let currentJobId = null;
 let isConnected = false;
+let responseResolvers = [];
+
 
 // Scan for USB serial devices
 async function scanForDevice() {
@@ -76,6 +78,7 @@ async function connect(devicePath = null) {
       isConnected = false;
     });
 
+
     // Wait for port to open
     await new Promise((resolve, reject) => {
       port.once('open', resolve);
@@ -88,7 +91,7 @@ async function connect(devicePath = null) {
     return { success: false, error: err.message };
   }
 }
-
+/*
 // Handle GRBL responses
 function handleGrblResponse(data) {
   const response = data.trim();
@@ -103,6 +106,49 @@ function handleGrblResponse(data) {
     console.log('GRBL Status:', response);
   }
 }
+*/
+
+//Status based
+function handleGrblResponse(data) {
+  const response = data.trim();
+
+  console.log('GRBL:', response);
+
+  // --- Flow control FIRST ---
+  if (responseResolvers.length > 0) {
+    if (response === 'ok') {
+      responseResolvers.shift()('ok');
+      return;
+    }
+
+    if (response.startsWith('error:')) {
+      responseResolvers.shift()(response);
+      return;
+    }
+  }
+
+  // --- Non-blocking informational handling ---
+  if (response.startsWith('<') && response.endsWith('>')) {
+    // Status report
+    console.log('GRBL Status:', response);
+   _toggleUiStatus?.(response); // optional
+    return;
+  }
+
+  if (response.includes('Grbl')) {
+    // Startup banner
+    console.log('GRBL Startup:', response);
+    return;
+  }
+
+  if (response.startsWith('ALARM')) {
+    console.error('GRBL Alarm:', response);
+    return;
+  }
+
+  // Other chatter can be ignored or logged
+}
+
 
 // Disconnect from GRBL
 function disconnect() {
@@ -114,8 +160,55 @@ function disconnect() {
   isConnected = false;
 }
 
+//Status based response start
+function sendCommandAndWait(command) {
+  const fs = require('fs');
+  fs.appendFileSync('sent_gcode.txt', command + '\n', 'utf8');
+
+  return new Promise((resolve, reject) => {
+    if (!port || !isConnected) {
+      reject(new Error('Not connected to GRBL'));
+      return;
+    }
+
+    responseResolvers.push((response) => {
+      if (response.startsWith('ok')) {
+        resolve();
+      } else if (response.startsWith('error')) {
+        reject(new Error(`GRBL ${response} on command: ${command}`));
+      }
+      // ignore status chatter
+    });
+
+    port.write(command + '\n', (err) => {
+      if (err) reject(err);
+    });
+  });
+}
+
+async function sendGcode(gcodeString) {
+  const lines = gcodeString
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l && !l.startsWith(';'));
+
+  for (const line of lines) {
+    await sendCommandAndWait(line);
+
+    // Small safety delay (optional but recommended)
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+}
+
+//Status based send end.
+
+/*
+//Time based send
 // Send G-code command
 function sendCommand(command) {
+        const fs = require('fs');
+      fs.appendFileSync('sent_gcode.txt', command + '\n', 'utf8');
+      
   return new Promise((resolve, reject) => {
     if (!port || !isConnected) {
       reject(new Error('Not connected to GRBL'));
@@ -130,6 +223,7 @@ function sendCommand(command) {
       }
     });
   });
+  
 }
 
 // Send G-code line by line with small delay
@@ -142,9 +236,11 @@ async function sendGcode(gcodeString) {
   for (const line of lines) {
     await sendCommand(line);
     // Small delay between commands for GRBL buffer
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
 }
+*/
+
 
 // Print next job in queue
 async function printNext() {
@@ -180,8 +276,8 @@ async function printNext() {
     // Calculate statistics
     const linesPrinted = (job.message_1 ? 1 : 0) + (job.message_2 ? 1 : 0) + 1; // +1 for template
     const charsPrinted = (configData.template_text || '').length +
-                         (job.message_1 || '').length +
-                         (job.message_2 || '').length;
+      (job.message_1 || '').length +
+      (job.message_2 || '').length;
 
     console.log('Starting print job:', job.id);
     console.log('G-code:\n', gcodeString);
@@ -229,7 +325,16 @@ async function printJob(jobId) {
     return { success: false, error: 'Job is not in Pending status' };
   }
 
+  //Testing
+  const configData = await config.getConfig();
+  const gcodeString = gcode.generateGcode(job, configData);
+  console.log('G-code:\n', gcodeString);
+  const fs = require('fs');
+  fs.writeFileSync("output.txt", gcodeString.toString(), 'utf8');
+  //End testing
+
   // Ensure we're connected
+
   if (!isConnected) {
     const connectResult = await connect();
     if (!connectResult.success) {
@@ -249,8 +354,8 @@ async function printJob(jobId) {
     // Calculate statistics
     const linesPrinted = (job.message_1 ? 1 : 0) + (job.message_2 ? 1 : 0) + 1;
     const charsPrinted = (configData.template_text || '').length +
-                         (job.message_1 || '').length +
-                         (job.message_2 || '').length;
+      (job.message_1 || '').length +
+      (job.message_2 || '').length;
 
     console.log('Starting print job:', job.id);
     console.log('G-code:\n', gcodeString);
@@ -326,7 +431,7 @@ module.exports = {
   scanForDevice,
   connect,
   disconnect,
-  sendCommand,
+  sendCommandAndWait,
   sendGcode,
   printNext,
   printJob,
