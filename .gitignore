@@ -1,4 +1,5 @@
 node_modules/
+node_modules
 *.db
 output.txt
 cncchoco.db
