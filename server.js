@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 const { default: GCodeTextRenderer } = require('./gcodeconverter.js');
@@ -155,19 +155,8 @@ app.get('/cnc/pause', (req, res) => {
   });
 });
 
-<<<<<<< HEAD
-//connectGRBL();
-//app.listen(3000, () => console.log('CNC server on http://localhost:3000'));
 
-app.listen(3000, (err) => {
-  if (err) {
-    console.error('Listen error:', err);
-    return;
-  }
-  console.log(`Server is running on port: ${port}`);
-});
 
-=======
 //Resume the machine
 app.get('/cnc/pause', (req, res) => {
   port.write('~\n', (err) => {
@@ -185,6 +174,6 @@ app.get('/cnc/reset', (req, res) => {
 });
 
 
-connectGRBL();
+//connectGRBL();
 app.listen(3000, () => console.log('CNC server on http://localhost:3000'));
->>>>>>> b4d896f2745f885e59a233baf658d39e0480c824
+

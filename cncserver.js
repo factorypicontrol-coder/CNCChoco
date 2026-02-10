@@ -14,20 +14,42 @@ const engine = require('./engine');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy (Tailscale HTTPS termination)
+app.set('trust proxy', true);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/docs', express.static(path.join(__dirname, 'docs')));
 
-// Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'CNC Chocolate Engraver API',
-  swaggerOptions: {
+// Swagger UI - override swagger-ui-init.js to use window.location.origin
+app.get('/api-docs/swagger-ui-init.js', (req, res) => {
+  const initJs = `
+window.onload = function() {
+  var spec = ${JSON.stringify(swaggerSpec)};
+  spec.servers = [
+    { url: window.location.origin, description: "Current server" }
+  ];
+  var ui = SwaggerUIBundle({
+    spec: spec,
+    dom_id: '#swagger-ui',
+    deepLinking: true,
+    presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+    plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+    layout: "StandaloneLayout",
     persistAuthorization: true,
     displayRequestDuration: true,
     tryItOutEnabled: true
-  }
+  });
+  window.ui = ui;
+};`;
+  res.setHeader('Content-Type', 'application/javascript');
+  res.send(initJs);
+});
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'CNC Chocolate Engraver API'
 }));
 
 // Serve swagger spec as JSON
@@ -70,10 +92,9 @@ async function start() {
       console.log('You can connect manually via the web interface');
     }
 
-    // Start HTTP server
-    app.listen(PORT, () => {
-      console.log(`CNC Chocolate Engraver running at http://localhost:${PORT}`);
-    });
+    // Start HTTP server (bind to localhost only - Tailscale proxies to it)
+    const server = await app.listen(PORT, '127.0.0.1');
+    console.log(`CNC Chocolate Engraver running at http://localhost:${PORT}`);
   } catch (err) {
     console.error('Failed to start server:', err);
     process.exit(1);

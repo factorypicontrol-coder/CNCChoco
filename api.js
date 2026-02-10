@@ -195,6 +195,76 @@ router.get('/getjob/:id', async (req, res) => {
 
 /**
  * @swagger
+ * /api/updatejobs/bulk:
+ *   patch:
+ *     summary: Bulk update multiple jobs
+ *     description: Updates the status of multiple jobs at once
+ *     tags: [Jobs]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/BulkUpdateRequest'
+ *     responses:
+ *       200:
+ *         description: Jobs updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 changes:
+ *                   type: integer
+ *                   example: 3
+ *                 message:
+ *                   type: string
+ *                   example: 3 jobs updated
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.patch('/updatejobs/bulk', async (req, res) => {
+  try {
+    const { ids, status } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, error: 'No job IDs provided' });
+    }
+
+    if (!status || !configModule.JOB_STATUSES.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: `Invalid status. Valid values: ${configModule.JOB_STATUSES.join(', ')}`
+      });
+    }
+
+    // Track cancelled jobs for statistics
+    if (status.startsWith('Cancelled')) {
+      await database.incrementStat('total_jobs_cancelled', ids.length);
+      await database.updateDailyStat('jobs_cancelled', ids.length);
+    }
+
+    const result = await database.updateJobsBulk(ids, { status });
+    res.json({
+      success: true,
+      changes: result.changes,
+      message: `${result.changes} jobs updated`
+    });
+  } catch (err) {
+    console.error('Error bulk updating jobs:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
  * /api/updatejobs/{id}:
  *   patch:
  *     summary: Update a job (partial update)
@@ -342,76 +412,6 @@ router.put('/updatejobs/:id', async (req, res) => {
     });
   } catch (err) {
     console.error('Error updating job:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-/**
- * @swagger
- * /api/updatejobs/bulk:
- *   patch:
- *     summary: Bulk update multiple jobs
- *     description: Updates the status of multiple jobs at once
- *     tags: [Jobs]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/BulkUpdateRequest'
- *     responses:
- *       200:
- *         description: Jobs updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 changes:
- *                   type: integer
- *                   example: 3
- *                 message:
- *                   type: string
- *                   example: 3 jobs updated
- *       400:
- *         description: Invalid request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
-router.patch('/updatejobs/bulk', async (req, res) => {
-  try {
-    const { ids, status } = req.body;
-
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({ success: false, error: 'No job IDs provided' });
-    }
-
-    if (!status || !configModule.JOB_STATUSES.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        error: `Invalid status. Valid values: ${configModule.JOB_STATUSES.join(', ')}`
-      });
-    }
-
-    // Track cancelled jobs for statistics
-    if (status.startsWith('Cancelled')) {
-      await database.incrementStat('total_jobs_cancelled', ids.length);
-      await database.updateDailyStat('jobs_cancelled', ids.length);
-    }
-
-    const result = await database.updateJobsBulk(ids, { status });
-    res.json({
-      success: true,
-      changes: result.changes,
-      message: `${result.changes} jobs updated`
-    });
-  } catch (err) {
-    console.error('Error bulk updating jobs:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
