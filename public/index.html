@@ -907,7 +907,7 @@
           <div class="form-row">
             <div class="form-group">
               <label for="gapTemplateToMessage">Gap: Template to Message (mm)</label>
-              <input type="number" id="gapTemplateToMessage" step="0.1" min="0" max="50">
+              <input type="number" id="gapTemplateToMessage" step="0.1" min="-20" max="50">
             </div>
             <div class="form-group">
               <label for="gapBetweenLines">Gap: Between Lines (mm)</label>
@@ -1398,6 +1398,15 @@
 
         if (data.success) {
           showAlert('Script Saved to script.txt' , 'success');
+          if (data.gcode) {
+            const blob = new Blob([data.gcode], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `script_job_${id}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }
         } else {
           showAlert(data.error || 'Error getting script', 'error');
         }

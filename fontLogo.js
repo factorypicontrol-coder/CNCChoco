@@ -1,6 +1,6 @@
 // Logo, mocked into a letter to fit into the printing mechanisms.
 
-const CHAR_HEIGHT = 21; // "units-per-em" baseline
+const CHAR_HEIGHT = 15; // matches actual glyph Y extent (0–15)
 
 // Example glyph set: you will replace/extend these with your full glyph G-code.
 const characters = {
@@ -276,7 +276,7 @@ function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
       if (letter === 'X') {
         words.push(`X${fmt(dx + v * scale, decimals)}`);
       } else if (letter === 'Y') {
-        words.push(`Y${fmt(dy + (v + CHAR_HEIGHT) * scale, decimals)}`);
+        words.push(`Y${fmt(dy + v * scale, decimals)}`);
       } else if (letter === 'I') {
         words.push(`I${fmt(v * scale, decimals)}`);
       } else if (letter === 'J') {

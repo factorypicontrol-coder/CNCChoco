@@ -399,6 +399,7 @@ async function printScript(jobId) {
       success: true,
       jobId: job.id,
       message: 'Script Saved',
+      gcode: gcodeString,
     };
 }
 

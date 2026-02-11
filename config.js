@@ -22,7 +22,7 @@ const CONFIG_KEYS = {
   message_font_size_1_line: { type: 'number', min: 1, max: 50 },
   message_font_size_2_lines: { type: 'number', min: 1, max: 50 },
   message_alignment: { type: 'enum', values: MESSAGE_ALIGNMENTS },
-  gap_template_to_message: { type: 'number', min: 0, max: 50 },
+  gap_template_to_message: { type: 'number', min: -20, max: 50 },
   gap_between_lines: { type: 'number', min: 0, max: 50 },
   z_safe_height: { type: 'number', min: 0, max: 50 },
   z_engrave_depth: { type: 'number', min: -10, max: 0 },
