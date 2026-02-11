@@ -276,7 +276,7 @@ function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
       if (letter === 'X') {
         words.push(`X${fmt(dx + v * scale, decimals)}`);
       } else if (letter === 'Y') {
-        words.push(`Y${fmt(dy + v * scale, decimals)}`);
+        words.push(`Y${fmt(dy + (v + CHAR_HEIGHT) * scale, decimals)}`);
       } else if (letter === 'I') {
         words.push(`I${fmt(v * scale, decimals)}`);
       } else if (letter === 'J') {
