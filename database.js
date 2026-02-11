@@ -113,7 +113,10 @@ function initDefaultConfig() {
     gap_between_lines: '3',
     z_safe_height: '5',
     z_engrave_depth: '-0.5',
-    feed_rate: '200'
+    feed_rate: '200',
+    normalize_glyph_z: 'false',
+    normalize_glyph_feed: 'false',
+    decimals: '3'
   };
 
   return new Promise((resolve, reject) => {

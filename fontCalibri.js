@@ -6971,7 +6971,9 @@ for (const c of 'abcdefghijklmnopqrstuvwxyz') {
   */
 
 function getCharacter(char) {
-  return characters[char] || characters['?'];
+  if (characters[char]) return characters[char];
+  console.warn(`[fontCalibri] Missing glyph for character: "${char}" (U+${char.charCodeAt(0).toString(16).padStart(4, '0')})`);
+  return { width: characters[' '].width, gcode: '' };
 }
 
 function getTextWidth(text, fontSize) {
@@ -7056,7 +7058,7 @@ function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
     }
 
     // If cutting move with no feed and normalizeFeed enabled, add F
-    if (normalizeFeed && gWord && (gWord === 'G1' || gWord === 'G01' || gWord === 'G1' || gWord === 'G01' || gWord === 'G1' || gWord === 'G01')) {
+    if (normalizeFeed && gWord && (gWord === 'G1' || gWord === 'G01' || gWord === 'G2' || gWord === 'G02' || gWord === 'G3' || gWord === 'G03')) {
       if (!words.some(w => w.toUpperCase().startsWith('F'))) {
         words.push(`F${fmt(feedRate, decimals)}`);
       }
@@ -7066,6 +7068,10 @@ function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
   }
 
   return out;
+}
+
+function getCharAdvance(char) {
+  return getCharacter(char).width;
 }
 
 // Render one character at a specific placement
@@ -7078,6 +7084,7 @@ function renderCharGcode(char, fontSize, offsetX, offsetY, opts = {}) {
 module.exports = {
   CHAR_HEIGHT,
   getCharacter,
+  getCharAdvance,
   getTextWidth,
   renderCharGcode,
   name: 'calibri'

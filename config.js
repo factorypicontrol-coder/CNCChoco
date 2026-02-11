@@ -26,7 +26,10 @@ const CONFIG_KEYS = {
   gap_between_lines: { type: 'number', min: 0, max: 50 },
   z_safe_height: { type: 'number', min: 0, max: 50 },
   z_engrave_depth: { type: 'number', min: -10, max: 0 },
-  feed_rate: { type: 'number', min: 10, max: 2000 }
+  feed_rate: { type: 'number', min: 10, max: 2000 },
+  normalize_glyph_z: { type: 'boolean' },
+  normalize_glyph_feed: { type: 'boolean' },
+  decimals: { type: 'number', min: 0, max: 8 }
 };
 
 function validateConfigValue(key, value) {
@@ -57,17 +60,26 @@ function validateConfigValue(key, value) {
     return { valid: true, value: String(num) };
   }
 
+  if (rule.type === 'boolean') {
+    const str = String(value).toLowerCase();
+    if (str === 'true' || str === '1') return { valid: true, value: 'true' };
+    if (str === 'false' || str === '0') return { valid: true, value: 'false' };
+    return { valid: false, error: `${key} must be a boolean (true/false)` };
+  }
+
   return { valid: false, error: 'Unknown validation type' };
 }
 
 async function getConfig() {
   const config = await database.getConfig();
 
-  // Parse numeric values
+  // Parse typed values
   const parsed = { ...config };
   for (const [key, rule] of Object.entries(CONFIG_KEYS)) {
-    if (rule.type === 'number' && parsed[key]) {
+    if (rule.type === 'number' && parsed[key] != null) {
       parsed[key] = parseFloat(parsed[key]);
+    } else if (rule.type === 'boolean' && parsed[key] != null) {
+      parsed[key] = parsed[key] === 'true';
     }
   }
 
