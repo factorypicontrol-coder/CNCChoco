@@ -278,7 +278,7 @@ function textToPath(text, fontSize, startX, startY) {
       } else {
         currentStroke.push({
           x: currentX + point[0] * scale,
-          y: startY - point[1] * scale
+          y: startY + point[1] * scale
         });
       }
     }
@@ -319,7 +319,7 @@ function renderCharGcode(char, fontSize, offsetX, offsetY, opts = {}) {
   for (const stroke of strokes) {
     if (stroke.length === 0) continue;
     const sx = offsetX + stroke[0][0] * scale;
-    const sy = offsetY - stroke[0][1] * scale;
+    const sy = offsetY + stroke[0][1] * scale;
 
     lines.push(`G0 Z${Number(zSafe).toFixed(decimals)}`);
     lines.push(`G0 X${sx.toFixed(decimals)} Y${sy.toFixed(decimals)}`);
@@ -327,7 +327,7 @@ function renderCharGcode(char, fontSize, offsetX, offsetY, opts = {}) {
 
     for (let i = 1; i < stroke.length; i++) {
       const px = offsetX + stroke[i][0] * scale;
-      const py = offsetY - stroke[i][1] * scale;
+      const py = offsetY + stroke[i][1] * scale;
       lines.push(`G1 X${px.toFixed(decimals)} Y${py.toFixed(decimals)} F${Number(feedRate).toFixed(decimals)}`);
     }
   }
