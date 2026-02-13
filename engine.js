@@ -11,6 +11,7 @@ let parser = null;
 let currentJobId = null;
 let isConnected = false;
 let responseResolvers = [];
+let printLock = false;
 
 
 // Scan for USB serial devices
@@ -152,6 +153,13 @@ function handleGrblResponse(data) {
 
 // Disconnect from GRBL
 function disconnect() {
+  // Reject any pending command resolvers
+  const pending = responseResolvers;
+  responseResolvers = [];
+  pending.forEach(resolver => {
+    try { resolver('error:disconnected'); } catch (e) { /* already rejected */ }
+  });
+
   if (port && port.isOpen) {
     port.close();
   }
@@ -161,27 +169,46 @@ function disconnect() {
 }
 
 //Status based response start
-function sendCommandAndWait(command) {
-  const fs = require('fs');
-  fs.appendFileSync('sent_gcode.txt', command + '\n', 'utf8');
-
+function sendCommandAndWait(command, timeoutMs = 30000) {
   return new Promise((resolve, reject) => {
     if (!port || !isConnected) {
       reject(new Error('Not connected to GRBL'));
       return;
     }
 
-    responseResolvers.push((response) => {
+    let settled = false;
+    const timeout = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        // Remove this resolver from the queue
+        const idx = responseResolvers.indexOf(resolver);
+        if (idx !== -1) responseResolvers.splice(idx, 1);
+        reject(new Error(`GRBL timeout (${timeoutMs}ms) on command: ${command}`));
+      }
+    }, timeoutMs);
+
+    const resolver = (response) => {
+      if (settled) return;
       if (response.startsWith('ok')) {
+        settled = true;
+        clearTimeout(timeout);
         resolve();
       } else if (response.startsWith('error')) {
+        settled = true;
+        clearTimeout(timeout);
         reject(new Error(`GRBL ${response} on command: ${command}`));
       }
       // ignore status chatter
-    });
+    };
+
+    responseResolvers.push(resolver);
 
     port.write(command + '\n', (err) => {
-      if (err) reject(err);
+      if (err && !settled) {
+        settled = true;
+        clearTimeout(timeout);
+        reject(err);
+      }
     });
   });
 }
@@ -244,6 +271,18 @@ async function sendGcode(gcodeString) {
 
 // Print next job in queue
 async function printNext() {
+  if (printLock) {
+    return { success: false, error: 'A print operation is already in progress' };
+  }
+  printLock = true;
+  try {
+    return await _printNext();
+  } finally {
+    printLock = false;
+  }
+}
+
+async function _printNext() {
   // Check if already printing
   const isPrinting = await database.isAnyJobPrinting();
   if (isPrinting) {
@@ -309,6 +348,18 @@ async function printNext() {
 
 // Print a specific job by ID
 async function printJob(jobId) {
+  if (printLock) {
+    return { success: false, error: 'A print operation is already in progress' };
+  }
+  printLock = true;
+  try {
+    return await _printJob(jobId);
+  } finally {
+    printLock = false;
+  }
+}
+
+async function _printJob(jobId) {
   // Check if already printing
   const isPrinting = await database.isAnyJobPrinting();
   if (isPrinting) {
@@ -324,14 +375,6 @@ async function printJob(jobId) {
   if (job.status !== 'Pending') {
     return { success: false, error: 'Job is not in Pending status' };
   }
-
-  //Testing
-  const configData = await config.getConfig();
-  const gcodeString = gcode.generateGcode(job, configData);
-  console.log('G-code:\n', gcodeString);
-  const fs = require('fs');
-  fs.writeFileSync("output.txt", gcodeString.toString(), 'utf8');
-  //End testing
 
   // Ensure we're connected
 

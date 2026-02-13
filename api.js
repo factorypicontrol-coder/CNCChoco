@@ -245,13 +245,14 @@ router.patch('/updatejobs/bulk', async (req, res) => {
       });
     }
 
-    // Track cancelled jobs for statistics
-    if (status.startsWith('Cancelled')) {
-      await database.incrementStat('total_jobs_cancelled', ids.length);
-      await database.updateDailyStat('jobs_cancelled', ids.length);
+    const result = await database.updateJobsBulk(ids, { status });
+
+    // Track cancelled jobs for statistics using actual changes count
+    if (status.startsWith('Cancelled') && result.changes > 0) {
+      await database.incrementStat('total_jobs_cancelled', result.changes);
+      await database.updateDailyStat('jobs_cancelled', result.changes);
     }
 
-    const result = await database.updateJobsBulk(ids, { status });
     res.json({
       success: true,
       changes: result.changes,
@@ -333,6 +334,13 @@ router.patch('/updatejobs/:id', async (req, res) => {
     }
 
     const result = await database.updateJob(jobId, updates);
+
+    // Track cancellation statistics
+    if (updates.status && updates.status.startsWith('Cancelled') && !existingJob.status.startsWith('Cancelled') && result.changes > 0) {
+      await database.incrementStat('total_jobs_cancelled', 1);
+      await database.updateDailyStat('jobs_cancelled', 1);
+    }
+
     res.json({
       success: true,
       changes: result.changes,
@@ -801,7 +809,7 @@ router.post('/command', async (req, res) => {
       return res.status(400).json({ success: false, error: 'No gcode provided' });
     }
 
-    await engine.sendCommand(gcode);
+    await engine.sendCommandAndWait(gcode);
     res.json({ success: true, message: 'Command sent' });
   } catch (err) {
     console.error('Error sending command:', err);
@@ -929,8 +937,9 @@ router.get('/stats', async (req, res) => {
  */
 router.get('/queue/live', async (req, res) => {
   try {
+    const statusFilter = req.query.status || null;
     const [jobs, isPrinting, statusCounts] = await Promise.all([
-      database.getJobs(),
+      database.getJobs(statusFilter),
       database.isAnyJobPrinting(),
       database.getJobStatusCounts()
     ]);

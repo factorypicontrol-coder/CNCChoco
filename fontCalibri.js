@@ -6993,7 +6993,7 @@ function fmt(n, dp) {
 function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
   const {
     decimals = 6,
-    normalizeZ = false,
+    normalizeZ = true,
     zSafe = 5,
     zEngrave = -0.125,
     normalizeFeed = false,

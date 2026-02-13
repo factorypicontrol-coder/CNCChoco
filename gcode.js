@@ -182,8 +182,11 @@ function renderTextAsGlyphGcode(font, text, fontSize, startX, startY, glyphOpts)
   return lines;
 }
 
+const AVAILABLE_FONTS = Object.keys(fonts);
+
 module.exports = {
   generateGcode,
   getFont,
-  fonts
+  fonts,
+  AVAILABLE_FONTS
 };

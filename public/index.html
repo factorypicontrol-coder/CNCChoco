@@ -987,9 +987,6 @@
       } else if (viewName === 'apidocs') {
         document.querySelector('nav button:nth-child(4)').classList.add('active');
         stopLiveUpdates();
-        // Reload iframe to ensure fresh Swagger UI
-        const iframe = document.getElementById('swaggerFrame');
-        iframe.src = iframe.src;
       } else if (viewName === 'spec') {
         document.querySelector('nav button:nth-child(5)').classList.add('active');
         stopLiveUpdates();
@@ -1014,17 +1011,25 @@
     async function loadQueueLive() {
       try {
         const filter = document.getElementById('statusFilter').value;
-        const response = await fetch(`${API}/queue/live`);
+        const url = filter ? `${API}/queue/live?status=${filter}` : `${API}/queue/live`;
+        const response = await fetch(url);
         const data = await response.json();
 
         if (data.success) {
           isPrinting = data.isPrinting;
           updatePrintButtons();
-          renderQueue(data.jobs, filter);
+          renderQueue(data.jobs);
         }
       } catch (err) {
         console.error('Live update error:', err);
       }
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
     }
 
     // Show alert message
@@ -1076,9 +1081,9 @@
           row.innerHTML = `
             <td><input type="checkbox" class="job-checkbox" data-id="${job.id}" ${isSelected ? 'checked' : ''} onchange="toggleJobSelection(${job.id})"></td>
             <td>${job.id}</td>
-            <td onclick="editJob(${job.id})" style="cursor:pointer">${job.first_name || ''} ${job.last_name || ''}</td>
-            <td onclick="editJob(${job.id})" style="cursor:pointer">${job.message_1 || ''}</td>
-            <td onclick="editJob(${job.id})" style="cursor:pointer">${job.message_2 || ''}</td>
+            <td onclick="editJob(${job.id})" style="cursor:pointer">${escapeHtml(job.first_name || '')} ${escapeHtml(job.last_name || '')}</td>
+            <td onclick="editJob(${job.id})" style="cursor:pointer">${escapeHtml(job.message_1 || '')}</td>
+            <td onclick="editJob(${job.id})" style="cursor:pointer">${escapeHtml(job.message_2 || '')}</td>
             <td><span class="status-badge status-${job.status}">${job.status.replace(/_/g, ' ')}</span></td>
             <td>${formatDate(job.created_at)}</td>
             <td class="print-btn-cell">
@@ -1392,7 +1397,7 @@
 
         // Print specific job script
     function printJobScript(id) {
-      window.location.href = `${API}/script/${id}`;
+      window.open(`${API}/script/${id}`, '_blank');
     }
 
     // Statistics

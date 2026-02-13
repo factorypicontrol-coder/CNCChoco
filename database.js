@@ -98,26 +98,9 @@ function initDefaultStats() {
 }
 
 function initDefaultConfig() {
-  const defaults = {
-    template_text: 'KPMG',
-    template_font: 'hershey',
-    template_font_size: '12',
-    template_alignment: 'centered',
-    bar_width: '100',
-    bar_height: '40',
-    message_font: 'hershey',
-    message_font_size_1_line: '10',
-    message_font_size_2_lines: '7',
-    message_alignment: 'centered',
-    gap_template_to_message: '5',
-    gap_between_lines: '3',
-    z_safe_height: '5',
-    z_engrave_depth: '-0.5',
-    feed_rate: '200',
-    normalize_glyph_z: 'false',
-    normalize_glyph_feed: 'false',
-    decimals: '3'
-  };
+  // Lazy require to avoid circular dependency (config.js requires database.js)
+  const { getConfigDefaults } = require('./config');
+  const defaults = getConfigDefaults();
 
   return new Promise((resolve, reject) => {
     const stmt = db.prepare('INSERT OR IGNORE INTO config (key, value) VALUES (?, ?)');
@@ -362,6 +345,10 @@ function getDailyStats(days = 30) {
 }
 
 function updateDailyStat(field, amount = 1) {
+  const allowedFields = ['jobs_created', 'jobs_completed', 'jobs_cancelled', 'lines_printed', 'chars_printed'];
+  if (!allowedFields.includes(field)) {
+    return Promise.reject(new Error(`Invalid daily stat field: ${field}`));
+  }
   const today = new Date().toISOString().split('T')[0];
   return new Promise((resolve, reject) => {
     db.run(
