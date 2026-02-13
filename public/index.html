@@ -1391,28 +1391,8 @@
     }
 
         // Print specific job script
-    async function printJobScript(id) {
-      try {
-        const response = await fetch(`${API}/script/${id}`);
-        const data = await response.json();
-
-        if (data.success) {
-          showAlert('Script Saved to script.txt' , 'success');
-          if (data.gcode) {
-            const blob = new Blob([data.gcode], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `script_job_${id}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-          }
-        } else {
-          showAlert(data.error || 'Error getting script', 'error');
-        }
-      } catch (err) {
-        showAlert('Error getting script: ' + err.message, 'error');
-      }
+    function printJobScript(id) {
+      window.location.href = `${API}/script/${id}`;
     }
 
     // Statistics

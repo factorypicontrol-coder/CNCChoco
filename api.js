@@ -503,7 +503,9 @@ router.get('/script/:id', async (req, res) => {
     const jobId = parseInt(req.params.id);
     const result = await engine.printScript(jobId);
     if (result.success) {
-      res.json(result);
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Disposition', `attachment; filename="script_job_${jobId}.txt"`);
+      res.send(result.gcode);
     } else {
       res.status(400).json(result);
     }
