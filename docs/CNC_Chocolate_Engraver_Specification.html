@@ -145,8 +145,8 @@
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Crect fill='%231a5276' width='150' height='150' rx='20'/%3E%3Ctext x='75' y='85' text-anchor='middle' fill='white' font-size='60' font-family='Arial'%3ECNC%3C/text%3E%3C/svg%3E" alt="CNC Logo">
   </div>
   <div class="cover-info">
-    <p><strong>Version:</strong> 1.0</p>
-    <p><strong>Date:</strong> January 2026</p>
+    <p><strong>Version:</strong> 1.1</p>
+    <p><strong>Date:</strong> February 2026</p>
     <p><strong>Project:</strong> FactoryPiCNC / CNCChoco</p>
     <p><strong>Integration:</strong> SAP BTP via Cloud Connector</p>
   </div>
@@ -181,9 +181,16 @@
         <li><a href="#arch-sap">4.4 SAP BTP Integration</a></li>
       </ul>
     </li>
-    <li><a href="#deployment">5. Deployment</a></li>
-    <li><a href="#security">6. Security Considerations</a></li>
-    <li><a href="#appendix">7. Appendix</a></li>
+    <li><a href="#user-interface">5. User Interface</a>
+      <ul>
+        <li><a href="#ui-overview">5.1 UI Overview</a></li>
+        <li><a href="#ui-classic">5.2 Classic Web UI</a></li>
+        <li><a href="#ui-fiori">5.3 SAP Fiori UI</a></li>
+      </ul>
+    </li>
+    <li><a href="#deployment">6. Deployment</a></li>
+    <li><a href="#security">7. Security Considerations</a></li>
+    <li><a href="#appendix">8. Appendix</a></li>
   </ul>
 </div>
 
@@ -462,10 +469,16 @@
     <td>USB serial communication</td>
   </tr>
   <tr>
-    <td>Frontend</td>
+    <td>Frontend (Classic)</td>
     <td>Vanilla JS + Chart.js</td>
     <td>4.x</td>
     <td>Web UI with charts</td>
+  </tr>
+  <tr>
+    <td>Frontend (Fiori)</td>
+    <td>SAP OpenUI5</td>
+    <td>1.120+</td>
+    <td>SAP Fiori 3 UI (sap_horizon theme)</td>
   </tr>
   <tr>
     <td>CNC Protocol</td>
@@ -487,8 +500,19 @@ CNCChoco/
 ├── fontHershey.js      # Hershey stroke font
 ├── fontBlock.js        # Block geometric font
 ├── fontScript.js       # Script cursive font
+├── fontCalibri.js      # Calibri font (TrueType-based)
+├── fontPristina.js     # Pristina script font
+├── fontLogo.js         # Custom logo font
 ├── public/
-│   └── index.html      # Web UI (SPA)
+│   └── index.html      # Classic Web UI (SPA)
+├── fiori/
+│   └── webapp/         # SAP Fiori UI5 application
+│       ├── Component.js
+│       ├── manifest.json
+│       ├── controller/
+│       ├── view/
+│       ├── model/
+│       └── i18n/
 ├── docs/
 │   ├── architecture.drawio
 │   └── CNC_Chocolate_Engraver_Specification.html
@@ -697,7 +721,32 @@ M2
     <td>Cursive, flowing</td>
     <td>Elegant branding, signatures</td>
   </tr>
+  <tr>
+    <td>Calibri</td>
+    <td>TrueType-based, professional</td>
+    <td>Corporate branding, modern documents</td>
+  </tr>
+  <tr>
+    <td>Pristina</td>
+    <td>Elegant script, refined cursive</td>
+    <td>Premium branding, special occasions</td>
+  </tr>
+  <tr>
+    <td>Logo</td>
+    <td>Custom logo font</td>
+    <td>Company-specific branding</td>
+  </tr>
 </table>
+
+<div class="note">
+  <strong>Recent Font Enhancements (February 2026):</strong>
+  <ul>
+    <li>Added Calibri and Pristina fonts with vertical positioning adjustments for optimal engraving quality</li>
+    <li>Implemented custom logo font for brand-specific engraving</li>
+    <li>Enhanced font download functionality - generated G-code can now be downloaded as files</li>
+    <li>Improved spacing algorithms for better text layout across all fonts</li>
+  </ul>
+</div>
 
 <!-- Architecture -->
 <h1 id="architecture"><span class="section-number">4.</span> Architecture</h1>
@@ -927,8 +976,336 @@ sap.ui.define([
 });
 </pre>
 
+<!-- User Interface -->
+<h1 id="user-interface"><span class="section-number">5.</span> User Interface</h1>
+
+<h2 id="ui-overview">5.1 UI Overview</h2>
+
+<p>The CNC Chocolate Engraver system provides two distinct user interfaces to accommodate different usage scenarios and organizational preferences:</p>
+
+<table>
+  <tr>
+    <th>Interface</th>
+    <th>Technology</th>
+    <th>Use Case</th>
+    <th>Access Path</th>
+  </tr>
+  <tr>
+    <td><strong>Classic Web UI</strong></td>
+    <td>Vanilla JavaScript + Chart.js</td>
+    <td>Standalone operation, direct management, development/testing</td>
+    <td><code>http://localhost:3000/</code></td>
+  </tr>
+  <tr>
+    <td><strong>SAP Fiori UI</strong></td>
+    <td>OpenUI5 (sap_horizon theme)</td>
+    <td>Enterprise integration, SAP ecosystem consistency, BTP deployment</td>
+    <td><code>http://localhost:3000/fiori/</code></td>
+  </tr>
+</table>
+
+<h2 id="ui-classic">5.2 Classic Web UI</h2>
+
+<h3>5.2.1 Overview</h3>
+<p>The classic web interface is a single-page application (SPA) built with vanilla JavaScript and Chart.js. It provides full functionality for managing the CNC chocolate engraver without requiring any SAP infrastructure.</p>
+
+<h3>5.2.2 Features</h3>
+<ul>
+  <li><strong>Queue Management:</strong> Live-updating job list with status filtering and bulk operations</li>
+  <li><strong>Job Creation:</strong> Form-based interface for creating new engraving jobs</li>
+  <li><strong>Statistics Dashboard:</strong> Real-time charts showing job status distribution, daily activity, and productivity metrics</li>
+  <li><strong>Configuration Panel:</strong> UI for modifying all system parameters (templates, fonts, CNC settings)</li>
+  <li><strong>API Documentation:</strong> Embedded Swagger UI for testing and exploring REST endpoints</li>
+  <li><strong>CNC Control:</strong> Connection status, device selection, and raw G-code command interface</li>
+  <li><strong>Calibration Tool:</strong> Dedicated page for CNC calibration and testing (added February 2026)</li>
+</ul>
+
+<h3>5.2.3 Technology Details</h3>
+<table>
+  <tr>
+    <th>Component</th>
+    <th>Technology</th>
+    <th>Purpose</th>
+  </tr>
+  <tr>
+    <td>Layout</td>
+    <td>Custom CSS Grid/Flexbox</td>
+    <td>Responsive multi-view interface</td>
+  </tr>
+  <tr>
+    <td>State Management</td>
+    <td>Vanilla JavaScript</td>
+    <td>Client-side state and polling</td>
+  </tr>
+  <tr>
+    <td>Charting</td>
+    <td>Chart.js 4.x</td>
+    <td>Doughnut, line, and bar charts</td>
+  </tr>
+  <tr>
+    <td>API Communication</td>
+    <td>Fetch API</td>
+    <td>REST endpoint integration</td>
+  </tr>
+  <tr>
+    <td>Update Frequency</td>
+    <td>3-second polling</td>
+    <td>Live queue and statistics updates</td>
+  </tr>
+</table>
+
+<h2 id="ui-fiori">5.3 SAP Fiori UI</h2>
+
+<h3>5.3.1 Overview</h3>
+<p>The SAP Fiori interface is a full-featured OpenUI5 application that follows SAP Fiori 3 design guidelines and the Worklist application pattern. This interface is designed specifically for organizations using SAP BTP and ensures visual and functional consistency with other SAP applications in the enterprise ecosystem.</p>
+
+<h3>5.3.2 Architecture</h3>
+
+<h4>Component-Based MVC Structure</h4>
+<p>The Fiori UI follows the standard OpenUI5 Component-based architecture:</p>
+
+<pre>
+fiori/webapp/
+├── Component.js           # Application component initialization
+├── manifest.json          # Application descriptor (metadata, routing, models)
+├── index.html            # Bootstrap HTML
+├── controller/
+│   ├── App.controller.js         # Main app controller
+│   ├── Worklist.controller.js    # Job list controller
+│   ├── Object.controller.js      # Job detail controller
+│   └── CreateJob.controller.js   # Job creation controller
+├── view/
+│   ├── App.view.xml              # Main shell layout
+│   ├── Worklist.view.xml         # Job list with IconTabBar
+│   ├── Object.view.xml           # Job detail view
+│   └── CreateJob.view.xml        # Job creation dialog
+├── model/
+│   ├── formatter.js              # Data formatting utilities
+│   └── models.js                 # Model initialization
+└── i18n/
+    └── i18n.properties           # Internationalization texts
+</pre>
+
+<h3>5.3.3 Key Features</h3>
+
+<h4>Shell Bar Header</h4>
+<ul>
+  <li><strong>Application Title:</strong> "CNC Chocolate Engraver"</li>
+  <li><strong>CNC Connection Indicator:</strong> Live status badge (Connected/Disconnected) with color coding</li>
+  <li><strong>Quick Actions:</strong> Create job button prominently placed</li>
+  <li><strong>User Menu:</strong> Settings and help access</li>
+</ul>
+
+<h4>IconTabBar Navigation</h4>
+<p>Primary navigation uses SAP Fiori IconTabBar pattern for status-based filtering:</p>
+<table>
+  <tr>
+    <th>Tab</th>
+    <th>Icon</th>
+    <th>Filter</th>
+    <th>Live Count Badge</th>
+  </tr>
+  <tr>
+    <td>All Jobs</td>
+    <td>sap-icon://task</td>
+    <td>No filter</td>
+    <td>Total job count</td>
+  </tr>
+  <tr>
+    <td>Pending</td>
+    <td>sap-icon://pending</td>
+    <td>Status: Pending</td>
+    <td>Pending job count</td>
+  </tr>
+  <tr>
+    <td>Printing</td>
+    <td>sap-icon://in-progress</td>
+    <td>Status: Printing</td>
+    <td>Printing job count</td>
+  </tr>
+  <tr>
+    <td>Completed</td>
+    <td>sap-icon://complete</td>
+    <td>Status: Completed</td>
+    <td>Completed job count</td>
+  </tr>
+  <tr>
+    <td>Cancelled</td>
+    <td>sap-icon://decline</td>
+    <td>Status: Cancelled_*</td>
+    <td>Cancelled job count</td>
+  </tr>
+</table>
+
+<h4>Job Table (sap.m.Table)</h4>
+<p>Responsive table with the following columns:</p>
+<ul>
+  <li><strong>Selection:</strong> Multi-select mode for bulk operations</li>
+  <li><strong>Job ID:</strong> Unique identifier with navigation link</li>
+  <li><strong>Customer:</strong> First name + Last name</li>
+  <li><strong>Messages:</strong> Message 1 and Message 2 preview</li>
+  <li><strong>Status:</strong> Visual badge with semantic colors (Error/Warning/Success/Information)</li>
+  <li><strong>Created:</strong> Timestamp formatted for local timezone</li>
+  <li><strong>Actions:</strong> Per-row action buttons (Print, Edit, Cancel)</li>
+</ul>
+
+<h4>Dialogs and Interactions</h4>
+<table>
+  <tr>
+    <th>Dialog</th>
+    <th>Trigger</th>
+    <th>Functionality</th>
+  </tr>
+  <tr>
+    <td><strong>Create Job</strong></td>
+    <td>ShellBar "Create" button</td>
+    <td>Full form with all customer fields, messages, and survey questions. Form validation with value state messages.</td>
+  </tr>
+  <tr>
+    <td><strong>Edit Job</strong></td>
+    <td>Row action button or detail page</td>
+    <td>Modify job attributes including status change. Read-only fields for ID and timestamps.</td>
+  </tr>
+  <tr>
+    <td><strong>View Details</strong></td>
+    <td>Click on Job ID</td>
+    <td>Object page showing all job information, status history, and available actions.</td>
+  </tr>
+  <tr>
+    <td><strong>Bulk Status Change</strong></td>
+    <td>Toolbar button with selected items</td>
+    <td>Confirmation dialog for bulk status changes (e.g., Cancel selected jobs).</td>
+  </tr>
+</table>
+
+<h4>Live Updates</h4>
+<ul>
+  <li><strong>Polling Interval:</strong> 3 seconds (configurable)</li>
+  <li><strong>Updated Elements:</strong>
+    <ul>
+      <li>IconTabBar count badges</li>
+      <li>Table data (new, modified, deleted jobs)</li>
+      <li>CNC connection status in ShellBar</li>
+      <li>Status badges with animated transitions</li>
+    </ul>
+  </li>
+  <li><strong>Performance Optimization:</strong> Only refreshes visible tab data to minimize network traffic</li>
+</ul>
+
+<h4>Bulk Actions</h4>
+<p>Available toolbar actions when jobs are selected:</p>
+<ul>
+  <li><strong>Cancel Selected:</strong> Bulk status change to Cancelled_by_Admin</li>
+  <li><strong>Reinstate Selected:</strong> Bulk status change back to Pending</li>
+  <li><strong>Export Selected:</strong> Download job data as CSV/Excel</li>
+  <li><strong>Delete Selected:</strong> Permanent deletion with confirmation (admin only)</li>
+</ul>
+
+<h3>5.3.4 Theming and Visual Design</h3>
+
+<table>
+  <tr>
+    <th>Element</th>
+    <th>Specification</th>
+  </tr>
+  <tr>
+    <td>Theme</td>
+    <td>sap_horizon (SAP Fiori 3)</td>
+  </tr>
+  <tr>
+    <td>OpenUI5 Version</td>
+    <td>1.120+ (loaded from OpenUI5 CDN)</td>
+  </tr>
+  <tr>
+    <td>Status Colors</td>
+    <td>
+      Pending: Information (blue)<br>
+      Printing: Warning (orange)<br>
+      Completed: Success (green)<br>
+      Cancelled: Error (red)
+    </td>
+  </tr>
+  <tr>
+    <td>Responsive Breakpoints</td>
+    <td>Phone, Tablet, Desktop (automatic UI5 responsive behavior)</td>
+  </tr>
+</table>
+
+<h3>5.3.5 Integration Points</h3>
+
+<h4>REST API Communication</h4>
+<p>The Fiori UI communicates with the backend through the same REST API as the classic UI:</p>
+<ul>
+  <li><strong>Model Type:</strong> sap.ui.model.json.JSONModel for client-side data</li>
+  <li><strong>Data Source:</strong> RESTful endpoints at <code>/api/*</code></li>
+  <li><strong>Authentication:</strong> Inherits SAP BTP authentication when deployed to BTP</li>
+  <li><strong>CORS:</strong> Configured for cross-origin requests when needed</li>
+</ul>
+
+<h4>Deployment Options</h4>
+<table>
+  <tr>
+    <th>Deployment Type</th>
+    <th>Access URL</th>
+    <th>Use Case</th>
+  </tr>
+  <tr>
+    <td>Local Development</td>
+    <td><code>http://localhost:3000/fiori/</code></td>
+    <td>Testing alongside CNC server</td>
+  </tr>
+  <tr>
+    <td>SAP BTP HTML5 Application Repository</td>
+    <td><code>https://[tenant].launchpad.cfapps.[region].hana.ondemand.com</code></td>
+    <td>Production SAP BTP deployment with Fiori Launchpad integration</td>
+  </tr>
+  <tr>
+    <td>SAP Work Zone Integration</td>
+    <td>Embedded in Work Zone launchpad</td>
+    <td>Enterprise portal with single sign-on</td>
+  </tr>
+</table>
+
+<h3>5.3.6 Internationalization (i18n)</h3>
+<p>All user-facing text is externalized to i18n resource bundles for multi-language support:</p>
+<pre>
+# i18n/i18n.properties (English - default)
+appTitle=CNC Chocolate Engraver
+appDescription=Manage chocolate engraving jobs
+
+# Column headers
+colJobId=Job ID
+colCustomer=Customer
+colMessages=Messages
+colStatus=Status
+colCreated=Created
+
+# Status values
+statusPending=Pending
+statusPrinting=Printing
+statusCompleted=Completed
+statusCancelled=Cancelled
+
+# Additional languages supported via i18n_de.properties, i18n_es.properties, etc.
+</pre>
+
+<h3>5.3.7 Advantages of Fiori UI</h3>
+
+<div class="note">
+  <strong>Benefits of SAP Fiori Interface:</strong>
+  <ul>
+    <li><strong>Consistency:</strong> Matches look-and-feel of other SAP applications in the enterprise</li>
+    <li><strong>Accessibility:</strong> Built-in ARIA support and keyboard navigation</li>
+    <li><strong>Responsive:</strong> Automatic adaptation to phone, tablet, and desktop</li>
+    <li><strong>Enterprise Features:</strong> Role-based UI adaptation, personalization, theming</li>
+    <li><strong>SAP Integration:</strong> Seamless embedding in Fiori Launchpad and Work Zone</li>
+    <li><strong>Standards Compliance:</strong> Follows SAP Fiori Design Guidelines</li>
+    <li><strong>Maintainability:</strong> Component-based architecture with clear separation of concerns</li>
+  </ul>
+</div>
+
 <!-- Deployment -->
-<h1 id="deployment"><span class="section-number">5.</span> Deployment</h1>
+<h1 id="deployment"><span class="section-number">6.</span> Deployment</h1>
 
 <h2>5.1 Hardware Requirements</h2>
 
@@ -1027,7 +1404,7 @@ sudo systemctl start cnc-chocolate
 </pre>
 
 <!-- Security -->
-<h1 id="security"><span class="section-number">6.</span> Security Considerations</h1>
+<h1 id="security"><span class="section-number">7.</span> Security Considerations</h1>
 
 <h2>6.1 Current Implementation</h2>
 
@@ -1055,9 +1432,9 @@ sudo systemctl start cnc-chocolate
 </ul>
 
 <!-- Appendix -->
-<h1 id="appendix"><span class="section-number">7.</span> Appendix</h1>
+<h1 id="appendix"><span class="section-number">8.</span> Appendix</h1>
 
-<h2>7.1 Configuration Reference</h2>
+<h2>8.1 Configuration Reference</h2>
 
 <table>
   <tr>
@@ -1083,7 +1460,7 @@ sudo systemctl start cnc-chocolate
   <tr><td>feed_rate</td><td>number</td><td>200</td><td>Engraving feed rate (mm/min)</td></tr>
 </table>
 
-<h2>7.2 Error Codes</h2>
+<h2>8.2 Error Codes</h2>
 
 <table>
   <tr>
@@ -1097,7 +1474,7 @@ sudo systemctl start cnc-chocolate
   <tr><td>500</td><td>Server Error</td><td>Database error, serial port error</td></tr>
 </table>
 
-<h2>7.3 GRBL Commands Reference</h2>
+<h2>8.3 GRBL Commands Reference</h2>
 
 <table>
   <tr>
@@ -1114,7 +1491,7 @@ sudo systemctl start cnc-chocolate
   <tr><td>?</td><td>Query status</td></tr>
 </table>
 
-<h2>7.4 Document History</h2>
+<h2>8.4 Document History</h2>
 
 <table>
   <tr>
@@ -1129,9 +1506,15 @@ sudo systemctl start cnc-chocolate
     <td>Claude</td>
     <td>Initial release</td>
   </tr>
+  <tr>
+    <td>1.1</td>
+    <td>February 2026</td>
+    <td>Claude</td>
+    <td>Added SAP Fiori UI section, updated fonts (Calibri, Pristina, Logo), added calibration feature, enhanced file structure</td>
+  </tr>
 </table>
 
-<h2>7.5 Development Prompts</h2>
+<h2>8.5 Development Prompts</h2>
 
 <p>This section documents the chronological progression of user requirements that defined the CNC Chocolate Engraver project. Each entry includes the original prompt and a refactored version that clarifies intent and improves technical precision.</p>
 
@@ -1139,7 +1522,7 @@ sudo systemctl start cnc-chocolate
   <strong>Purpose:</strong> This appendix serves as a development history, capturing the evolution of project requirements and providing context for design decisions throughout the specification.
 </div>
 
-<h3>7.5.1 Prompt #1: Initial Prox Engine Requirements</h3>
+<h3>8.5.1 Prompt #1: Initial Prox Engine Requirements</h3>
 <p><strong>Date:</strong> January 2026<br>
 <strong>Context:</strong> Project inception and core architecture definition</p>
 
@@ -1164,7 +1547,7 @@ Build a "prox engine" for CNC chocolate engraver. APIs for web data integration.
 <strong>Expected Outcome:</strong> A fully functional backend system that accepts job requests via API, stores them persistently, generates appropriate G-code, and controls physical hardware to execute engravings.
 </div>
 
-<h3>7.5.2 Prompt #2: API Field Definitions</h3>
+<h3>8.5.2 Prompt #2: API Field Definitions</h3>
 <p><strong>Date:</strong> January 2026<br>
 <strong>Context:</strong> Detailed API schema specification for job management</p>
 
@@ -1214,7 +1597,7 @@ Define the following status values and their valid transitions:
 </ul>
 </div>
 
-<h3>7.5.3 Prompt #3: Template and Configuration Requirements</h3>
+<h3>8.5.3 Prompt #3: Template and Configuration Requirements</h3>
 <p><strong>Date:</strong> January 2026<br>
 <strong>Context:</strong> Configuration system and template customization capabilities</p>
 
@@ -1265,7 +1648,7 @@ Create a configuration interface allowing modification of:
 </ul>
 </div>
 
-<h3>7.5.4 Prompt #4: Statistics and UI Enhancement Requests</h3>
+<h3>8.5.4 Prompt #4: Statistics and UI Enhancement Requests</h3>
 <p><strong>Date:</strong> January 2026<br>
 <strong>Context:</strong> Dashboard enhancements and real-time monitoring capabilities</p>
 
@@ -1323,7 +1706,7 @@ Statistics page with graphs (Chart.js). Bulk selection and status change. Per-jo
 </ul>
 </div>
 
-<h3>7.5.5 Prompt #5: SAP BTP Integration</h3>
+<h3>8.5.5 Prompt #5: SAP BTP Integration</h3>
 <p><strong>Date:</strong> January 2026<br>
 <strong>Context:</strong> Enterprise integration requirements for SAP Business Technology Platform</p>
 
@@ -1372,7 +1755,7 @@ Integration via SAP Cloud Connector. SAP JDK on same machine as CNC server. REST
 SAP Fiori App (BTP Cloud) → BTP Destination → Cloud Connector → CNC Server (port 3000)
 </div>
 
-<h3>7.5.6 Prompt #6: Documentation Requirements</h3>
+<h3>8.5.6 Prompt #6: Documentation Requirements</h3>
 <p><strong>Date:</strong> January 2026<br>
 <strong>Context:</strong> Technical documentation and API specification delivery</p>
 
@@ -1432,11 +1815,197 @@ Swagger/OpenAPI documentation with testable UI. Specification document with draw
 </ul>
 </div>
 
+<h3>8.5.7 Prompt #7: SAP Fiori UI Development</h3>
+<p><strong>Date:</strong> February 2026<br>
+<strong>Context:</strong> Request for SAP Fiori-based frontend to maintain consistency with SAP ecosystem</p>
+
+<h4>Original Prompt:</h4>
+<div style="background-color: #f4f4f4; padding: 15px; border-left: 4px solid #999; margin: 10px 0;">
+I need a fiori based front end page as well as the current one. Could you draft one for me? We intend to integrate this into our SAP ecosystem and would prefer to maintain the Fiori based aesthetic across apps
+</div>
+
+<h4>Refactored Prompt:</h4>
+<div style="background-color: #e8f6f3; padding: 15px; border-left: 4px solid #1abc9c; margin: 10px 0;">
+<strong>Objective:</strong> Develop a SAP Fiori-based user interface that runs alongside the existing classic web UI, providing a consistent user experience for organizations using SAP Business Technology Platform.
+
+<strong>Requirements:</strong>
+<ol>
+  <li><strong>Dual UI Strategy:</strong>
+    <ul>
+      <li>Maintain the existing classic web UI at <code>/</code> for standalone usage and development</li>
+      <li>Create a new SAP Fiori UI at <code>/fiori/</code> for enterprise SAP ecosystem integration</li>
+      <li>Both UIs should consume the same REST API endpoints</li>
+      <li>Ensure feature parity between both interfaces</li>
+    </ul>
+  </li>
+  <li><strong>Technology Stack:</strong>
+    <ul>
+      <li>Use SAP OpenUI5 framework (version 1.120 or higher)</li>
+      <li>Apply the sap_horizon theme (SAP Fiori 3 design)</li>
+      <li>Load OpenUI5 from the official CDN for ease of deployment</li>
+      <li>Follow Component-based MVC architecture pattern</li>
+    </ul>
+  </li>
+  <li><strong>Application Pattern:</strong>
+    <ul>
+      <li>Implement the SAP Fiori Worklist application pattern</li>
+      <li>Create a master-detail layout with job list and detail views</li>
+      <li>Include proper routing for deep-linking support</li>
+      <li>Implement responsive design for phone, tablet, and desktop</li>
+    </ul>
+  </li>
+  <li><strong>Core Functionality:</strong>
+    <ul>
+      <li>ShellBar header with application title and CNC connection status indicator</li>
+      <li>IconTabBar for filtering jobs by status with live count badges</li>
+      <li>Responsive table (sap.m.Table) displaying job queue with all relevant information</li>
+      <li>Dialogs for creating, editing, and viewing job details</li>
+      <li>Bulk action support with multi-select capability</li>
+      <li>Per-row action buttons for individual job operations (Print, Edit, Cancel)</li>
+    </ul>
+  </li>
+  <li><strong>Real-time Updates:</strong>
+    <ul>
+      <li>Implement 3-second polling interval (consistent with classic UI)</li>
+      <li>Update IconTabBar count badges in real-time</li>
+      <li>Refresh table data without disrupting user interactions</li>
+      <li>Update CNC connection status indicator automatically</li>
+    </ul>
+  </li>
+  <li><strong>Visual Design Requirements:</strong>
+    <ul>
+      <li>Use SAP Fiori semantic colors for status badges (Information, Warning, Success, Error)</li>
+      <li>Follow SAP Fiori Design Guidelines for layout, spacing, and typography</li>
+      <li>Implement proper ARIA labels for accessibility</li>
+      <li>Ensure visual consistency with other SAP applications in the enterprise</li>
+    </ul>
+  </li>
+  <li><strong>File Structure:</strong>
+    <ul>
+      <li>Create <code>fiori/webapp/</code> directory following standard OpenUI5 project structure</li>
+      <li>Include Component.js, manifest.json (application descriptor)</li>
+      <li>Separate controllers, views (XML), models, and i18n resources</li>
+      <li>Follow naming conventions and best practices for OpenUI5 applications</li>
+    </ul>
+  </li>
+</ol>
+
+<strong>Expected Outcome:</strong> A fully functional SAP Fiori UI5 application that provides the same capabilities as the classic UI but with SAP Fiori design language, making it suitable for deployment to SAP BTP and integration with Fiori Launchpad and SAP Work Zone.
+</div>
+
+<h3>8.5.8 Prompt #8: Documentation Update Request</h3>
+<p><strong>Date:</strong> February 2026<br>
+<strong>Context:</strong> Request to update technical specification document to reflect new Fiori UI and recent features</p>
+
+<h4>Original Prompt:</h4>
+<div style="background-color: #f4f4f4; padding: 15px; border-left: 4px solid #999; margin: 10px 0;">
+Could you update the docs page on the index site to reflect new changes?
+</div>
+
+<h4>Refactored Prompt:</h4>
+<div style="background-color: #e8f6f3; padding: 15px; border-left: 4px solid #1abc9c; margin: 10px 0;">
+<strong>Objective:</strong> Update the technical specification document (<code>CNC_Chocolate_Engraver_Specification.html</code>) to accurately reflect all recent system enhancements and new features.
+
+<strong>Required Updates:</strong>
+<ol>
+  <li><strong>Version and Date:</strong>
+    <ul>
+      <li>Increment document version from 1.0 to 1.1</li>
+      <li>Update "Last Updated" date to February 2026</li>
+      <li>Add entry to Document History table describing changes</li>
+    </ul>
+  </li>
+  <li><strong>New User Interface Section:</strong>
+    <ul>
+      <li>Add a new major section (Section 5) titled "User Interface"</li>
+      <li>Document both Classic Web UI and SAP Fiori UI interfaces</li>
+      <li>Include comparison table showing use cases and access paths for each UI</li>
+      <li>Provide detailed architecture documentation for Fiori UI including:
+        <ul>
+          <li>Component-based MVC structure</li>
+          <li>IconTabBar navigation pattern</li>
+          <li>Table structure and columns</li>
+          <li>Dialog interactions</li>
+          <li>Live update mechanism</li>
+          <li>Bulk action capabilities</li>
+          <li>Theming and visual design specifications</li>
+          <li>Deployment options (local, SAP BTP, Work Zone)</li>
+          <li>Internationalization support</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong>Technology Stack Updates:</strong>
+    <ul>
+      <li>Add OpenUI5 to the technology stack table with version 1.120+ and sap_horizon theme</li>
+      <li>Distinguish between "Frontend (Classic)" and "Frontend (Fiori)"</li>
+    </ul>
+  </li>
+  <li><strong>File Structure Updates:</strong>
+    <ul>
+      <li>Update the file structure diagram to include new font files (fontCalibri.js, fontPristina.js, fontLogo.js)</li>
+      <li>Add the <code>fiori/webapp/</code> directory structure with subdirectories (controller, view, model, i18n)</li>
+      <li>Show Component.js and manifest.json files</li>
+    </ul>
+  </li>
+  <li><strong>Font Library Expansion:</strong>
+    <ul>
+      <li>Expand the "Available Fonts" table to include three new fonts:
+        <ul>
+          <li>Calibri (TrueType-based, professional, for corporate branding)</li>
+          <li>Pristina (Elegant script, refined cursive, for premium branding)</li>
+          <li>Logo (Custom logo font, for company-specific branding)</li>
+        </ul>
+      </li>
+      <li>Add a note box documenting February 2026 font enhancements:
+        <ul>
+          <li>Vertical positioning adjustments for Calibri and Pristina</li>
+          <li>Custom logo font implementation</li>
+          <li>G-code file download functionality</li>
+          <li>Improved spacing algorithms</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong>Feature Documentation:</strong>
+    <ul>
+      <li>Add calibration tool feature to the Classic Web UI features list</li>
+      <li>Note that calibration page was added in February 2026</li>
+    </ul>
+  </li>
+  <li><strong>Table of Contents:</strong>
+    <ul>
+      <li>Insert new Section 5 (User Interface) with subsections</li>
+      <li>Renumber subsequent sections (Deployment becomes 6, Security becomes 7, Appendix becomes 8)</li>
+      <li>Update all internal section references and numbering</li>
+    </ul>
+  </li>
+  <li><strong>Development Prompts Appendix:</strong>
+    <ul>
+      <li>Add two new prompt entries (Prompts #7 and #8)</li>
+      <li>Include both original and refactored versions following existing format</li>
+      <li>Update all appendix subsection numbers from 7.x to 8.x</li>
+    </ul>
+  </li>
+</ol>
+
+<strong>Quality Standards:</strong>
+<ul>
+  <li>Maintain consistent formatting with existing document style</li>
+  <li>Ensure all cross-references and navigation links work correctly</li>
+  <li>Preserve all existing content unless explicitly superseded</li>
+  <li>Use professional technical writing tone throughout</li>
+  <li>Validate HTML structure and ensure proper nesting</li>
+</ul>
+
+<strong>Expected Outcome:</strong> An updated specification document (version 1.1) that comprehensively documents the dual UI strategy, new font capabilities, calibration features, and recent enhancements while maintaining the professional structure and formatting of the original document.
+</div>
+
 <hr style="margin-top: 50px;">
 <p style="text-align: center; color: #999; font-size: 10pt;">
-  CNC Chocolate Engraver - Technical Specification v1.0<br>
-  Last Updated: January 31, 2026<br>
-  Generated: January 2026
+  CNC Chocolate Engraver - Technical Specification v1.1<br>
+  Last Updated: February 15, 2026<br>
+  Generated: January 2026 | Revised: February 2026
 </p>
 
 </body>
