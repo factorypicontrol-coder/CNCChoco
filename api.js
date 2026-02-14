@@ -818,6 +818,314 @@ router.post('/command', async (req, res) => {
 });
 
 // ============================================
+// Calibration APIs
+// ============================================
+
+/**
+ * @swagger
+ * /api/calibrate/home:
+ *   post:
+ *     summary: Home the machine
+ *     description: Sends $H homing cycle to find limit switches and establish machine zero. Takes up to 60 seconds.
+ *     tags: [Calibration]
+ *     responses:
+ *       200:
+ *         description: Homing result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 position:
+ *                   $ref: '#/components/schemas/GrblPosition'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/calibrate/home', async (req, res) => {
+  try {
+    const result = await engine.home();
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error('Error homing:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/calibrate/unlock:
+ *   post:
+ *     summary: Clear alarm lock
+ *     description: Sends $X to clear GRBL alarm state. Use after homing failure or alarm.
+ *     tags: [Calibration]
+ *     responses:
+ *       200:
+ *         description: Unlock result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/calibrate/unlock', async (req, res) => {
+  try {
+    const result = await engine.unlock();
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error('Error unlocking:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/calibrate/jog:
+ *   post:
+ *     summary: Jog the tool along an axis
+ *     description: Sends a GRBL jog command to move the tool incrementally. Used during calibration to position the tool over the chocolate bar corner.
+ *     tags: [Calibration]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/JogRequest'
+ *     responses:
+ *       200:
+ *         description: Jog completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 position:
+ *                   $ref: '#/components/schemas/GrblPosition'
+ *       400:
+ *         description: Invalid parameters or not connected
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/calibrate/jog', async (req, res) => {
+  try {
+    const { axis, distance, feedRate } = req.body;
+
+    if (!axis || distance === undefined || distance === null) {
+      return res.status(400).json({ success: false, error: 'axis and distance are required' });
+    }
+
+    const configData = await configModule.getConfig();
+    const jogFeed = feedRate ? Number(feedRate) : configData.jog_feed_rate;
+
+    const result = await engine.jog(axis, Number(distance), jogFeed);
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error('Error jogging:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/calibrate/jog/cancel:
+ *   post:
+ *     summary: Cancel active jog
+ *     description: Sends real-time jog cancel command (0x85) to immediately stop jog motion.
+ *     tags: [Calibration]
+ *     responses:
+ *       200:
+ *         description: Jog cancel sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ */
+router.post('/calibrate/jog/cancel', (req, res) => {
+  const result = engine.jogCancel();
+  res.json(result);
+});
+
+/**
+ * @swagger
+ * /api/calibrate/position:
+ *   get:
+ *     summary: Query current position
+ *     description: Sends GRBL real-time status query (?) and returns current machine and work positions.
+ *     tags: [Calibration]
+ *     responses:
+ *       200:
+ *         description: Current position
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 position:
+ *                   $ref: '#/components/schemas/GrblPosition'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/calibrate/position', async (req, res) => {
+  try {
+    const position = await engine.queryPosition();
+    res.json({ success: true, position });
+  } catch (err) {
+    console.error('Error querying position:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/calibrate/setorigin:
+ *   post:
+ *     summary: Set G54 work coordinate offset
+ *     description: Sets the current machine position as the G54 work coordinate origin (0,0,0). Stores the offset in GRBL EEPROM. Requires GRBL $10=1 or $10=2 for MPos reporting.
+ *     tags: [Calibration]
+ *     responses:
+ *       200:
+ *         description: Origin set successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 machinePosition:
+ *                   type: object
+ *                   properties:
+ *                     x:
+ *                       type: number
+ *                     y:
+ *                       type: number
+ *                     z:
+ *                       type: number
+ *                 offset:
+ *                   type: object
+ *                   properties:
+ *                     x:
+ *                       type: number
+ *                     y:
+ *                       type: number
+ *                     z:
+ *                       type: number
+ *       400:
+ *         description: Cannot set offset (not connected, printing, or MPos unavailable)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/calibrate/setorigin', async (req, res) => {
+  try {
+    const result = await engine.setWorkOffset();
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error('Error setting origin:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/calibrate/dryrun:
+ *   post:
+ *     summary: Dry-run bar boundary
+ *     description: Traces the chocolate bar boundary rectangle at safe Z height using G54 coordinates. Verifies calibration alignment without engraving.
+ *     tags: [Calibration]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DryRunRequest'
+ *     responses:
+ *       200:
+ *         description: Dry run completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 boundary:
+ *                   type: object
+ *                   properties:
+ *                     width:
+ *                       type: number
+ *                     height:
+ *                       type: number
+ *       400:
+ *         description: Cannot run (not connected or printing)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/calibrate/dryrun', async (req, res) => {
+  try {
+    const configData = await configModule.getConfig();
+    const barWidth = req.body.barWidth || configData.bar_width;
+    const barHeight = req.body.barHeight || configData.bar_height;
+    const zSafe = configData.z_safe_height;
+    const feedRate = configData.feed_rate;
+
+    const result = await engine.dryRunBoundary(barWidth, barHeight, zSafe, feedRate);
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error('Error running dry run:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ============================================
 // Statistics APIs
 // ============================================
 

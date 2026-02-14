@@ -22,7 +22,8 @@ const options = {
       { name: 'Print', description: 'Print control operations' },
       { name: 'Configuration', description: 'System configuration' },
       { name: 'Statistics', description: 'Statistics and reporting' },
-      { name: 'CNC Control', description: 'CNC hardware control' }
+      { name: 'CNC Control', description: 'CNC hardware control' },
+      { name: 'Calibration', description: 'Homing, jogging, and work coordinate calibration' }
     ],
     components: {
       schemas: {
@@ -249,6 +250,46 @@ const options = {
                 charsPrinted: { type: 'integer', example: 25 }
               }
             }
+          }
+        },
+        JogRequest: {
+          type: 'object',
+          required: ['axis', 'distance'],
+          properties: {
+            axis: { type: 'string', enum: ['X', 'Y', 'Z'], description: 'Axis to jog', example: 'X' },
+            distance: { type: 'number', description: 'Distance in mm (negative for opposite direction)', example: 10 },
+            feedRate: { type: 'number', description: 'Feed rate in mm/min (optional, defaults to config jog_feed_rate)', example: 500 }
+          }
+        },
+        GrblPosition: {
+          type: 'object',
+          properties: {
+            state: { type: 'string', description: 'GRBL state (Idle, Run, Jog, Home, Alarm)', example: 'Idle' },
+            mpos: {
+              type: 'object',
+              nullable: true,
+              properties: {
+                x: { type: 'number', example: -150.5 },
+                y: { type: 'number', example: -80.3 },
+                z: { type: 'number', example: 0 }
+              }
+            },
+            wpos: {
+              type: 'object',
+              nullable: true,
+              properties: {
+                x: { type: 'number', example: 0 },
+                y: { type: 'number', example: 0 },
+                z: { type: 'number', example: 0 }
+              }
+            }
+          }
+        },
+        DryRunRequest: {
+          type: 'object',
+          properties: {
+            barWidth: { type: 'number', description: 'Override bar width in mm', example: 100 },
+            barHeight: { type: 'number', description: 'Override bar height in mm', example: 40 }
           }
         }
       }

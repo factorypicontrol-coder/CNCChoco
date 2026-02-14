@@ -73,7 +73,11 @@ function generateGcode(job, config) {
   out.push('');
   out.push('G21 ; Set units to millimeters');
   out.push('G90 ; Absolute positioning');
-  out.push('G92 X0 Y0 Z0 ; Set current position as origin');
+  if (config.use_g54_calibration) {
+    out.push('G54 ; Use calibrated work coordinate system');
+  } else {
+    out.push('G92 X0 Y0 Z0 ; Set current position as origin');
+  }
   out.push(`G0 Z${Number(zSafe).toFixed(decimals)} ; Raise to safe height`);
   out.push(`M3 S500`);
   out.push('');

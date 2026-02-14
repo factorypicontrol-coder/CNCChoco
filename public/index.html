@@ -370,6 +370,162 @@
       box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
     }
 
+    /* Calibration */
+    .calibration-steps {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .calibration-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+      border-left: 3px solid rgba(255,255,255,0.1);
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .calibration-step.complete {
+      background: rgba(16, 185, 129, 0.1);
+      border-left-color: #10b981;
+    }
+
+    .calibration-step.active {
+      background: rgba(102, 126, 234, 0.1);
+      border-left-color: #667eea;
+    }
+
+    .calibration-step .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .calibration-step.complete .step-num {
+      background: #10b981;
+    }
+
+    .calibration-step.active .step-num {
+      background: #667eea;
+    }
+
+    .jog-container {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .jog-pad {
+      display: grid;
+      grid-template-areas:
+        ".    yp   ."
+        "xn   stop xp"
+        ".    yn   .";
+      grid-template-columns: 60px 60px 60px;
+      grid-template-rows: 60px 60px 60px;
+      gap: 6px;
+    }
+
+    .jog-z {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .jog-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(102, 126, 234, 0.3);
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .jog-btn:hover { background: rgba(102, 126, 234, 0.6); }
+    .jog-btn:active { background: rgba(102, 126, 234, 0.8); }
+    .jog-btn.stop { background: rgba(239, 68, 68, 0.4); }
+    .jog-btn.stop:hover { background: rgba(239, 68, 68, 0.6); }
+
+    .step-selector {
+      display: flex;
+      gap: 8px;
+      margin: 15px 0;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .step-btn.active {
+      background: #667eea;
+      border-color: #667eea;
+    }
+
+    .position-readout {
+      font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+      font-size: 1rem;
+      padding: 15px 20px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin: 15px 0;
+    }
+
+    .position-readout .pos-row {
+      display: flex;
+      gap: 20px;
+      margin: 4px 0;
+    }
+
+    .position-readout .pos-label {
+      color: rgba(255,255,255,0.5);
+      width: 50px;
+    }
+
+    .position-readout .pos-coord {
+      width: 110px;
+      text-align: right;
+    }
+
+    .position-readout .grbl-state {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 4px;
+      background: rgba(102, 126, 234, 0.3);
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
     /* Filter Bar */
     .filter-bar {
       display: flex;
@@ -592,6 +748,7 @@
     <button class="active" onclick="showView('queue')">Queue</button>
     <button onclick="showView('stats')">Statistics</button>
     <button onclick="showView('config')">Configuration</button>
+    <button onclick="showView('calibrate')">Calibrate</button>
     <button onclick="showView('apidocs')">API Docs</button>
     <button onclick="showView('spec')">Spec</button>
   </nav>
@@ -934,9 +1091,156 @@
           </div>
         </div>
 
+        <div class="config-section">
+          <h3>Calibration</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="useG54Calibration">Use G54 Calibration</label>
+              <select id="useG54Calibration">
+                <option value="true">Yes (G54 - requires calibration)</option>
+                <option value="false">No (G92 - legacy, set origin manually)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="jogFeedRate">Jog Feed Rate (mm/min)</label>
+              <input type="number" id="jogFeedRate" step="10" min="10" max="5000">
+            </div>
+          </div>
+        </div>
+
         <div class="form-actions">
           <button type="button" class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
           <button type="button" class="btn btn-secondary" onclick="loadConfig()">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calibrate View -->
+    <div id="calibrateView" class="view">
+      <div class="card">
+        <h2>Machine Calibration</h2>
+
+        <details class="cal-help" style="margin-bottom: 20px; padding: 12px 16px; background: rgba(102,126,234,0.08); border: 1px solid rgba(102,126,234,0.2); border-radius: 8px;">
+          <summary style="cursor: pointer; font-weight: bold; color: #a5b4fc; user-select: none;">How to use calibration</summary>
+          <div style="margin-top: 12px; color: rgba(255,255,255,0.75); line-height: 1.6; font-size: 0.9rem;">
+            <p style="margin-bottom: 10px;">Calibration ensures the CNC tool always engraves at the exact same position on the chocolate bar. Once calibrated, the offset is stored in the GRBL controller's EEPROM and persists across power cycles.</p>
+
+            <p style="margin-bottom: 4px; font-weight: bold; color: #a5b4fc;">Initial Setup (first time or when fixture moves):</p>
+            <ol style="margin: 0 0 12px 20px; padding: 0;">
+              <li><strong>Connect</strong> to the CNC machine using the Connect button in the status bar above.</li>
+              <li><strong>Home ($H)</strong> &mdash; Click to send the machine to its limit switches. This establishes an absolute machine reference point. If the machine enters an alarm state, click <em>Unlock ($X)</em> to clear it.</li>
+              <li><strong>Jog to bar corner</strong> &mdash; Use the directional pad to move the tool to the bottom-left corner of the chocolate bar. Select a step size (0.1mm for fine adjustments, 10mm for large moves). The position readout updates in real-time so you can see exactly where the tool is.</li>
+              <li><strong>Set Origin (G54)</strong> &mdash; Click to save the current tool position as the work coordinate origin. The G54 offset is written to GRBL EEPROM &mdash; it will survive power cycles and disconnects.</li>
+              <li><strong>Dry Run Boundary</strong> &mdash; Click to trace the chocolate bar outline at safe height (no engraving). Watch the tool path and verify it follows the bar edges. If it's off, go back to Step 2 and re-jog.</li>
+            </ol>
+
+            <p style="margin-bottom: 4px; font-weight: bold; color: #a5b4fc;">Each Session (after powering on the machine):</p>
+            <ol style="margin: 0 0 12px 20px; padding: 0;">
+              <li><strong>Connect</strong> to the CNC machine.</li>
+              <li><strong>Home ($H)</strong> &mdash; Required each session because the machine loses its position when powered off. Homing re-finds the limit switches.</li>
+              <li><strong>Print jobs</strong> &mdash; The stored G54 offset is automatically applied. No need to re-jog or re-set origin unless the bar fixture has physically moved.</li>
+            </ol>
+
+            <p style="margin-bottom: 4px; font-weight: bold; color: #a5b4fc;">Troubleshooting:</p>
+            <ul style="margin: 0 0 0 20px; padding: 0;">
+              <li><strong>Alarm state</strong> &mdash; Click <em>Unlock ($X)</em> to clear. Common after a failed homing attempt or if the machine hits a limit switch unexpectedly.</li>
+              <li><strong>Position shows "?"</strong> &mdash; The machine is not connected or has not been homed yet.</li>
+              <li><strong>MPos missing, only WPos shown</strong> &mdash; Set Origin requires MPos. Send <code>$10=1</code> via the API Docs command endpoint to enable MPos reporting.</li>
+              <li><strong>Dry run traces the wrong area</strong> &mdash; Go back to Step 2, jog to the correct corner, and set origin again.</li>
+              <li><strong>Legacy mode</strong> &mdash; If you prefer the old behavior (manually position before each print), set <em>Use G54 Calibration</em> to "No" in the Configuration tab. The G-code will use G92 instead of G54.</li>
+            </ul>
+          </div>
+        </details>
+
+        <div class="calibration-steps">
+          <div class="calibration-step active" id="calStep1">
+            <span class="step-num">1</span>
+            <span>Home</span>
+          </div>
+          <div class="calibration-step" id="calStep2">
+            <span class="step-num">2</span>
+            <span>Jog to Corner</span>
+          </div>
+          <div class="calibration-step" id="calStep3">
+            <span class="step-num">3</span>
+            <span>Set Origin</span>
+          </div>
+          <div class="calibration-step" id="calStep4">
+            <span class="step-num">4</span>
+            <span>Verify</span>
+          </div>
+        </div>
+
+        <div class="position-readout">
+          <span class="grbl-state" id="grblState">Unknown</span>
+          <div class="pos-row">
+            <span class="pos-label">MPos</span>
+            <span class="pos-coord" id="mposX">X: ?</span>
+            <span class="pos-coord" id="mposY">Y: ?</span>
+            <span class="pos-coord" id="mposZ">Z: ?</span>
+          </div>
+          <div class="pos-row">
+            <span class="pos-label">WPos</span>
+            <span class="pos-coord" id="wposX">X: ?</span>
+            <span class="pos-coord" id="wposY">Y: ?</span>
+            <span class="pos-coord" id="wposZ">Z: ?</span>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <h3>Step 1: Home Machine</h3>
+          <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Send the machine to its limit switches to establish a known reference point.</p>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-primary" onclick="doHome()" id="homeBtn">Home ($H)</button>
+            <button class="btn btn-secondary btn-sm" onclick="doUnlock()" id="unlockBtn">Unlock ($X)</button>
+            <span id="homeStatus" style="color: rgba(255,255,255,0.6);"></span>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <h3>Step 2: Jog to Bar Corner</h3>
+          <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Position the tool over the bottom-left corner of the chocolate bar.</p>
+
+          <div class="step-selector">
+            <span style="color: rgba(255,255,255,0.6);">Step:</span>
+            <button class="step-btn" data-step="0.1" onclick="setJogStep(0.1)">0.1</button>
+            <button class="step-btn active" data-step="1" onclick="setJogStep(1)">1</button>
+            <button class="step-btn" data-step="5" onclick="setJogStep(5)">5</button>
+            <button class="step-btn" data-step="10" onclick="setJogStep(10)">10</button>
+            <span style="color: rgba(255,255,255,0.6);">mm</span>
+          </div>
+
+          <div class="jog-container">
+            <div class="jog-pad">
+              <button class="jog-btn" style="grid-area: yp" onclick="doJog('Y', 1)">Y+</button>
+              <button class="jog-btn" style="grid-area: xn" onclick="doJog('X', -1)">X-</button>
+              <button class="jog-btn stop" style="grid-area: stop" onclick="doJogCancel()">Stop</button>
+              <button class="jog-btn" style="grid-area: xp" onclick="doJog('X', 1)">X+</button>
+              <button class="jog-btn" style="grid-area: yn" onclick="doJog('Y', -1)">Y-</button>
+            </div>
+            <div class="jog-z">
+              <button class="jog-btn" onclick="doJog('Z', 1)">Z+</button>
+              <button class="jog-btn" onclick="doJog('Z', -1)">Z-</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <h3>Step 3: Set Work Origin</h3>
+          <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Set the current tool position as the bar origin (0,0,0). Stored in GRBL EEPROM and persists across power cycles.</p>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-success" onclick="doSetOrigin()" id="setOriginBtn">Set Origin (G54)</button>
+            <span id="originStatus" style="color: rgba(255,255,255,0.6);"></span>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <h3>Step 4: Verify Alignment</h3>
+          <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Trace the chocolate bar boundary at safe height to verify calibration. The tool should follow the bar edges.</p>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-primary" onclick="doDryRun()" id="dryRunBtn">Dry Run Boundary</button>
+            <span id="dryRunStatus" style="color: rgba(255,255,255,0.6);"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -972,6 +1276,7 @@
       document.getElementById(viewName + 'View').classList.add('active');
 
       document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      stopPositionPolling();
       if (viewName === 'queue') {
         document.querySelector('nav button:nth-child(1)').classList.add('active');
         loadQueue();
@@ -984,11 +1289,15 @@
         document.querySelector('nav button:nth-child(3)').classList.add('active');
         loadConfig();
         stopLiveUpdates();
-      } else if (viewName === 'apidocs') {
+      } else if (viewName === 'calibrate') {
         document.querySelector('nav button:nth-child(4)').classList.add('active');
         stopLiveUpdates();
-      } else if (viewName === 'spec') {
+        startPositionPolling();
+      } else if (viewName === 'apidocs') {
         document.querySelector('nav button:nth-child(5)').classList.add('active');
+        stopLiveUpdates();
+      } else if (viewName === 'spec') {
+        document.querySelector('nav button:nth-child(6)').classList.add('active');
         stopLiveUpdates();
       } else {
         stopLiveUpdates();
@@ -1312,6 +1621,8 @@
           document.getElementById('zSafeHeight').value = config.z_safe_height;
           document.getElementById('zEngraveDepth').value = config.z_engrave_depth;
           document.getElementById('feedRate').value = config.feed_rate;
+          document.getElementById('useG54Calibration').value = String(config.use_g54_calibration);
+          document.getElementById('jogFeedRate').value = config.jog_feed_rate;
         }
       } catch (err) {
         showAlert('Error loading config: ' + err.message, 'error');
@@ -1335,7 +1646,9 @@
         gap_between_lines: document.getElementById('gapBetweenLines').value,
         z_safe_height: document.getElementById('zSafeHeight').value,
         z_engrave_depth: document.getElementById('zEngraveDepth').value,
-        feed_rate: document.getElementById('feedRate').value
+        feed_rate: document.getElementById('feedRate').value,
+        use_g54_calibration: document.getElementById('useG54Calibration').value,
+        jog_feed_rate: document.getElementById('jogFeedRate').value
       };
 
       try {
@@ -1644,6 +1957,184 @@
       } catch (err) {
         showAlert('Error: ' + err.message, 'error');
       }
+    }
+
+    // ============================================
+    // Calibration
+    // ============================================
+
+    let jogStep = 1;
+    let positionPollInterval = null;
+    let calibrationState = { homed: false, jogged: false, originSet: false, verified: false };
+
+    function startPositionPolling() {
+      if (positionPollInterval) return;
+      updatePosition();
+      positionPollInterval = setInterval(updatePosition, 500);
+    }
+
+    function stopPositionPolling() {
+      if (positionPollInterval) {
+        clearInterval(positionPollInterval);
+        positionPollInterval = null;
+      }
+    }
+
+    async function updatePosition() {
+      try {
+        const response = await fetch(`${API}/calibrate/position`);
+        const data = await response.json();
+        if (data.success && data.position) {
+          const pos = data.position;
+          const mpos = pos.mpos || {};
+          const wpos = pos.wpos || {};
+          document.getElementById('grblState').textContent = pos.state || 'Unknown';
+          document.getElementById('mposX').textContent = `X: ${formatCoord(mpos.x)}`;
+          document.getElementById('mposY').textContent = `Y: ${formatCoord(mpos.y)}`;
+          document.getElementById('mposZ').textContent = `Z: ${formatCoord(mpos.z)}`;
+          document.getElementById('wposX').textContent = `X: ${formatCoord(wpos.x)}`;
+          document.getElementById('wposY').textContent = `Y: ${formatCoord(wpos.y)}`;
+          document.getElementById('wposZ').textContent = `Z: ${formatCoord(wpos.z)}`;
+        }
+      } catch (err) {
+        // Silently ignore poll errors (machine may not be connected)
+      }
+    }
+
+    function formatCoord(val) {
+      if (typeof val === 'number') return val.toFixed(3).padStart(9);
+      return '?'.padStart(9);
+    }
+
+    async function doHome() {
+      const btn = document.getElementById('homeBtn');
+      const status = document.getElementById('homeStatus');
+      btn.disabled = true;
+      status.textContent = 'Homing...';
+      try {
+        const response = await fetch(`${API}/calibrate/home`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+          showAlert('Homing complete', 'success');
+          status.textContent = 'Complete';
+          calibrationState.homed = true;
+          updateCalibrationSteps();
+        } else {
+          showAlert('Homing failed: ' + data.error, 'error');
+          status.textContent = 'Failed';
+        }
+      } catch (err) {
+        showAlert('Homing error: ' + err.message, 'error');
+        status.textContent = 'Error';
+      }
+      btn.disabled = false;
+    }
+
+    async function doUnlock() {
+      try {
+        const response = await fetch(`${API}/calibrate/unlock`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+          showAlert('Alarm cleared', 'success');
+        } else {
+          showAlert('Unlock failed: ' + data.error, 'error');
+        }
+      } catch (err) {
+        showAlert('Unlock error: ' + err.message, 'error');
+      }
+    }
+
+    async function doJog(axis, direction) {
+      const distance = jogStep * direction;
+      try {
+        const response = await fetch(`${API}/calibrate/jog`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ axis, distance })
+        });
+        const data = await response.json();
+        if (!data.success) {
+          showAlert('Jog failed: ' + data.error, 'error');
+        } else {
+          calibrationState.jogged = true;
+          updateCalibrationSteps();
+        }
+      } catch (err) {
+        showAlert('Jog error: ' + err.message, 'error');
+      }
+    }
+
+    function doJogCancel() {
+      fetch(`${API}/calibrate/jog/cancel`, { method: 'POST' });
+    }
+
+    function setJogStep(step) {
+      jogStep = step;
+      document.querySelectorAll('.step-btn').forEach(btn => {
+        btn.classList.toggle('active', parseFloat(btn.dataset.step) === step);
+      });
+    }
+
+    async function doSetOrigin() {
+      const status = document.getElementById('originStatus');
+      try {
+        const response = await fetch(`${API}/calibrate/setorigin`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+          showAlert('Work origin set at current position', 'success');
+          const mp = data.machinePosition;
+          status.textContent = `Set at MPos (${mp.x.toFixed(3)}, ${mp.y.toFixed(3)}, ${mp.z.toFixed(3)})`;
+          calibrationState.originSet = true;
+          updateCalibrationSteps();
+        } else {
+          showAlert('Set origin failed: ' + data.error, 'error');
+          status.textContent = 'Failed';
+        }
+      } catch (err) {
+        showAlert('Set origin error: ' + err.message, 'error');
+        status.textContent = 'Error';
+      }
+    }
+
+    async function doDryRun() {
+      const btn = document.getElementById('dryRunBtn');
+      const status = document.getElementById('dryRunStatus');
+      btn.disabled = true;
+      status.textContent = 'Running...';
+      try {
+        const response = await fetch(`${API}/calibrate/dryrun`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+          showAlert('Dry run complete - check bar alignment', 'success');
+          status.textContent = `Complete (${data.boundary.width}x${data.boundary.height}mm)`;
+          calibrationState.verified = true;
+          updateCalibrationSteps();
+        } else {
+          showAlert('Dry run failed: ' + data.error, 'error');
+          status.textContent = 'Failed';
+        }
+      } catch (err) {
+        showAlert('Dry run error: ' + err.message, 'error');
+        status.textContent = 'Error';
+      }
+      btn.disabled = false;
+    }
+
+    function updateCalibrationSteps() {
+      const steps = ['homed', 'jogged', 'originSet', 'verified'];
+      const stepIds = ['calStep1', 'calStep2', 'calStep3', 'calStep4'];
+      let foundActive = false;
+      steps.forEach((key, i) => {
+        const el = document.getElementById(stepIds[i]);
+        if (!el) return;
+        el.classList.remove('complete', 'active');
+        if (calibrationState[key]) {
+          el.classList.add('complete');
+        } else if (!foundActive) {
+          el.classList.add('active');
+          foundActive = true;
+        }
+      });
     }
 
     // Initialize
