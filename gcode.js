@@ -73,7 +73,11 @@ function generateGcode(job, config) {
   out.push('');
   out.push('G21 ; Set units to millimeters');
   out.push('G90 ; Absolute positioning');
-  out.push('G92 X0 Y0 Z0 ; Set current position as origin');
+  if (config.use_g54_calibration) {
+    out.push('G54 ; Use calibrated work coordinate system');
+  } else {
+    out.push('G92 X0 Y0 Z0 ; Set current position as origin');
+  }
   out.push(`G0 Z${Number(zSafe).toFixed(decimals)} ; Raise to safe height`);
   out.push(`M3 S500`);
   out.push('');
@@ -96,6 +100,10 @@ function generateGcode(job, config) {
   const templateText = config.template_text || '';
   if (templateText.length > 0) {
     const w = templateFont.getTextWidth(templateText, templateFontSize);
+    if (w > barWidth) {
+      out.push(`; WARNING: Template text width (${w.toFixed(1)}mm) exceeds bar_width (${barWidth}mm)`);
+      console.warn(`[gcode] Template text width (${w.toFixed(1)}mm) exceeds bar_width (${barWidth}mm)`);
+    }
     const baseX = calculateAlignment(w, barWidth, templateAlignment);
 
     currentY -= templateFontSize;
@@ -110,6 +118,10 @@ function generateGcode(job, config) {
   // --- Message 1 ---
   if (hasMessage1) {
     const w = messageFont.getTextWidth(job.message_1, messageFontSize);
+    if (w > barWidth) {
+      out.push(`; WARNING: Message 1 width (${w.toFixed(1)}mm) exceeds bar_width (${barWidth}mm)`);
+      console.warn(`[gcode] Message 1 width (${w.toFixed(1)}mm) exceeds bar_width (${barWidth}mm)`);
+    }
     const baseX = calculateAlignment(w, barWidth, messageAlignment);
 
     currentY -= messageFontSize;
@@ -124,6 +136,10 @@ function generateGcode(job, config) {
   // --- Message 2 ---
   if (hasMessage2) {
     const w = messageFont.getTextWidth(job.message_2, messageFontSize);
+    if (w > barWidth) {
+      out.push(`; WARNING: Message 2 width (${w.toFixed(1)}mm) exceeds bar_width (${barWidth}mm)`);
+      console.warn(`[gcode] Message 2 width (${w.toFixed(1)}mm) exceeds bar_width (${barWidth}mm)`);
+    }
     const baseX = calculateAlignment(w, barWidth, messageAlignment);
 
     currentY -= messageFontSize;
@@ -131,6 +147,12 @@ function generateGcode(job, config) {
     out.push('; Message 2: ' + job.message_2);
     out.push(...renderTextAsGlyphGcode(messageFont, job.message_2, messageFontSize, baseX, currentY, glyphOpts));
     out.push('');
+  }
+
+  // Boundary validation warnings
+  if (currentY < 0) {
+    out.splice(0, 0, `; WARNING: Text layout extends ${(-currentY).toFixed(1)}mm below the bar (bar_height=${barHeight}mm)`);
+    console.warn(`[gcode] Text layout extends ${(-currentY).toFixed(1)}mm below the bar (bar_height=${barHeight}mm)`);
   }
 
   // Footer
@@ -151,24 +173,24 @@ function renderTextAsGlyphGcode(font, text, fontSize, startX, startY, glyphOpts)
   let cursorX = startX;
 
   for (const ch of text) {
-    const glyph = font.getCharacter(ch);
-    // Translate glyph to current cursor
     const gx = cursorX;
     const gy = startY;
 
-    // Render glyph gcode (already includes G0/G1/G2/G3 etc)
     const glyphLines = font.renderCharGcode(ch, fontSize, gx, gy, glyphOpts);
     lines.push(...glyphLines);
 
-    // Advance cursor by glyph width * scale
-    cursorX += glyph.width * scale;
+    // Advance cursor using font-specific advance width (includes inter-character spacing)
+    cursorX += font.getCharAdvance(ch) * scale;
   }
 
   return lines;
 }
 
+const AVAILABLE_FONTS = Object.keys(fonts);
+
 module.exports = {
   generateGcode,
   getFont,
-  fonts
+  fonts,
+  AVAILABLE_FONTS
 };

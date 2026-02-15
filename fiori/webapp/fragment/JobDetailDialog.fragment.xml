@@ -1,0 +1,114 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form">
+
+    <Dialog id="jobDetailDialog"
+        title="{= ${dialog>/mode} === 'create' ? ${i18n>createJobTitle} : ${i18n>editJobTitle}}"
+        contentWidth="40rem"
+        draggable="true"
+        resizable="true">
+
+        <content>
+            <form:SimpleForm id="jobForm"
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4" labelSpanL="4" labelSpanM="4" labelSpanS="12"
+                emptySpanXL="0" emptySpanL="0" emptySpanM="0"
+                columnsXL="1" columnsL="1" columnsM="1">
+
+                <form:toolbar>
+                    <Toolbar>
+                        <Title text="{i18n>personalDetails}" level="H5" />
+                    </Toolbar>
+                </form:toolbar>
+
+                <Label text="{i18n>firstName}" required="false" />
+                <Input value="{dialog>/job/first_name}" placeholder="{i18n>firstNamePlaceholder}" />
+
+                <Label text="{i18n>lastName}" required="false" />
+                <Input value="{dialog>/job/last_name}" placeholder="{i18n>lastNamePlaceholder}" />
+
+                <Label text="{i18n>email}" />
+                <Input value="{dialog>/job/email_address}" type="Email" placeholder="{i18n>emailPlaceholder}" />
+
+                <Label text="{i18n>phone}" />
+                <Input value="{dialog>/job/phone_number}" type="Tel" placeholder="{i18n>phonePlaceholder}" />
+
+                <form:toolbar>
+                    <Toolbar>
+                        <Title text="{i18n>questions}" level="H5" />
+                    </Toolbar>
+                </form:toolbar>
+
+                <Label text="{i18n>question1}" />
+                <TextArea value="{dialog>/job/question_1}" rows="2" growing="true" />
+
+                <Label text="{i18n>question2}" />
+                <TextArea value="{dialog>/job/question_2}" rows="2" growing="true" />
+
+                <Label text="{i18n>question3}" />
+                <TextArea value="{dialog>/job/question_3}" rows="2" growing="true" />
+
+                <form:toolbar>
+                    <Toolbar>
+                        <Title text="{i18n>contactInfo}" level="H5" />
+                    </Toolbar>
+                </form:toolbar>
+
+                <Label text="{i18n>bestContact}" />
+                <Input value="{dialog>/job/best_contact}" />
+
+                <Label text="{i18n>contactDetails}" />
+                <Input value="{dialog>/job/contact_details}" />
+
+                <Label text="{i18n>reachOut}" />
+                <Select selectedKey="{dialog>/job/reach_out_next_month}">
+                    <core:Item key="yes" text="{i18n>yes}" />
+                    <core:Item key="no" text="{i18n>no}" />
+                </Select>
+
+                <form:toolbar>
+                    <Toolbar>
+                        <Title text="{i18n>engraving}" level="H5" />
+                    </Toolbar>
+                </form:toolbar>
+
+                <Label text="{i18n>message1}" required="true" />
+                <Input value="{dialog>/job/message_1}" maxLength="50"
+                    placeholder="{i18n>messagePlaceholder}" />
+
+                <Label text="{i18n>message2}" />
+                <Input value="{dialog>/job/message_2}" maxLength="50"
+                    placeholder="{i18n>messagePlaceholder}" />
+
+                <Label text="{i18n>agreement}" />
+                <Select selectedKey="{dialog>/job/agreement}">
+                    <core:Item key="yes" text="{i18n>yes}" />
+                    <core:Item key="no" text="{i18n>no}" />
+                </Select>
+
+                <!-- Status field only shown in edit mode -->
+                <Label text="{i18n>status}" visible="{= ${dialog>/mode} === 'edit'}" />
+                <Select selectedKey="{dialog>/job/status}"
+                    visible="{= ${dialog>/mode} === 'edit'}">
+                    <core:Item key="Pending" text="{i18n>statusPending}" />
+                    <core:Item key="Completed" text="{i18n>statusCompleted}" />
+                    <core:Item key="Cancelled_by_User" text="{i18n>statusCancelledUser}" />
+                    <core:Item key="Cancelled_by_Admin" text="{i18n>statusCancelledAdmin}" />
+                </Select>
+
+            </form:SimpleForm>
+        </content>
+
+        <beginButton>
+            <Button
+                text="{= ${dialog>/mode} === 'create' ? ${i18n>create} : ${i18n>save}}"
+                type="Emphasized"
+                press=".onSaveJob" />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>cancel}" press=".onCancelJobDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

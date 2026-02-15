@@ -1,6 +1,6 @@
 // Logo, mocked into a letter to fit into the printing mechanisms.
 
-const CHAR_HEIGHT = 21; // "units-per-em" baseline
+const CHAR_HEIGHT = 15; // matches actual glyph Y extent (0–15)
 
 // Example glyph set: you will replace/extend these with your full glyph G-code.
 const characters = {
@@ -212,7 +212,9 @@ G00 Z5.000000
 
 
 function getCharacter(char) {
-  return characters[char] || characters['?'];
+  if (characters[char]) return characters[char];
+  console.warn(`[fontLogo] Missing glyph for character: "${char}" (U+${char.charCodeAt(0).toString(16).padStart(4, '0')})`);
+  return { width: characters[' '] ? characters[' '].width : 5, gcode: '' };
 }
 
 function getTextWidth(text, fontSize) {
@@ -232,7 +234,7 @@ function fmt(n, dp) {
 function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
   const {
     decimals = 6,
-    normalizeZ = false,
+    normalizeZ = true,
     zSafe = 5,
     zEngrave = -0.125,
     normalizeFeed = false,
@@ -309,6 +311,10 @@ function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
   return out;
 }
 
+function getCharAdvance(char) {
+  return getCharacter(char).width;
+}
+
 // Render one character at a specific placement
 function renderCharGcode(char, fontSize, offsetX, offsetY, opts = {}) {
   const glyph = getCharacter(char);
@@ -319,6 +325,7 @@ function renderCharGcode(char, fontSize, offsetX, offsetY, opts = {}) {
 module.exports = {
   CHAR_HEIGHT,
   getCharacter,
+  getCharAdvance,
   getTextWidth,
   renderCharGcode,
   name: 'logo'

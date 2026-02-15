@@ -1,0 +1,32 @@
+/*
+ * CNC Chocolate Engraver - Fiori UI Custom Styles
+ * Follows SAP Fiori Design Guidelines / Horizon Theme
+ */
+
+/* Ensure full viewport height */
+html, body, #content {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Pulsing live indicator */
+.cncPulse {
+    animation: cncPulseAnim 2s ease-in-out infinite;
+}
+
+@keyframes cncPulseAnim {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Info strip styling */
+#infoStrip {
+    background-color: var(--sapList_Background, #ffffff);
+    border-bottom: 1px solid var(--sapList_BorderColor, #e5e5e5);
+}
+
+/* Compact spacing for action buttons in table cells */
+.sapMListTblCell .sapMBtn {
+    margin: 0 0.125rem;
+}

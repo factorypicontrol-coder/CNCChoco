@@ -11,6 +11,10 @@ let parser = null;
 let currentJobId = null;
 let isConnected = false;
 let responseResolvers = [];
+let printLock = false;
+let lastStatusReport = null;
+let statusReportCallback = null;
+let isCalibrated = false;
 
 
 // Scan for USB serial devices
@@ -108,6 +112,26 @@ function handleGrblResponse(data) {
 }
 */
 
+// Parse GRBL status report string like <Idle|MPos:0.000,0.000,0.000|FS:0,0>
+function parseStatusReport(raw) {
+  const inner = raw.slice(1, -1);
+  const parts = inner.split('|');
+  const state = parts[0];
+  const result = { state, mpos: null, wpos: null, raw };
+
+  for (const part of parts) {
+    if (part.startsWith('MPos:')) {
+      const coords = part.substring(5).split(',').map(Number);
+      result.mpos = { x: coords[0], y: coords[1], z: coords[2] };
+    } else if (part.startsWith('WPos:')) {
+      const coords = part.substring(5).split(',').map(Number);
+      result.wpos = { x: coords[0], y: coords[1], z: coords[2] };
+    }
+  }
+
+  return result;
+}
+
 //Status based
 function handleGrblResponse(data) {
   const response = data.trim();
@@ -129,9 +153,12 @@ function handleGrblResponse(data) {
 
   // --- Non-blocking informational handling ---
   if (response.startsWith('<') && response.endsWith('>')) {
-    // Status report
-    console.log('GRBL Status:', response);
-   _toggleUiStatus?.(response); // optional
+    lastStatusReport = parseStatusReport(response);
+    if (statusReportCallback) {
+      const cb = statusReportCallback;
+      statusReportCallback = null;
+      cb(lastStatusReport);
+    }
     return;
   }
 
@@ -152,6 +179,13 @@ function handleGrblResponse(data) {
 
 // Disconnect from GRBL
 function disconnect() {
+  // Reject any pending command resolvers
+  const pending = responseResolvers;
+  responseResolvers = [];
+  pending.forEach(resolver => {
+    try { resolver('error:disconnected'); } catch (e) { /* already rejected */ }
+  });
+
   if (port && port.isOpen) {
     port.close();
   }
@@ -161,27 +195,46 @@ function disconnect() {
 }
 
 //Status based response start
-function sendCommandAndWait(command) {
-  const fs = require('fs');
-  fs.appendFileSync('sent_gcode.txt', command + '\n', 'utf8');
-
+function sendCommandAndWait(command, timeoutMs = 30000) {
   return new Promise((resolve, reject) => {
     if (!port || !isConnected) {
       reject(new Error('Not connected to GRBL'));
       return;
     }
 
-    responseResolvers.push((response) => {
+    let settled = false;
+    const timeout = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        // Remove this resolver from the queue
+        const idx = responseResolvers.indexOf(resolver);
+        if (idx !== -1) responseResolvers.splice(idx, 1);
+        reject(new Error(`GRBL timeout (${timeoutMs}ms) on command: ${command}`));
+      }
+    }, timeoutMs);
+
+    const resolver = (response) => {
+      if (settled) return;
       if (response.startsWith('ok')) {
+        settled = true;
+        clearTimeout(timeout);
         resolve();
       } else if (response.startsWith('error')) {
+        settled = true;
+        clearTimeout(timeout);
         reject(new Error(`GRBL ${response} on command: ${command}`));
       }
       // ignore status chatter
-    });
+    };
+
+    responseResolvers.push(resolver);
 
     port.write(command + '\n', (err) => {
-      if (err) reject(err);
+      if (err && !settled) {
+        settled = true;
+        clearTimeout(timeout);
+        reject(err);
+      }
     });
   });
 }
@@ -244,6 +297,18 @@ async function sendGcode(gcodeString) {
 
 // Print next job in queue
 async function printNext() {
+  if (printLock) {
+    return { success: false, error: 'A print operation is already in progress' };
+  }
+  printLock = true;
+  try {
+    return await _printNext();
+  } finally {
+    printLock = false;
+  }
+}
+
+async function _printNext() {
   // Check if already printing
   const isPrinting = await database.isAnyJobPrinting();
   if (isPrinting) {
@@ -309,6 +374,18 @@ async function printNext() {
 
 // Print a specific job by ID
 async function printJob(jobId) {
+  if (printLock) {
+    return { success: false, error: 'A print operation is already in progress' };
+  }
+  printLock = true;
+  try {
+    return await _printJob(jobId);
+  } finally {
+    printLock = false;
+  }
+}
+
+async function _printJob(jobId) {
   // Check if already printing
   const isPrinting = await database.isAnyJobPrinting();
   if (isPrinting) {
@@ -324,14 +401,6 @@ async function printJob(jobId) {
   if (job.status !== 'Pending') {
     return { success: false, error: 'Job is not in Pending status' };
   }
-
-  //Testing
-  const configData = await config.getConfig();
-  const gcodeString = gcode.generateGcode(job, configData);
-  console.log('G-code:\n', gcodeString);
-  const fs = require('fs');
-  fs.writeFileSync("output.txt", gcodeString.toString(), 'utf8');
-  //End testing
 
   // Ensure we're connected
 
@@ -399,6 +468,7 @@ async function printScript(jobId) {
       success: true,
       jobId: job.id,
       message: 'Script Saved',
+      gcode: gcodeString,
     };
 }
 
@@ -422,12 +492,182 @@ async function completeJob(jobId, linesPrinted = 0, charsPrinted = 0) {
   currentJobId = null;
 }
 
+// ============================================
+// Calibration functions
+// ============================================
+
+// Query current GRBL position via real-time '?' command
+function queryPosition(timeoutMs = 5000) {
+  return new Promise((resolve, reject) => {
+    if (!port || !isConnected) {
+      reject(new Error('Not connected to GRBL'));
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      statusReportCallback = null;
+      reject(new Error('Status query timeout'));
+    }, timeoutMs);
+
+    statusReportCallback = (report) => {
+      clearTimeout(timeout);
+      resolve(report);
+    };
+
+    // '?' is a real-time command, does not produce 'ok', produces <...> status report
+    port.write('?', (err) => {
+      if (err) {
+        clearTimeout(timeout);
+        statusReportCallback = null;
+        reject(err);
+      }
+    });
+  });
+}
+
+// Home the machine via $H
+async function home() {
+  if (!port || !isConnected) {
+    return { success: false, error: 'Not connected to GRBL' };
+  }
+  if (printLock || currentJobId) {
+    return { success: false, error: 'Cannot home while a job is printing' };
+  }
+
+  try {
+    await sendCommandAndWait('$H', 60000);
+    isCalibrated = false;
+    const position = await queryPosition();
+    return { success: true, message: 'Homing complete', position };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+// Clear alarm lock via $X
+async function unlock() {
+  if (!port || !isConnected) {
+    return { success: false, error: 'Not connected to GRBL' };
+  }
+
+  try {
+    await sendCommandAndWait('$X', 5000);
+    return { success: true, message: 'Alarm cleared' };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+// Jog the tool along an axis
+async function jog(axis, distance, feedRate = 500) {
+  if (!port || !isConnected) {
+    return { success: false, error: 'Not connected to GRBL' };
+  }
+  if (printLock || currentJobId) {
+    return { success: false, error: 'Cannot jog while a job is printing' };
+  }
+
+  const upperAxis = axis.toUpperCase();
+  if (!['X', 'Y', 'Z'].includes(upperAxis)) {
+    return { success: false, error: 'Invalid axis. Must be X, Y, or Z' };
+  }
+  if (!Number.isFinite(distance)) {
+    return { success: false, error: 'Distance must be a finite number' };
+  }
+
+  try {
+    await sendCommandAndWait(`$J=G91 ${upperAxis}${distance} F${feedRate}`, 30000);
+    const position = await queryPosition();
+    return { success: true, position };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+// Cancel an active jog via real-time command 0x85
+function jogCancel() {
+  if (!port || !isConnected) {
+    return { success: false, error: 'Not connected to GRBL' };
+  }
+  port.write(Buffer.from([0x85]));
+  return { success: true, message: 'Jog cancel sent' };
+}
+
+// Set G54 work coordinate offset at current position
+async function setWorkOffset() {
+  if (!port || !isConnected) {
+    return { success: false, error: 'Not connected to GRBL' };
+  }
+  if (printLock || currentJobId) {
+    return { success: false, error: 'Cannot set offset while a job is printing' };
+  }
+
+  try {
+    const status = await queryPosition();
+
+    if (!status.mpos) {
+      return { success: false, error: 'Could not read machine position. Ensure GRBL $10 setting reports MPos ($10=1 or $10=2).' };
+    }
+
+    const { x, y, z } = status.mpos;
+    await sendCommandAndWait(`G10 L2 P1 X${x} Y${y} Z${z}`, 5000);
+    isCalibrated = true;
+
+    return {
+      success: true,
+      message: 'G54 work offset set successfully',
+      machinePosition: status.mpos,
+      offset: { x, y, z }
+    };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+// Dry-run: trace bar boundary rectangle at safe Z height
+async function dryRunBoundary(barWidth, barHeight, zSafe, feedRate) {
+  if (!port || !isConnected) {
+    return { success: false, error: 'Not connected to GRBL' };
+  }
+  if (printLock || currentJobId) {
+    return { success: false, error: 'Cannot run dry run while a job is printing' };
+  }
+
+  try {
+    const gcodeLines = [
+      'G54',
+      'G21',
+      'G90',
+      `G0 Z${zSafe}`,
+      'G0 X0 Y0',
+      `G1 X${barWidth} Y0 F${feedRate}`,
+      `G1 X${barWidth} Y${barHeight}`,
+      `G1 X0 Y${barHeight}`,
+      'G1 X0 Y0',
+      `G0 Z${zSafe}`,
+      'G0 X0 Y0'
+    ];
+
+    await sendGcode(gcodeLines.join('\n'));
+
+    return {
+      success: true,
+      message: 'Dry run complete',
+      boundary: { width: barWidth, height: barHeight }
+    };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 // Get connection status
 function getStatus() {
   return {
     connected: isConnected,
     port: port ? port.path : null,
-    currentJobId: currentJobId
+    currentJobId: currentJobId,
+    isCalibrated: isCalibrated,
+    lastPosition: lastStatusReport
   };
 }
 
@@ -457,5 +697,13 @@ module.exports = {
   printScript,
   completeJob,
   getStatus,
-  listDevices
+  listDevices,
+  // Calibration
+  home,
+  unlock,
+  jog,
+  jogCancel,
+  setWorkOffset,
+  dryRunBoundary,
+  queryPosition
 };

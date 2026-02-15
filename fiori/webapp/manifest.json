@@ -1,0 +1,74 @@
+{
+    "_version": "1.60.0",
+    "sap.app": {
+        "id": "cncchoco.queue",
+        "type": "application",
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "applicationVersion": {
+            "version": "1.0.0"
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "rootView": {
+            "viewName": "cncchoco.queue.view.App",
+            "type": "XML",
+            "id": "appView",
+            "async": true
+        },
+        "dependencies": {
+            "minUI5Version": "1.120.0",
+            "libs": {
+                "sap.m": {},
+                "sap.f": {},
+                "sap.ui.layout": {},
+                "sap.ui.core": {}
+            }
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "cncchoco.queue.i18n.i18n"
+                }
+            }
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "type": "View",
+                "viewType": "XML",
+                "path": "cncchoco.queue.view",
+                "controlId": "app",
+                "controlAggregation": "pages",
+                "async": true
+            },
+            "routes": [
+                {
+                    "name": "worklist",
+                    "pattern": "",
+                    "target": "worklist"
+                }
+            ],
+            "targets": {
+                "worklist": {
+                    "name": "Worklist",
+                    "id": "worklist"
+                }
+            }
+        },
+        "resources": {
+            "css": [
+                { "uri": "css/style.css" }
+            ]
+        }
+    }
+}

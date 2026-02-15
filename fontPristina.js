@@ -6368,7 +6368,9 @@ for (const c of 'abcdefghijklmnopqrstuvwxyz') {
   */
 
 function getCharacter(char) {
-  return characters[char] || characters['?'];
+  if (characters[char]) return characters[char];
+  console.warn(`[fontPristina] Missing glyph for character: "${char}" (U+${char.charCodeAt(0).toString(16).padStart(4, '0')})`);
+  return { width: characters[' '].width, gcode: '' };
 }
 
 function getTextWidth(text, fontSize) {
@@ -6388,7 +6390,7 @@ function fmt(n, dp) {
 function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
   const {
     decimals = 6,
-    normalizeZ = false,
+    normalizeZ = true,
     zSafe = 5,
     zEngrave = -0.125,
     normalizeFeed = false,
@@ -6430,7 +6432,7 @@ function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
       if (letter === 'X') {
         words.push(`X${fmt(dx + v * scale, decimals)}`);
       } else if (letter === 'Y') {
-        words.push(`Y${fmt(dy + v * scale, decimals)}`);
+        words.push(`Y${fmt(dy + (v + CHAR_HEIGHT) * scale, decimals)}`);
       } else if (letter === 'I') {
         words.push(`I${fmt(v * scale, decimals)}`);
       } else if (letter === 'J') {
@@ -6453,7 +6455,7 @@ function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
     }
 
     // If cutting move with no feed and normalizeFeed enabled, add F
-    if (normalizeFeed && gWord && (gWord === 'G1' || gWord === 'G01' || gWord === 'G1' || gWord === 'G01' || gWord === 'G1' || gWord === 'G01')) {
+    if (normalizeFeed && gWord && (gWord === 'G1' || gWord === 'G01' || gWord === 'G2' || gWord === 'G02' || gWord === 'G3' || gWord === 'G03')) {
       if (!words.some(w => w.toUpperCase().startsWith('F'))) {
         words.push(`F${fmt(feedRate, decimals)}`);
       }
@@ -6463,6 +6465,10 @@ function transformGcode(gcodeStr, scale, dx, dy, opts = {}) {
   }
 
   return out;
+}
+
+function getCharAdvance(char) {
+  return getCharacter(char).width;
 }
 
 // Render one character at a specific placement
@@ -6475,6 +6481,7 @@ function renderCharGcode(char, fontSize, offsetX, offsetY, opts = {}) {
 module.exports = {
   CHAR_HEIGHT,
   getCharacter,
+  getCharAdvance,
   getTextWidth,
   renderCharGcode,
   name: 'pristina'
