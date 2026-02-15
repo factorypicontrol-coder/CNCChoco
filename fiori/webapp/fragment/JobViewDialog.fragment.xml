@@ -1,0 +1,106 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form">
+
+    <Dialog id="jobViewDialog"
+        title="{i18n>jobDetails}"
+        contentWidth="36rem"
+        draggable="true"
+        resizable="true">
+
+        <content>
+            <ObjectHeader
+                title="{= ${detail>/first_name} + ' ' + ${detail>/last_name}}"
+                number="#{detail>/id}"
+                class="sapUiSmallMarginBottom">
+                <statuses>
+                    <ObjectStatus
+                        text="{detail>/status}"
+                        state="{
+                            path: 'detail>/status',
+                            formatter: 'cncchoco.queue.model.formatter.statusState'
+                        }" />
+                </statuses>
+            </ObjectHeader>
+
+            <form:SimpleForm
+                editable="false"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="5" labelSpanL="5" labelSpanM="5" labelSpanS="12"
+                columnsXL="1" columnsL="1" columnsM="1">
+
+                <form:toolbar>
+                    <Toolbar>
+                        <Title text="{i18n>engraving}" level="H5" />
+                    </Toolbar>
+                </form:toolbar>
+
+                <Label text="{i18n>message1}" />
+                <Text text="{detail>/message_1}" />
+
+                <Label text="{i18n>message2}" />
+                <Text text="{detail>/message_2}" />
+
+                <form:toolbar>
+                    <Toolbar>
+                        <Title text="{i18n>personalDetails}" level="H5" />
+                    </Toolbar>
+                </form:toolbar>
+
+                <Label text="{i18n>email}" />
+                <Text text="{detail>/email_address}" />
+
+                <Label text="{i18n>phone}" />
+                <Text text="{detail>/phone_number}" />
+
+                <Label text="{i18n>bestContact}" />
+                <Text text="{detail>/best_contact}" />
+
+                <Label text="{i18n>contactDetails}" />
+                <Text text="{detail>/contact_details}" />
+
+                <Label text="{i18n>reachOut}" />
+                <Text text="{detail>/reach_out_next_month}" />
+
+                <form:toolbar>
+                    <Toolbar>
+                        <Title text="{i18n>questions}" level="H5" />
+                    </Toolbar>
+                </form:toolbar>
+
+                <Label text="{i18n>question1}" />
+                <Text text="{detail>/question_1}" />
+
+                <Label text="{i18n>question2}" />
+                <Text text="{detail>/question_2}" />
+
+                <Label text="{i18n>question3}" />
+                <Text text="{detail>/question_3}" />
+
+                <form:toolbar>
+                    <Toolbar>
+                        <Title text="{i18n>meta}" level="H5" />
+                    </Toolbar>
+                </form:toolbar>
+
+                <Label text="{i18n>agreement}" />
+                <Text text="{detail>/agreement}" />
+
+                <Label text="{i18n>colCreated}" />
+                <Text text="{
+                    path: 'detail>/created_at',
+                    formatter: 'cncchoco.queue.model.formatter.formatDate'
+                }" />
+
+            </form:SimpleForm>
+        </content>
+
+        <beginButton>
+            <Button text="{i18n>edit}" type="Emphasized" icon="sap-icon://edit" press=".onEditFromView" />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>close}" press=".onCloseViewDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

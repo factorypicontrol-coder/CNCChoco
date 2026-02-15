@@ -21,6 +21,7 @@ app.set('trust proxy', true);
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/fiori', express.static(path.join(__dirname, 'fiori', 'webapp')));
 app.use('/docs', express.static(path.join(__dirname, 'docs')));
 
 // Swagger UI - override swagger-ui-init.js to use window.location.origin

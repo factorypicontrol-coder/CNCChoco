@@ -1,0 +1,198 @@
+<mvc:View
+    controllerName="cncchoco.queue.controller.Worklist"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    height="100%">
+
+    <VBox id="rootLayout" height="100%" class="sapUiNoMargin">
+
+        <!-- Shell Bar - outside Page so it never scrolls or clips -->
+        <f:ShellBar id="shellBar"
+            title="{i18n>appTitle}"
+            secondTitle="{i18n>appSubtitle}"
+            showCopilot="false"
+            showSearch="false"
+            showNotifications="false"
+            showProductSwitcher="false">
+            <f:additionalContent>
+                <Button id="connectionStatusBtn"
+                    icon="{= ${cnc>/connected} ? 'sap-icon://connected' : 'sap-icon://disconnected'}"
+                    text="{= ${cnc>/connected} ? 'Connected' : 'Disconnected'}"
+                    type="{= ${cnc>/connected} ? 'Success' : 'Negative'}"
+                    press=".onConnectionPress" />
+            </f:additionalContent>
+        </f:ShellBar>
+
+        <!-- Info Strip -->
+        <Toolbar id="infoStrip">
+            <core:Icon
+                src="sap-icon://message-information"
+                color="{= ${cnc>/connected} ? '#107E3E' : '#BB0000'}"
+                class="sapUiSmallMarginEnd" />
+            <Label text="{= ${cnc>/connected} ? ${i18n>cncConnectedTo} : ${i18n>cncDisconnected}}" />
+            <Label text="{cnc>/port}" visible="{cnc>/connected}" class="sapUiSmallMarginBegin" />
+            <ToolbarSpacer />
+            <Label text="{i18n>liveUpdates}" />
+            <core:Icon src="sap-icon://record" color="#107E3E" class="sapUiSmallMarginBegin cncPulse" />
+        </Toolbar>
+
+        <!-- Main content area - fills remaining space -->
+        <IconTabBar id="statusTabBar"
+            select=".onFilterSelect"
+            class="sapUiResponsiveContentPadding"
+            stretchContentHeight="false"
+            applyContentPadding="true"
+            headerMode="Inline"
+            expandable="false">
+
+            <layoutData>
+                <FlexItemData growFactor="1" />
+            </layoutData>
+
+            <items>
+                <IconTabFilter id="tabAll"
+                    key="All"
+                    text="{i18n>filterAll}"
+                    count="{queue>/statusCounts/all}"
+                    showAll="true" />
+                <IconTabSeparator />
+                <IconTabFilter id="tabPending"
+                    key="Pending"
+                    text="{i18n>filterPending}"
+                    count="{queue>/statusCounts/pending}"
+                    iconColor="Critical"
+                    icon="sap-icon://pending" />
+                <IconTabFilter id="tabPrinting"
+                    key="Printing"
+                    text="{i18n>filterPrinting}"
+                    count="{queue>/statusCounts/printing}"
+                    iconColor="Neutral"
+                    icon="sap-icon://print" />
+                <IconTabFilter id="tabCompleted"
+                    key="Completed"
+                    text="{i18n>filterCompleted}"
+                    count="{queue>/statusCounts/completed}"
+                    iconColor="Positive"
+                    icon="sap-icon://accept" />
+                <IconTabFilter id="tabCancelled"
+                    key="Cancelled"
+                    text="{i18n>filterCancelled}"
+                    count="{queue>/statusCounts/cancelled}"
+                    iconColor="Negative"
+                    icon="sap-icon://decline" />
+            </items>
+
+            <content>
+                <!-- Table Toolbar -->
+                <OverflowToolbar id="tableToolbar">
+                    <Title id="tableTitle" text="{i18n>queueTitle}" level="H3" />
+                    <ToolbarSpacer />
+
+                    <!-- Bulk Actions -->
+                    <Select id="bulkStatusSelect"
+                        selectedKey="{view>/bulkStatus}"
+                        visible="{= ${view>/selectedCount} > 0}"
+                        class="sapUiSmallMarginEnd">
+                        <core:Item key="Pending" text="{i18n>statusPending}" />
+                        <core:Item key="Cancelled_by_Admin" text="{i18n>statusCancelledAdmin}" />
+                    </Select>
+                    <Button id="bulkApplyBtn"
+                        text="{i18n>applyToSelected} ({view>/selectedCount})"
+                        type="Emphasized"
+                        icon="sap-icon://batch-payments"
+                        press=".onBulkApply"
+                        visible="{= ${view>/selectedCount} > 0}" />
+                    <Button id="clearSelectionBtn"
+                        text="{i18n>clearSelection}"
+                        press=".onClearSelection"
+                        visible="{= ${view>/selectedCount} > 0}" />
+                    <ToolbarSeparator visible="{= ${view>/selectedCount} > 0}" />
+
+                    <Button id="printNextBtn"
+                        text="{i18n>printNext}"
+                        icon="sap-icon://print"
+                        type="Emphasized"
+                        press=".onPrintNext"
+                        enabled="{= !${queue>/isPrinting}}" />
+                    <Button id="createJobBtn"
+                        text="{i18n>createJob}"
+                        icon="sap-icon://add"
+                        type="Ghost"
+                        press=".onCreateJob" />
+                    <Button id="refreshBtn"
+                        icon="sap-icon://refresh"
+                        tooltip="{i18n>refresh}"
+                        press=".onRefresh" />
+                </OverflowToolbar>
+
+                <!-- Job Queue Table -->
+                <Table id="jobTable"
+                    items="{queue>/jobs}"
+                    mode="MultiSelect"
+                    selectionChange=".onSelectionChange"
+                    growing="true"
+                    growingThreshold="50"
+                    sticky="ColumnHeaders,HeaderToolbar"
+                    alternateRowColors="true"
+                    noDataText="{i18n>noJobs}">
+
+                    <columns>
+                        <Column id="colId" width="5em" hAlign="Center">
+                            <Text text="{i18n>colId}" />
+                        </Column>
+                        <Column id="colName" minScreenWidth="Tablet" demandPopin="true">
+                            <Text text="{i18n>colName}" />
+                        </Column>
+                        <Column id="colMsg1">
+                            <Text text="{i18n>colMessage1}" />
+                        </Column>
+                        <Column id="colMsg2" minScreenWidth="Tablet" demandPopin="true">
+                            <Text text="{i18n>colMessage2}" />
+                        </Column>
+                        <Column id="colStatus" width="10em" hAlign="Center">
+                            <Text text="{i18n>colStatus}" />
+                        </Column>
+                        <Column id="colCreated" width="12em" minScreenWidth="Desktop" demandPopin="true" hAlign="Center">
+                            <Text text="{i18n>colCreated}" />
+                        </Column>
+                        <Column id="colActions" width="10em" hAlign="Center">
+                            <Text text="{i18n>colActions}" />
+                        </Column>
+                    </columns>
+
+                    <items>
+                        <ColumnListItem type="Navigation" press=".onViewJob">
+                            <cells>
+                                <Text text="{queue>id}" />
+                                <Text text="{queue>first_name} {queue>last_name}" />
+                                <Text text="{queue>message_1}" />
+                                <Text text="{queue>message_2}" />
+                                <ObjectStatus
+                                    text="{ path: 'queue>status', formatter: '.formatter.statusText' }"
+                                    state="{ path: 'queue>status', formatter: '.formatter.statusState' }"
+                                    icon="{ path: 'queue>status', formatter: '.formatter.statusIcon' }" />
+                                <Text text="{ path: 'queue>created_at', formatter: '.formatter.formatDate' }" />
+                                <HBox justifyContent="Center">
+                                    <Button
+                                        icon="sap-icon://print"
+                                        tooltip="{i18n>printJob}"
+                                        type="Ghost"
+                                        press=".onPrintJob"
+                                        visible="{ path: 'queue>status', formatter: '.formatter.isPending' }"
+                                        enabled="{= !${queue>/isPrinting}}" />
+                                    <Button
+                                        icon="sap-icon://download"
+                                        tooltip="{i18n>downloadScript}"
+                                        type="Ghost"
+                                        press=".onDownloadScript" />
+                                </HBox>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </content>
+        </IconTabBar>
+    </VBox>
+</mvc:View>
