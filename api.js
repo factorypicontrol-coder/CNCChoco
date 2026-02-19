@@ -771,6 +771,41 @@ router.post('/disconnect', async (req, res) => {
 
 /**
  * @swagger
+ * /api/estop:
+ *   post:
+ *     summary: Emergency stop
+ *     description: |
+ *       Immediately halts all CNC motion by sending the GRBL soft reset command (Ctrl-X / 0x18).
+ *       This clears the motion planner buffer and stops the machine instantly.
+ *       Any active print job is reverted to **Pending** status so it can be retried.
+ *       The machine must be re-homed before resuming normal operation.
+ *     tags: [CNC Control]
+ *     responses:
+ *       200:
+ *         description: Emergency stop sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/estop', (req, res) => {
+  try {
+    const result = engine.emergencyStop();
+    res.json(result);
+  } catch (err) {
+    console.error('Error during emergency stop:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
  * /api/command:
  *   post:
  *     summary: Send raw G-code command

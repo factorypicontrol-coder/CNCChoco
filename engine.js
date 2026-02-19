@@ -23,9 +23,9 @@ async function scanForDevice() {
     const ports = await SerialPort.list();
     // Look for USB serial devices
     const usbPorts = ports.filter(p =>
-      p.path.includes('ttyUSB') ||
-      p.path.includes('ttyACM') ||
-      (p.vendorId && p.productId)
+      (p.path && p.path.includes('ttyUSB')) ||
+      (p.path && p.path.includes('ttyACM')) ||
+      (p.path && p.vendorId && p.productId)
     );
 
     if (usbPorts.length > 0) {
@@ -660,6 +660,36 @@ async function dryRunBoundary(barWidth, barHeight, zSafe, feedRate) {
   }
 }
 
+// Emergency stop — sends GRBL soft reset (Ctrl-X / 0x18) to immediately halt all motion.
+// Clears the motion planner buffer, reverts the active job to Pending, and releases the print lock.
+// The machine must be re-homed after an emergency stop.
+function emergencyStop() {
+  // Reject all pending command resolvers — GRBL will discard its buffer and won't send 'ok'
+  const pending = responseResolvers;
+  responseResolvers = [];
+  pending.forEach(resolver => {
+    try { resolver('error:emergency-stop'); } catch (e) { /* already settled */ }
+  });
+
+  // Send GRBL soft reset (real-time command, no newline needed)
+  if (port && isConnected) {
+    port.write(Buffer.from([0x18]));
+  }
+
+  // Revert the current job back to Pending so it can be retried
+  const jobId = currentJobId;
+  currentJobId = null;
+  printLock = false;
+
+  if (jobId) {
+    database.updateJob(jobId, { status: 'Pending' }).catch(err => {
+      console.error('Error reverting job after emergency stop:', err);
+    });
+  }
+
+  return { success: true, message: 'Emergency stop sent — machine halted and reset' };
+}
+
 // Get connection status
 function getStatus() {
   return {
@@ -676,9 +706,9 @@ async function listDevices() {
   try {
     const ports = await SerialPort.list();
     return ports.filter(p =>
-      p.path.includes('ttyUSB') ||
-      p.path.includes('ttyACM') ||
-      (p.vendorId && p.productId)
+      (p.path && p.path.includes('ttyUSB')) ||
+      (p.path && p.path.includes('ttyACM')) ||
+      (p.path && p.vendorId && p.productId)
     );
   } catch (err) {
     console.error('Error listing devices:', err);
@@ -696,6 +726,7 @@ module.exports = {
   printJob,
   printScript,
   completeJob,
+  emergencyStop,
   getStatus,
   listDevices,
   // Calibration

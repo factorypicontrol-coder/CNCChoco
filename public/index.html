@@ -117,6 +117,28 @@
       background: rgba(255, 255, 255, 0.2);
     }
 
+    .btn-estop {
+      background: #ff0000;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      border: 3px solid #ff6666;
+      box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+      text-transform: uppercase;
+      padding: 10px 22px;
+    }
+
+    .btn-estop:hover {
+      background: #cc0000;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.9);
+      transform: scale(1.04);
+    }
+
+    .btn-estop:active {
+      transform: scale(0.97);
+    }
+
     .btn-sm {
       padding: 6px 12px;
       font-size: 0.85rem;
@@ -739,6 +761,7 @@
   <header>
     <h1>CNC Chocolate Engraver</h1>
     <div class="header-buttons">
+      <button class="btn btn-estop" onclick="emergencyStop()" id="estopBtn" title="Immediately halt the CNC machine">&#9632; E-STOP</button>
       <button class="btn btn-success" onclick="printNext()" id="printNextBtn">Print Next</button>
       <button class="btn btn-primary" onclick="showView('detail'); clearForm();">Create Job</button>
     </div>
@@ -1711,6 +1734,29 @@
         // Print specific job script
     function printJobScript(id) {
       window.open(`${API}/script/${id}`, '_blank');
+    }
+
+    // Emergency stop
+    async function emergencyStop() {
+      const btn = document.getElementById('estopBtn');
+      btn.disabled = true;
+      btn.textContent = 'STOPPING...';
+      try {
+        const response = await fetch(`${API}/estop`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+          showAlert('Emergency stop sent — machine halted. Re-home before resuming.', 'error');
+          isPrinting = false;
+          updatePrintButtons();
+          loadQueue();
+        } else {
+          showAlert('E-Stop error: ' + (data.error || 'Unknown'), 'error');
+        }
+      } catch (err) {
+        showAlert('E-Stop failed: ' + err.message, 'error');
+      }
+      btn.disabled = false;
+      btn.innerHTML = '&#9632; E-STOP';
     }
 
     // Statistics

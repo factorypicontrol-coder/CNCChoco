@@ -63,6 +63,7 @@ npm run server:old      # Run the legacy test server (server.js)
 - `GET /api/status` - Connection status and available devices
 - `POST /api/connect` - Connect to CNC
 - `POST /api/disconnect` - Disconnect from CNC
+- `POST /api/estop` - **Emergency stop** — sends GRBL soft reset (Ctrl-X/0x18), halts all motion immediately, reverts active job to Pending. Machine must be re-homed after use.
 - `POST /api/command` - Send raw G-code
 
 ### Job Status Values
