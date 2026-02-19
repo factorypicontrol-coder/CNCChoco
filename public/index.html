@@ -1249,6 +1249,25 @@
         </div>
 
         <div class="config-section">
+          <h3>Go to Position</h3>
+          <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Move to specific work coordinates. Leave any axis blank to keep it unchanged.</p>
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
+            <label style="color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 6px;">
+              X <input type="number" id="gotoX" step="0.1" placeholder="—" style="width: 72px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 8px; color: #fff; font-size: 0.9rem;">
+            </label>
+            <label style="color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 6px;">
+              Y <input type="number" id="gotoY" step="0.1" placeholder="—" style="width: 72px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 8px; color: #fff; font-size: 0.9rem;">
+            </label>
+            <label style="color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 6px;">
+              Z <input type="number" id="gotoZ" step="0.1" placeholder="—" style="width: 72px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 8px; color: #fff; font-size: 0.9rem;">
+            </label>
+            <button class="btn btn-primary btn-sm" onclick="doMoveTo()">Go To</button>
+            <button class="btn btn-secondary btn-sm" onclick="doGoToOrigin()">Go to Origin (0, 0, 0)</button>
+            <span id="moveToStatus" style="color: rgba(255,255,255,0.6);"></span>
+          </div>
+        </div>
+
+        <div class="config-section">
           <h3>Step 3: Set Work Origin</h3>
           <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Set the current tool position as the bar origin (0,0,0). Stored in GRBL EEPROM and persists across power cycles.</p>
           <div style="display: flex; gap: 10px; align-items: center;">
@@ -2112,6 +2131,64 @@
 
     function doJogCancel() {
       fetch(`${API}/calibrate/jog/cancel`, { method: 'POST' });
+    }
+
+    async function doMoveTo() {
+      const x = document.getElementById('gotoX').value;
+      const y = document.getElementById('gotoY').value;
+      const z = document.getElementById('gotoZ').value;
+      const status = document.getElementById('moveToStatus');
+
+      if (x === '' && y === '' && z === '') {
+        showAlert('Enter at least one coordinate', 'error');
+        return;
+      }
+
+      const body = {};
+      if (x !== '') body.x = parseFloat(x);
+      if (y !== '') body.y = parseFloat(y);
+      if (z !== '') body.z = parseFloat(z);
+
+      status.textContent = 'Moving...';
+      try {
+        const response = await fetch(`${API}/calibrate/moveto`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (data.success) {
+          status.textContent = 'Done';
+        } else {
+          showAlert('Move failed: ' + data.error, 'error');
+          status.textContent = 'Failed';
+        }
+      } catch (err) {
+        showAlert('Move error: ' + err.message, 'error');
+        status.textContent = 'Error';
+      }
+    }
+
+    async function doGoToOrigin() {
+      const status = document.getElementById('moveToStatus');
+      status.textContent = 'Moving to origin...';
+      try {
+        const response = await fetch(`${API}/calibrate/moveto`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ x: 0, y: 0, z: 0 })
+        });
+        const data = await response.json();
+        if (data.success) {
+          status.textContent = 'At origin';
+        } else {
+          showAlert('Go to origin failed: ' + data.error, 'error');
+          status.textContent = 'Failed';
+        }
+      } catch (err) {
+        showAlert('Go to origin error: ' + err.message, 'error');
+        status.textContent = 'Error';
+      }
     }
 
     function setJogStep(step) {

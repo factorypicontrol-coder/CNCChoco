@@ -1010,6 +1010,44 @@ router.post('/calibrate/jog/cancel', (req, res) => {
 
 /**
  * @swagger
+ * /api/calibrate/moveto:
+ *   post:
+ *     summary: Move to absolute work coordinates
+ *     description: Moves the tool to specified X, Y, Z work coordinates (G54). Omit any axis to leave it unchanged.
+ *     tags: [Calibration]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               x: { type: number, description: 'Target X work coordinate (mm)' }
+ *               y: { type: number, description: 'Target Y work coordinate (mm)' }
+ *               z: { type: number, description: 'Target Z work coordinate (mm)' }
+ *               feedRate: { type: number, description: 'Feed rate mm/min (default 500)' }
+ *     responses:
+ *       200:
+ *         description: Move complete
+ *       400:
+ *         description: Invalid request or move failed
+ */
+router.post('/calibrate/moveto', async (req, res) => {
+  try {
+    const { x, y, z, feedRate } = req.body;
+    const result = await engine.moveTo(x, y, z, feedRate);
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
  * /api/calibrate/position:
  *   get:
  *     summary: Query current position
@@ -1143,8 +1181,8 @@ router.post('/calibrate/setorigin', async (req, res) => {
 router.post('/calibrate/dryrun', async (req, res) => {
   try {
     const configData = await configModule.getConfig();
-    const barWidth = req.body.barWidth || configData.bar_width;
-    const barHeight = req.body.barHeight || configData.bar_height;
+    const barWidth = req.body?.barWidth || configData.bar_width;
+    const barHeight = req.body?.barHeight || configData.bar_height;
     const zSafe = configData.z_safe_height;
     const feedRate = configData.feed_rate;
 

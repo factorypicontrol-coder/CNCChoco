@@ -89,11 +89,37 @@ async function connect(devicePath = null) {
       port.once('error', reject);
     });
 
-    return { success: true, path: path };
+    // Wait for GRBL to finish booting (sends welcome banner ~2s after open)
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const appliedSettings = await applyGrblSettings();
+
+    return { success: true, path: path, appliedSettings };
   } catch (err) {
     console.error('Failed to connect:', err);
     return { success: false, error: err.message };
   }
+}
+
+// Apply critical GRBL machine settings after connection
+async function applyGrblSettings() {
+  const settings = [
+    { cmd: '$21=1', desc: 'Hard limits enabled' },
+    { cmd: '$22=1', desc: 'Homing cycle enabled' }
+  ];
+
+  const results = [];
+  for (const { cmd, desc } of settings) {
+    try {
+      await sendCommandAndWait(cmd, 5000);
+      console.log(`Applied GRBL setting: ${cmd} (${desc})`);
+      results.push({ setting: cmd, success: true });
+    } catch (err) {
+      console.warn(`Failed to apply GRBL setting ${cmd}: ${err.message}`);
+      results.push({ setting: cmd, success: false, error: err.message });
+    }
+  }
+  return results;
 }
 /*
 // Handle GRBL responses
@@ -584,6 +610,34 @@ async function jog(axis, distance, feedRate = 500) {
   }
 }
 
+// Move to absolute work coordinates (G54)
+async function moveTo(x, y, z, feedRate = 500) {
+  if (!port || !isConnected) {
+    return { success: false, error: 'Not connected to GRBL' };
+  }
+  if (printLock || currentJobId) {
+    return { success: false, error: 'Cannot move while a job is printing' };
+  }
+
+  const coords = [];
+  if (x !== undefined && x !== null && x !== '') coords.push(`X${Number(x).toFixed(3)}`);
+  if (y !== undefined && y !== null && y !== '') coords.push(`Y${Number(y).toFixed(3)}`);
+  if (z !== undefined && z !== null && z !== '') coords.push(`Z${Number(z).toFixed(3)}`);
+
+  if (coords.length === 0) {
+    return { success: false, error: 'At least one coordinate required' };
+  }
+
+  try {
+    await sendCommandAndWait('G90 G54', 5000);
+    await sendCommandAndWait(`G0 ${coords.join(' ')}`, 60000);
+    const position = await queryPosition();
+    return { success: true, position };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 // Cancel an active jog via real-time command 0x85
 function jogCancel() {
   if (!port || !isConnected) {
@@ -633,6 +687,7 @@ async function dryRunBoundary(barWidth, barHeight, zSafe, feedRate) {
     return { success: false, error: 'Cannot run dry run while a job is printing' };
   }
 
+  printLock = true;
   try {
     const gcodeLines = [
       'G54',
@@ -657,6 +712,8 @@ async function dryRunBoundary(barWidth, barHeight, zSafe, feedRate) {
     };
   } catch (err) {
     return { success: false, error: err.message };
+  } finally {
+    printLock = false;
   }
 }
 
@@ -733,6 +790,7 @@ module.exports = {
   home,
   unlock,
   jog,
+  moveTo,
   jogCancel,
   setWorkOffset,
   dryRunBoundary,

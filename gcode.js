@@ -79,7 +79,6 @@ function generateGcode(job, config) {
     out.push('G92 X0 Y0 Z0 ; Set current position as origin');
   }
   out.push(`G0 Z${Number(zSafe).toFixed(decimals)} ; Raise to safe height`);
-  out.push(`M3 S500`);
   out.push('');
 
   // Options for glyph transformation
@@ -159,7 +158,6 @@ function generateGcode(job, config) {
   out.push('; End of job');
   out.push(`G0 Z${Number(zSafe).toFixed(decimals)} ; Raise to safe height`);
   out.push('G0 X0 Y0 ; Return to origin');
-  out.push('M5 ; Stop Spindle');
   out.push('M2 ; End program');
 
   return out.join('\n');
