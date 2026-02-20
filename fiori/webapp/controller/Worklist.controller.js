@@ -29,15 +29,65 @@ sap.ui.define([
         },
 
         onExit: function () {
-            if (this._pollTimer) {
-                clearInterval(this._pollTimer);
-            }
-            if (this._connTimer) {
-                clearInterval(this._connTimer);
+            if (this._pollTimer) { clearInterval(this._pollTimer); }
+            if (this._connTimer) { clearInterval(this._connTimer); }
+            this._stopPositionPolling();
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // Main Navigation
+        // ═══════════════════════════════════════════════════════════════
+
+        onMainTabSelect: function (oEvent) {
+            var sKey = oEvent.getParameter("key");
+            if (sKey === "Statistics") {
+                this._stopPositionPolling();
+                this._loadStats();
+            } else if (sKey === "Configuration") {
+                this._stopPositionPolling();
+                this._loadConfig();
+            } else if (sKey === "Calibration") {
+                this._startPositionPolling();
+            } else {
+                // Queue or anything else
+                this._stopPositionPolling();
             }
         },
 
-        // --- Data Loading ---
+        // ═══════════════════════════════════════════════════════════════
+        // Emergency Stop
+        // ═══════════════════════════════════════════════════════════════
+
+        onEStop: function () {
+            var oBtn = this.byId("estopBtn");
+            oBtn.setEnabled(false);
+            oBtn.setText("STOPPING…");
+
+            fetch(API_BASE + "/estop", { method: "POST" })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        MessageBox.error(
+                            this._getText("estopSuccess"),
+                            { title: this._getText("estopTitle") }
+                        );
+                        this._refreshQueue();
+                    } else {
+                        MessageBox.error(data.error || this._getText("estopError"));
+                    }
+                }.bind(this))
+                .catch(function () {
+                    MessageBox.error(this._getText("estopError"));
+                }.bind(this))
+                .finally(function () {
+                    oBtn.setEnabled(true);
+                    oBtn.setText(this._getText("estop"));
+                }.bind(this));
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // Data Loading — Queue
+        // ═══════════════════════════════════════════════════════════════
 
         _refreshQueue: function () {
             var oQueueModel = this.getOwnerComponent().getModel("queue");
@@ -87,7 +137,9 @@ sap.ui.define([
             MessageToast.show(this._getText("refreshed"));
         },
 
-        // --- Filtering ---
+        // ═══════════════════════════════════════════════════════════════
+        // Filtering
+        // ═══════════════════════════════════════════════════════════════
 
         onFilterSelect: function (oEvent) {
             var sKey = oEvent.getParameter("key");
@@ -112,7 +164,9 @@ sap.ui.define([
             oBinding.filter(aFilters);
         },
 
-        // --- Selection ---
+        // ═══════════════════════════════════════════════════════════════
+        // Selection
+        // ═══════════════════════════════════════════════════════════════
 
         onSelectionChange: function () {
             var oTable = this.byId("jobTable");
@@ -125,7 +179,9 @@ sap.ui.define([
             this.getOwnerComponent().getModel("view").setProperty("/selectedCount", 0);
         },
 
-        // --- Bulk Actions ---
+        // ═══════════════════════════════════════════════════════════════
+        // Bulk Actions
+        // ═══════════════════════════════════════════════════════════════
 
         onBulkApply: function () {
             var oTable = this.byId("jobTable");
@@ -171,7 +227,9 @@ sap.ui.define([
                 }.bind(this));
         },
 
-        // --- Print ---
+        // ═══════════════════════════════════════════════════════════════
+        // Print
+        // ═══════════════════════════════════════════════════════════════
 
         onPrintNext: function () {
             fetch(API_BASE + "/print")
@@ -214,7 +272,9 @@ sap.ui.define([
             window.open(API_BASE + "/script/" + iId, "_blank");
         },
 
-        // --- View Job Detail ---
+        // ═══════════════════════════════════════════════════════════════
+        // View Job Detail
+        // ═══════════════════════════════════════════════════════════════
 
         onViewJob: function (oEvent) {
             var oCtx = oEvent.getSource().getBindingContext("queue");
@@ -230,9 +290,7 @@ sap.ui.define([
         },
 
         onCloseViewDialog: function () {
-            if (this._oViewDialog) {
-                this._oViewDialog.close();
-            }
+            if (this._oViewDialog) { this._oViewDialog.close(); }
         },
 
         onEditFromView: function () {
@@ -243,7 +301,9 @@ sap.ui.define([
             }
         },
 
-        // --- Create / Edit Job ---
+        // ═══════════════════════════════════════════════════════════════
+        // Create / Edit Job
+        // ═══════════════════════════════════════════════════════════════
 
         onCreateJob: function () {
             this._openJobDialog("create", this._emptyJob());
@@ -333,12 +393,12 @@ sap.ui.define([
         },
 
         onCancelJobDialog: function () {
-            if (this._oJobDialog) {
-                this._oJobDialog.close();
-            }
+            if (this._oJobDialog) { this._oJobDialog.close(); }
         },
 
-        // --- Connection ---
+        // ═══════════════════════════════════════════════════════════════
+        // Connection
+        // ═══════════════════════════════════════════════════════════════
 
         onConnectionPress: function () {
             var oCncModel = this.getOwnerComponent().getModel("cnc");
@@ -365,7 +425,325 @@ sap.ui.define([
             }
         },
 
-        // --- Helpers ---
+        // ═══════════════════════════════════════════════════════════════
+        // Statistics
+        // ═══════════════════════════════════════════════════════════════
+
+        _loadStats: function () {
+            var oStatsModel = this.getOwnerComponent().getModel("stats");
+            fetch(API_BASE + "/stats")
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        oStatsModel.setData({
+                            totals: data.totals || {},
+                            statusCounts: data.statusCounts || {},
+                            dailyStats: (data.dailyStats || []).slice().reverse()
+                        });
+                    }
+                }.bind(this))
+                .catch(function () {
+                    MessageToast.show(this._getText("statsLoadError"));
+                }.bind(this));
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // Configuration
+        // ═══════════════════════════════════════════════════════════════
+
+        _loadConfig: function () {
+            var oConfigModel = this.getOwnerComponent().getModel("config");
+            fetch(API_BASE + "/getConfig")
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success && data.config) {
+                        var oConfig = data.config;
+                        // Ensure use_g54_calibration is a string for Select binding
+                        oConfig.use_g54_calibration = String(oConfig.use_g54_calibration);
+                        oConfigModel.setData(oConfig);
+                    }
+                }.bind(this))
+                .catch(function () {
+                    MessageToast.show(this._getText("configLoadError"));
+                }.bind(this));
+        },
+
+        onSaveConfig: function () {
+            var oConfig = this.getOwnerComponent().getModel("config").getData();
+
+            fetch(API_BASE + "/updateConfig", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(oConfig)
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        MessageToast.show(this._getText("configSaved"));
+                    } else {
+                        MessageBox.error(data.error || this._getText("configSaveError"));
+                    }
+                }.bind(this))
+                .catch(function () {
+                    MessageBox.error(this._getText("configSaveError"));
+                }.bind(this));
+        },
+
+        onResetConfig: function () {
+            this._loadConfig();
+            MessageToast.show(this._getText("configReset"));
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // Calibration — Position Polling
+        // ═══════════════════════════════════════════════════════════════
+
+        _startPositionPolling: function () {
+            if (this._positionPollTimer) { return; }
+            this._refreshPosition();
+            this._positionPollTimer = setInterval(this._refreshPosition.bind(this), 500);
+        },
+
+        _stopPositionPolling: function () {
+            if (this._positionPollTimer) {
+                clearInterval(this._positionPollTimer);
+                this._positionPollTimer = null;
+            }
+        },
+
+        _refreshPosition: function () {
+            var oCalModel = this.getOwnerComponent().getModel("calibration");
+            fetch(API_BASE + "/calibrate/position")
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success && data.position) {
+                        var pos = data.position;
+                        var mpos = pos.mpos || {};
+                        var wpos = pos.wpos || {};
+                        oCalModel.setProperty("/state", pos.state || "?");
+                        oCalModel.setProperty("/mpos/x", this._fmtCoord(mpos.x));
+                        oCalModel.setProperty("/mpos/y", this._fmtCoord(mpos.y));
+                        oCalModel.setProperty("/mpos/z", this._fmtCoord(mpos.z));
+                        oCalModel.setProperty("/wpos/x", this._fmtCoord(wpos.x));
+                        oCalModel.setProperty("/wpos/y", this._fmtCoord(wpos.y));
+                        oCalModel.setProperty("/wpos/z", this._fmtCoord(wpos.z));
+                    }
+                }.bind(this))
+                .catch(function () { /* silently ignore poll errors */ });
+        },
+
+        _fmtCoord: function (val) {
+            if (typeof val === "number") { return val.toFixed(3); }
+            return "?";
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // Calibration — Home & Unlock
+        // ═══════════════════════════════════════════════════════════════
+
+        onHome: function () {
+            var oCalModel = this.getOwnerComponent().getModel("calibration");
+            var oBtn = this.byId("homeBtn");
+            oBtn.setEnabled(false);
+            oCalModel.setProperty("/homeStatus", this._getText("calHoming"));
+
+            fetch(API_BASE + "/calibrate/home", { method: "POST" })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        MessageToast.show(this._getText("calHomeSuccess"));
+                        oCalModel.setProperty("/homeStatus", this._getText("calComplete"));
+                        oCalModel.setProperty("/steps/homed", true);
+                    } else {
+                        MessageBox.error(this._getText("calHomeFailed") + ": " + data.error);
+                        oCalModel.setProperty("/homeStatus", this._getText("calFailed"));
+                    }
+                }.bind(this))
+                .catch(function () {
+                    oCalModel.setProperty("/homeStatus", this._getText("calError"));
+                }.bind(this))
+                .finally(function () {
+                    oBtn.setEnabled(true);
+                }.bind(this));
+        },
+
+        onUnlock: function () {
+            fetch(API_BASE + "/calibrate/unlock", { method: "POST" })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        MessageToast.show(this._getText("calUnlocked"));
+                    } else {
+                        MessageBox.error(this._getText("calUnlockFailed") + ": " + data.error);
+                    }
+                }.bind(this))
+                .catch(function () {
+                    MessageBox.error(this._getText("calError"));
+                }.bind(this));
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // Calibration — Jog
+        // ═══════════════════════════════════════════════════════════════
+
+        _doJog: function (sAxis, iDir) {
+            var oCalModel = this.getOwnerComponent().getModel("calibration");
+            var fStep = parseFloat(oCalModel.getProperty("/jogStep")) || 1;
+            var fDistance = fStep * iDir;
+
+            fetch(API_BASE + "/calibrate/jog", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ axis: sAxis, distance: fDistance })
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        oCalModel.setProperty("/steps/jogged", true);
+                    } else {
+                        MessageToast.show(this._getText("calJogFailed") + ": " + data.error);
+                    }
+                }.bind(this))
+                .catch(function () { /* ignore transient jog errors */ });
+        },
+
+        onJogXPlus:  function () { this._doJog("X",  1); },
+        onJogXMinus: function () { this._doJog("X", -1); },
+        onJogYPlus:  function () { this._doJog("Y",  1); },
+        onJogYMinus: function () { this._doJog("Y", -1); },
+        onJogZPlus:  function () { this._doJog("Z",  1); },
+        onJogZMinus: function () { this._doJog("Z", -1); },
+
+        onJogCancel: function () {
+            fetch(API_BASE + "/calibrate/jog/cancel", { method: "POST" });
+        },
+
+        onJogStepChange: function (oEvent) {
+            var sKey = oEvent.getParameter("item").getKey();
+            this.getOwnerComponent().getModel("calibration").setProperty("/jogStep", sKey);
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // Calibration — Move To
+        // ═══════════════════════════════════════════════════════════════
+
+        onMoveTo: function () {
+            var oCalModel = this.getOwnerComponent().getModel("calibration");
+            var sX = oCalModel.getProperty("/gotoX");
+            var sY = oCalModel.getProperty("/gotoY");
+            var sZ = oCalModel.getProperty("/gotoZ");
+
+            if (sX === "" && sY === "" && sZ === "") {
+                MessageToast.show(this._getText("calEnterCoord"));
+                return;
+            }
+
+            var oBody = {};
+            if (sX !== "") { oBody.x = parseFloat(sX); }
+            if (sY !== "") { oBody.y = parseFloat(sY); }
+            if (sZ !== "") { oBody.z = parseFloat(sZ); }
+
+            oCalModel.setProperty("/moveToStatus", this._getText("calMoving"));
+
+            fetch(API_BASE + "/calibrate/moveto", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(oBody)
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        oCalModel.setProperty("/moveToStatus", this._getText("calDone"));
+                    } else {
+                        MessageBox.error(this._getText("calMoveFailed") + ": " + data.error);
+                        oCalModel.setProperty("/moveToStatus", this._getText("calFailed"));
+                    }
+                }.bind(this))
+                .catch(function () {
+                    oCalModel.setProperty("/moveToStatus", this._getText("calError"));
+                }.bind(this));
+        },
+
+        onGoToOrigin: function () {
+            var oCalModel = this.getOwnerComponent().getModel("calibration");
+            oCalModel.setProperty("/moveToStatus", this._getText("calMovingOrigin"));
+
+            fetch(API_BASE + "/calibrate/moveto", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ x: 0, y: 0, z: 0 })
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        oCalModel.setProperty("/moveToStatus", this._getText("calAtOrigin"));
+                    } else {
+                        MessageBox.error(this._getText("calMoveFailed") + ": " + data.error);
+                        oCalModel.setProperty("/moveToStatus", this._getText("calFailed"));
+                    }
+                }.bind(this))
+                .catch(function () {
+                    oCalModel.setProperty("/moveToStatus", this._getText("calError"));
+                }.bind(this));
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // Calibration — Set Origin & Dry Run
+        // ═══════════════════════════════════════════════════════════════
+
+        onSetOrigin: function () {
+            var oCalModel = this.getOwnerComponent().getModel("calibration");
+
+            fetch(API_BASE + "/calibrate/setorigin", { method: "POST" })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        var mp = data.machinePosition || {};
+                        var sPos = "(" + (mp.x || 0).toFixed(3) + ", " + (mp.y || 0).toFixed(3) + ", " + (mp.z || 0).toFixed(3) + ")";
+                        MessageToast.show(this._getText("calOriginSet"));
+                        oCalModel.setProperty("/originStatus", this._getText("calOriginAt") + " " + sPos);
+                        oCalModel.setProperty("/steps/originSet", true);
+                    } else {
+                        MessageBox.error(this._getText("calOriginFailed") + ": " + data.error);
+                        oCalModel.setProperty("/originStatus", this._getText("calFailed"));
+                    }
+                }.bind(this))
+                .catch(function () {
+                    oCalModel.setProperty("/originStatus", this._getText("calError"));
+                }.bind(this));
+        },
+
+        onDryRun: function () {
+            var oCalModel = this.getOwnerComponent().getModel("calibration");
+            var oBtn = this.byId("dryRunBtn");
+            oBtn.setEnabled(false);
+            oCalModel.setProperty("/dryRunStatus", this._getText("calRunning"));
+
+            fetch(API_BASE + "/calibrate/dryrun", { method: "POST" })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        var b = data.boundary || {};
+                        MessageToast.show(this._getText("calDryRunSuccess"));
+                        oCalModel.setProperty("/dryRunStatus",
+                            this._getText("calComplete") + " (" + b.width + "x" + b.height + "mm)");
+                        oCalModel.setProperty("/steps/verified", true);
+                    } else {
+                        MessageBox.error(this._getText("calDryRunFailed") + ": " + data.error);
+                        oCalModel.setProperty("/dryRunStatus", this._getText("calFailed"));
+                    }
+                }.bind(this))
+                .catch(function () {
+                    oCalModel.setProperty("/dryRunStatus", this._getText("calError"));
+                }.bind(this))
+                .finally(function () {
+                    oBtn.setEnabled(true);
+                }.bind(this));
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // Helpers
+        // ═══════════════════════════════════════════════════════════════
 
         _emptyJob: function () {
             return {

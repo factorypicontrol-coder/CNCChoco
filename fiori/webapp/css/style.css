@@ -3,11 +3,22 @@
  * Follows SAP Fiori Design Guidelines / Horizon Theme
  */
 
-/* Ensure full viewport height */
+/* Ensure full viewport height — root VBox scrolls so tab content is never clipped */
 html, body, #content {
     height: 100%;
     margin: 0;
     padding: 0;
+}
+
+/* Root VBox fills the viewport exactly; the tab content area scrolls internally */
+#rootLayout.sapMVBox {
+    min-height: 100%;
+}
+
+/* stretchContentHeight="true" gives the content area a defined height but hides overflow by default.
+   Override so every tab scrolls naturally when its content is taller than the available space. */
+.sapMITBContent {
+    overflow-y: auto !important;
 }
 
 /* Pulsing live indicator */
@@ -29,4 +40,145 @@ html, body, #content {
 /* Compact spacing for action buttons in table cells */
 .sapMListTblCell .sapMBtn {
     margin: 0 0.125rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Statistics Tiles
+═══════════════════════════════════════════════════════════ */
+
+.cncStatGrid {
+    margin-bottom: 1rem;
+}
+
+.cncStatTile {
+    min-width: 10rem;
+    width: 10rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Calibration — Jog Pad
+═══════════════════════════════════════════════════════════ */
+
+.cncJogPad,
+.cncJogZ {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.cncJogPad .sapMBtn,
+.cncJogZ .sapMBtn {
+    min-width: 3.5rem !important;
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.cncJogPad .sapMBtnInner,
+.cncJogZ .sapMBtnInner {
+    height: 3.5rem;
+    min-height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Stop button in jog pad — styled Reject/red */
+.cncJogStop.sapMBtn .sapMBtnInner {
+    background-color: var(--sapButton_Reject_Background, #bb0000);
+    border-color: var(--sapButton_Reject_BorderColor, #bb0000);
+    color: #ffffff;
+}
+
+.cncJogStop.sapMBtn:hover .sapMBtnInner {
+    background-color: var(--sapButton_Reject_Hover_Background, #a30000);
+}
+
+/* Row inside the jog pad (X- Stop X+) */
+.cncJogPad > .sapMHBox {
+    gap: 0.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Calibration — Position Readout
+═══════════════════════════════════════════════════════════ */
+
+.cncPosCoord.sapMObjStatus {
+    font-family: "Courier New", Courier, monospace;
+    min-width: 6rem;
+}
+
+.cncPosCoord .sapMObjStatusText {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.875rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Calibration — Step Progress
+═══════════════════════════════════════════════════════════ */
+
+.cncCalStep.sapMObjStatus {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Calibration — two-column layout
+═══════════════════════════════════════════════════════════ */
+
+/* Grid cells in the calibration layout stretch to fill */
+.cncCalCol {
+    padding-right: 0.5rem;
+}
+
+.cncCalCol:last-child {
+    padding-right: 0;
+}
+
+/* Bottom breathing room so the last calibration panel isn't flush with the viewport edge */
+.cncCalibrationTab {
+    padding-bottom: 3rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Configuration — panel card grid
+═══════════════════════════════════════════════════════════ */
+
+/* Config grid — fixed 3-column layout, all rows equal height */
+.cncCfgGrid.sapUiRespGrid {
+    grid-auto-rows: 1fr;
+}
+
+/* Each section card stretches to fill its grid cell */
+.cncCfgPanel.sapMPanel {
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Constrain inputs/selects so they don't stretch to full card width */
+.cncCfgPanel .sapMSIt,
+.cncCfgPanel .sapMSelect,
+.cncCfgPanel .sapMInputBase {
+    max-width: 14rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Calibration — jog step size buttons (larger hit targets)
+═══════════════════════════════════════════════════════════ */
+
+#jogStepBtn .sapMSegBBtn {
+    min-width: 3.25rem;
+    padding: 0 0.75rem;
+    font-size: 0.9375rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   E-STOP Button — extra visual weight in the shell bar
+═══════════════════════════════════════════════════════════ */
+
+#estopBtn.sapMBtn .sapMBtnInner {
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
