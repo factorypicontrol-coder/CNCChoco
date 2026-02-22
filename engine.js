@@ -648,7 +648,7 @@ function jogCancel() {
 }
 
 // Set G54 work coordinate offset at current position
-async function setWorkOffset() {
+async function setWorkOffset(xDelta = 0, yDelta = 0) {
   if (!port || !isConnected) {
     return { success: false, error: 'Not connected to GRBL' };
   }
@@ -664,14 +664,16 @@ async function setWorkOffset() {
     }
 
     const { x, y, z } = status.mpos;
-    await sendCommandAndWait(`G10 L2 P1 X${x} Y${y} Z${z}`, 5000);
+    const ox = x + xDelta;
+    const oy = y + yDelta;
+    await sendCommandAndWait(`G10 L2 P1 X${ox} Y${oy} Z${z}`, 5000);
     isCalibrated = true;
 
     return {
       success: true,
       message: 'G54 work offset set successfully',
       machinePosition: status.mpos,
-      offset: { x, y, z }
+      offset: { x: ox, y: oy, z }
     };
   } catch (err) {
     return { success: false, error: err.message };

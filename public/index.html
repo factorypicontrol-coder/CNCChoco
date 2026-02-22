@@ -1270,8 +1270,9 @@
         <div class="config-section">
           <h3>Step 3: Set Work Origin</h3>
           <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Set the current tool position as the bar origin (0,0,0). Stored in GRBL EEPROM and persists across power cycles.</p>
-          <div style="display: flex; gap: 10px; align-items: center;">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <button class="btn btn-success" onclick="doSetOrigin()" id="setOriginBtn">Set Origin (G54)</button>
+            <button class="btn btn-secondary" onclick="doSetOriginRelative(-40, -40)" id="setOriginRelBtn">Set Origin (X-40, Y-40)</button>
             <span id="originStatus" style="color: rgba(255,255,255,0.6);"></span>
           </div>
         </div>
@@ -2207,6 +2208,31 @@
           showAlert('Work origin set at current position', 'success');
           const mp = data.machinePosition;
           status.textContent = `Set at MPos (${mp.x.toFixed(3)}, ${mp.y.toFixed(3)}, ${mp.z.toFixed(3)})`;
+          calibrationState.originSet = true;
+          updateCalibrationSteps();
+        } else {
+          showAlert('Set origin failed: ' + data.error, 'error');
+          status.textContent = 'Failed';
+        }
+      } catch (err) {
+        showAlert('Set origin error: ' + err.message, 'error');
+        status.textContent = 'Error';
+      }
+    }
+
+    async function doSetOriginRelative(xDelta, yDelta) {
+      const status = document.getElementById('originStatus');
+      try {
+        const response = await fetch(`${API}/calibrate/setorigin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ xDelta, yDelta })
+        });
+        const data = await response.json();
+        if (data.success) {
+          const mp = data.machinePosition;
+          showAlert(`Work origin set at (${data.offset.x.toFixed(3)}, ${data.offset.y.toFixed(3)}, ${data.offset.z.toFixed(3)}) — current pos is X+${-xDelta}, Y+${-yDelta} from origin`, 'success');
+          status.textContent = `Set (offset X${xDelta}, Y${yDelta}) — MPos (${mp.x.toFixed(3)}, ${mp.y.toFixed(3)}, ${mp.z.toFixed(3)})`;
           calibrationState.originSet = true;
           updateCalibrationSteps();
         } else {

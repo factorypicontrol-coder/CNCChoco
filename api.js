@@ -1128,7 +1128,9 @@ router.get('/calibrate/position', async (req, res) => {
  */
 router.post('/calibrate/setorigin', async (req, res) => {
   try {
-    const result = await engine.setWorkOffset();
+    const xDelta = req.body?.xDelta ?? 0;
+    const yDelta = req.body?.yDelta ?? 0;
+    const result = await engine.setWorkOffset(xDelta, yDelta);
     if (result.success) {
       res.json(result);
     } else {
