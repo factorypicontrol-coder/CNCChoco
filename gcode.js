@@ -43,6 +43,8 @@ function generateGcode(job, config) {
   const zEngrave = config.z_engrave_depth;
 
   const feedRate = config.feed_rate;
+  const spindleEnabled = config.spindle_enabled === true || config.spindle_enabled === 'true';
+  const spindleSpeed = Number(config.spindle_speed) || 500;
   const gapTemplateToMessage = config.gap_template_to_message;
   const gapBetweenLines = config.gap_between_lines;
 
@@ -75,6 +77,9 @@ function generateGcode(job, config) {
   out.push('G90 ; Absolute positioning');
   out.push('G54 ; Use calibrated work coordinate system');
   out.push(`G0 Z${Number(zSafe).toFixed(decimals)} ; Raise to safe height`);
+  if (spindleEnabled) {
+    out.push(`M3 S${spindleSpeed} ; Spindle on (CW)`);
+  }
   out.push('');
 
   // Options for glyph transformation
@@ -154,6 +159,9 @@ function generateGcode(job, config) {
   out.push('; End of job');
   out.push(`G0 Z${Number(zSafe).toFixed(decimals)} ; Raise to safe height`);
   out.push('G0 X0 Y0 ; Return to origin');
+  if (spindleEnabled) {
+    out.push('M5 ; Spindle off');
+  }
   out.push('M2 ; End program');
 
   return out.join('\n');

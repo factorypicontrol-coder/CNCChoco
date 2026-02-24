@@ -740,6 +740,50 @@
       margin: 20px 0;
     }
 
+    /* Spindle slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.15);
+      outline: none;
+      margin-top: 8px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      box-shadow: 0 0 4px rgba(102, 126, 234, 0.6);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      border: none;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .slider-value {
+      font-weight: 600;
+      color: #a5b4fc;
+      min-width: 50px;
+      text-align: right;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .form-row {
@@ -1111,6 +1155,23 @@
           <div class="form-group">
             <label for="feedRate">Feed Rate (mm/min)</label>
             <input type="number" id="feedRate" step="1" min="10" max="2000">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="spindleEnabled">Spindle</label>
+              <select id="spindleEnabled" onchange="updateSpindleVisibility()">
+                <option value="true">Enabled — M3/M5 commands in G-code</option>
+                <option value="false">Disabled — no spindle commands</option>
+              </select>
+            </div>
+            <div class="form-group" id="spindleSpeedGroup">
+              <div class="slider-label">
+                <label for="spindleSpeed">Spindle Speed (S value)</label>
+                <span class="slider-value" id="spindleSpeedValue">500</span>
+              </div>
+              <input type="range" id="spindleSpeed" min="0" max="1000" step="10"
+                oninput="document.getElementById('spindleSpeedValue').textContent = this.value">
+            </div>
           </div>
         </div>
 
@@ -1666,6 +1727,11 @@
           document.getElementById('feedRate').value = config.feed_rate;
           document.getElementById('useG54Calibration').value = String(config.use_g54_calibration);
           document.getElementById('jogFeedRate').value = config.jog_feed_rate;
+          document.getElementById('spindleEnabled').value = String(config.spindle_enabled);
+          const spindleSpeedVal = config.spindle_speed != null ? config.spindle_speed : 1000;
+          document.getElementById('spindleSpeed').value = spindleSpeedVal;
+          document.getElementById('spindleSpeedValue').textContent = spindleSpeedVal;
+          updateSpindleVisibility();
         }
       } catch (err) {
         showAlert('Error loading config: ' + err.message, 'error');
@@ -1691,7 +1757,9 @@
         z_engrave_depth: document.getElementById('zEngraveDepth').value,
         feed_rate: document.getElementById('feedRate').value,
         use_g54_calibration: document.getElementById('useG54Calibration').value,
-        jog_feed_rate: document.getElementById('jogFeedRate').value
+        jog_feed_rate: document.getElementById('jogFeedRate').value,
+        spindle_enabled: document.getElementById('spindleEnabled').value,
+        spindle_speed: document.getElementById('spindleSpeed').value
       };
 
       try {
@@ -2284,6 +2352,12 @@
           foundActive = true;
         }
       });
+    }
+
+    function updateSpindleVisibility() {
+      const enabled = document.getElementById('spindleEnabled').value === 'true';
+      document.getElementById('spindleSpeedGroup').style.opacity = enabled ? '1' : '0.4';
+      document.getElementById('spindleSpeed').disabled = !enabled;
     }
 
     // Initialize

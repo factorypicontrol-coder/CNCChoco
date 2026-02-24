@@ -29,7 +29,9 @@ const CONFIG_KEYS = {
   normalize_glyph_feed: { type: 'boolean', default: 'false' },
   decimals: { type: 'number', min: 0, max: 8, default: '3' },
   use_g54_calibration: { type: 'boolean', default: 'true' },
-  jog_feed_rate: { type: 'number', min: 10, max: 5000, default: '500' }
+  jog_feed_rate: { type: 'number', min: 10, max: 5000, default: '500' },
+  spindle_enabled: { type: 'boolean', default: 'false' },
+  spindle_speed: { type: 'number', min: 0, max: 1000, default: '500' }
 };
 
 // Get default config values (for database initialization)
