@@ -1177,10 +1177,8 @@
             <button class="btn btn-secondary btn-sm" onclick="doUnlock()" id="unlockBtn">Unlock ($X)</button>
             <button class="btn btn-success" onclick="doSetOrigin()" id="setOriginBtn">Set Origin (G54)</button>
             <button class="btn btn-secondary" onclick="doSetOriginRelative(-35.978, -33.420)" id="setOriginRelBtn">Quick Set Print Origin</button>
-            <button class="btn btn-secondary" onclick="doTraceJobArea()" id="traceJobBtn">Trace Print Area</button>
             <span id="homeStatus" style="color: rgba(255,255,255,0.6);"></span>
             <span id="originStatus" style="color: rgba(255,255,255,0.6);"></span>
-            <span id="traceJobStatus" style="color: rgba(255,255,255,0.6);"></span>
           </div>
         </div>
 
@@ -1227,6 +1225,18 @@
             <button class="btn btn-primary btn-sm" onclick="doMoveTo()">Go To</button>
             <button class="btn btn-secondary btn-sm" onclick="doGoToOrigin()">Go to Origin (0, 0, 0)</button>
             <span id="moveToStatus" style="color: rgba(255,255,255,0.6);"></span>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <h3>Trace Print Area</h3>
+          <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Traces the minimum bounding rectangle of a job's engraving area at safe Z height (with 1mm padding). Use this to verify the current origin has enough space on the physical bar before printing.</p>
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <label style="color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 6px;">
+              Job ID <input type="number" id="traceJobId" step="1" min="1" placeholder="next pending" style="width: 120px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 8px; color: #fff; font-size: 0.9rem;">
+            </label>
+            <button class="btn btn-primary" onclick="doTraceJobArea()" id="traceJobBtn">Trace Print Area</button>
+            <span id="traceJobStatus" style="color: rgba(255,255,255,0.6);"></span>
           </div>
         </div>
 
@@ -2190,16 +2200,25 @@
     async function doTraceJobArea() {
       const btn = document.getElementById('traceJobBtn');
       const status = document.getElementById('traceJobStatus');
+      const jobIdInput = document.getElementById('traceJobId').value;
+
+      const body = {};
+      if (jobIdInput !== '') body.jobId = parseInt(jobIdInput);
+
       btn.disabled = true;
       status.textContent = 'Tracing...';
       try {
-        const response = await fetch(`${API}/calibrate/tracejob`, { method: 'POST' });
+        const response = await fetch(`${API}/calibrate/tracejob`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
         const data = await response.json();
         if (data.success) {
           const b = data.boundary;
-          const label = data.jobId ? `Job #${data.jobId}` : 'bar boundary';
+          const label = data.jobId ? `Job #${data.jobId}` : 'next pending';
           showAlert(`Print area traced (${label}): X ${b.x0.toFixed(1)}→${b.x1.toFixed(1)}, Y ${b.y0.toFixed(1)}→${b.y1.toFixed(1)}`, 'success');
-          status.textContent = data.jobId ? `Job #${data.jobId}` : 'Bar boundary';
+          status.textContent = data.jobId ? `Job #${data.jobId}` : 'Next pending';
         } else {
           showAlert('Trace failed: ' + data.error, 'error');
           status.textContent = 'Failed';
