@@ -393,56 +393,6 @@
     }
 
     /* Calibration */
-    .calibration-steps {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .calibration-step {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 16px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.03);
-      border-left: 3px solid rgba(255,255,255,0.1);
-      flex: 1;
-      min-width: 150px;
-    }
-
-    .calibration-step.complete {
-      background: rgba(16, 185, 129, 0.1);
-      border-left-color: #10b981;
-    }
-
-    .calibration-step.active {
-      background: rgba(102, 126, 234, 0.1);
-      border-left-color: #667eea;
-    }
-
-    .calibration-step .step-num {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-
-    .calibration-step.complete .step-num {
-      background: #10b981;
-    }
-
-    .calibration-step.active .step-num {
-      background: #667eea;
-    }
-
     .jog-container {
       display: flex;
       gap: 40px;
@@ -1204,57 +1154,6 @@
       <div class="card">
         <h2>Machine Calibration</h2>
 
-        <details class="cal-help" style="margin-bottom: 20px; padding: 12px 16px; background: rgba(102,126,234,0.08); border: 1px solid rgba(102,126,234,0.2); border-radius: 8px;">
-          <summary style="cursor: pointer; font-weight: bold; color: #a5b4fc; user-select: none;">How to use calibration</summary>
-          <div style="margin-top: 12px; color: rgba(255,255,255,0.75); line-height: 1.6; font-size: 0.9rem;">
-            <p style="margin-bottom: 10px;">Calibration ensures the CNC tool always engraves at the exact same position on the chocolate bar. Once calibrated, the offset is stored in the GRBL controller's EEPROM and persists across power cycles.</p>
-
-            <p style="margin-bottom: 4px; font-weight: bold; color: #a5b4fc;">Initial Setup (first time or when fixture moves):</p>
-            <ol style="margin: 0 0 12px 20px; padding: 0;">
-              <li><strong>Connect</strong> to the CNC machine using the Connect button in the status bar above.</li>
-              <li><strong>Home ($H)</strong> &mdash; Click to send the machine to its limit switches. This establishes an absolute machine reference point. If the machine enters an alarm state, click <em>Unlock ($X)</em> to clear it.</li>
-              <li><strong>Jog to bar corner</strong> &mdash; Use the directional pad to move the tool to the bottom-left corner of the chocolate bar. Select a step size (0.1mm for fine adjustments, 10mm for large moves). The position readout updates in real-time so you can see exactly where the tool is.</li>
-              <li><strong>Set Origin (G54)</strong> &mdash; Click to save the current tool position as the work coordinate origin. The G54 offset is written to GRBL EEPROM &mdash; it will survive power cycles and disconnects.</li>
-              <li><strong>Dry Run Boundary</strong> &mdash; Click to trace the chocolate bar outline at safe height (no engraving). Watch the tool path and verify it follows the bar edges. If it's off, go back to Step 2 and re-jog.</li>
-            </ol>
-
-            <p style="margin-bottom: 4px; font-weight: bold; color: #a5b4fc;">Each Session (after powering on the machine):</p>
-            <ol style="margin: 0 0 12px 20px; padding: 0;">
-              <li><strong>Connect</strong> to the CNC machine.</li>
-              <li><strong>Home ($H)</strong> &mdash; Required each session because the machine loses its position when powered off. Homing re-finds the limit switches.</li>
-              <li><strong>Print jobs</strong> &mdash; The stored G54 offset is automatically applied. No need to re-jog or re-set origin unless the bar fixture has physically moved.</li>
-            </ol>
-
-            <p style="margin-bottom: 4px; font-weight: bold; color: #a5b4fc;">Troubleshooting:</p>
-            <ul style="margin: 0 0 0 20px; padding: 0;">
-              <li><strong>Alarm state</strong> &mdash; Click <em>Unlock ($X)</em> to clear. Common after a failed homing attempt or if the machine hits a limit switch unexpectedly.</li>
-              <li><strong>Position shows "?"</strong> &mdash; The machine is not connected or has not been homed yet.</li>
-              <li><strong>MPos missing, only WPos shown</strong> &mdash; Set Origin requires MPos. Send <code>$10=1</code> via the API Docs command endpoint to enable MPos reporting.</li>
-              <li><strong>Dry run traces the wrong area</strong> &mdash; Go back to Step 2, jog to the correct corner, and set origin again.</li>
-              <li><strong>Legacy mode</strong> &mdash; If you prefer the old behavior (manually position before each print), set <em>Use G54 Calibration</em> to "No" in the Configuration tab. The G-code will use G92 instead of G54.</li>
-            </ul>
-          </div>
-        </details>
-
-        <div class="calibration-steps">
-          <div class="calibration-step active" id="calStep1">
-            <span class="step-num">1</span>
-            <span>Home</span>
-          </div>
-          <div class="calibration-step" id="calStep2">
-            <span class="step-num">2</span>
-            <span>Jog to Corner</span>
-          </div>
-          <div class="calibration-step" id="calStep3">
-            <span class="step-num">3</span>
-            <span>Set Origin</span>
-          </div>
-          <div class="calibration-step" id="calStep4">
-            <span class="step-num">4</span>
-            <span>Verify</span>
-          </div>
-        </div>
-
         <div class="position-readout">
           <span class="grbl-state" id="grblState">Unknown</span>
           <div class="pos-row">
@@ -1272,18 +1171,19 @@
         </div>
 
         <div class="config-section">
-          <h3>Step 1: Home Machine</h3>
-          <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Send the machine to its limit switches to establish a known reference point.</p>
-          <div style="display: flex; gap: 10px; align-items: center;">
+          <h3>Utilities</h3>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <button class="btn btn-primary" onclick="doHome()" id="homeBtn">Home ($H)</button>
             <button class="btn btn-secondary btn-sm" onclick="doUnlock()" id="unlockBtn">Unlock ($X)</button>
+            <button class="btn btn-success" onclick="doSetOrigin()" id="setOriginBtn">Set Origin (G54)</button>
+            <button class="btn btn-secondary" onclick="doSetOriginRelative(-35.978, -33.420)" id="setOriginRelBtn">Quick Set Print Origin</button>
             <span id="homeStatus" style="color: rgba(255,255,255,0.6);"></span>
+            <span id="originStatus" style="color: rgba(255,255,255,0.6);"></span>
           </div>
         </div>
 
         <div class="config-section">
-          <h3>Step 2: Jog to Bar Corner</h3>
-          <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Position the tool over the bottom-left corner of the chocolate bar.</p>
+          <h3>Controls</h3>
 
           <div class="step-selector">
             <span style="color: rgba(255,255,255,0.6);">Step:</span>
@@ -1328,24 +1228,6 @@
           </div>
         </div>
 
-        <div class="config-section">
-          <h3>Step 3: Set Work Origin</h3>
-          <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Set the current tool position as the bar origin (0,0,0). Stored in GRBL EEPROM and persists across power cycles.</p>
-          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <button class="btn btn-success" onclick="doSetOrigin()" id="setOriginBtn">Set Origin (G54)</button>
-            <button class="btn btn-secondary" onclick="doSetOriginRelative(-40, -40)" id="setOriginRelBtn">Set Origin (X-40, Y-40)</button>
-            <span id="originStatus" style="color: rgba(255,255,255,0.6);"></span>
-          </div>
-        </div>
-
-        <div class="config-section">
-          <h3>Step 4: Verify Alignment</h3>
-          <p style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">Trace the chocolate bar boundary at safe height to verify calibration. The tool should follow the bar edges.</p>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <button class="btn btn-primary" onclick="doDryRun()" id="dryRunBtn">Dry Run Boundary</button>
-            <span id="dryRunStatus" style="color: rgba(255,255,255,0.6);"></span>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -2099,7 +1981,6 @@
 
     let jogStep = 1;
     let positionPollInterval = null;
-    let calibrationState = { homed: false, jogged: false, originSet: false, verified: false };
 
     function startPositionPolling() {
       if (positionPollInterval) return;
@@ -2151,8 +2032,6 @@
         if (data.success) {
           showAlert('Homing complete', 'success');
           status.textContent = 'Complete';
-          calibrationState.homed = true;
-          updateCalibrationSteps();
         } else {
           showAlert('Homing failed: ' + data.error, 'error');
           status.textContent = 'Failed';
@@ -2189,9 +2068,6 @@
         const data = await response.json();
         if (!data.success) {
           showAlert('Jog failed: ' + data.error, 'error');
-        } else {
-          calibrationState.jogged = true;
-          updateCalibrationSteps();
         }
       } catch (err) {
         showAlert('Jog error: ' + err.message, 'error');
@@ -2276,8 +2152,6 @@
           showAlert('Work origin set at current position', 'success');
           const mp = data.machinePosition;
           status.textContent = `Set at MPos (${mp.x.toFixed(3)}, ${mp.y.toFixed(3)}, ${mp.z.toFixed(3)})`;
-          calibrationState.originSet = true;
-          updateCalibrationSteps();
         } else {
           showAlert('Set origin failed: ' + data.error, 'error');
           status.textContent = 'Failed';
@@ -2301,8 +2175,6 @@
           const mp = data.machinePosition;
           showAlert(`Work origin set at (${data.offset.x.toFixed(3)}, ${data.offset.y.toFixed(3)}, ${data.offset.z.toFixed(3)}) — current pos is X+${-xDelta}, Y+${-yDelta} from origin`, 'success');
           status.textContent = `Set (offset X${xDelta}, Y${yDelta}) — MPos (${mp.x.toFixed(3)}, ${mp.y.toFixed(3)}, ${mp.z.toFixed(3)})`;
-          calibrationState.originSet = true;
-          updateCalibrationSteps();
         } else {
           showAlert('Set origin failed: ' + data.error, 'error');
           status.textContent = 'Failed';
@@ -2311,47 +2183,6 @@
         showAlert('Set origin error: ' + err.message, 'error');
         status.textContent = 'Error';
       }
-    }
-
-    async function doDryRun() {
-      const btn = document.getElementById('dryRunBtn');
-      const status = document.getElementById('dryRunStatus');
-      btn.disabled = true;
-      status.textContent = 'Running...';
-      try {
-        const response = await fetch(`${API}/calibrate/dryrun`, { method: 'POST' });
-        const data = await response.json();
-        if (data.success) {
-          showAlert('Dry run complete - check bar alignment', 'success');
-          status.textContent = `Complete (${data.boundary.width}x${data.boundary.height}mm)`;
-          calibrationState.verified = true;
-          updateCalibrationSteps();
-        } else {
-          showAlert('Dry run failed: ' + data.error, 'error');
-          status.textContent = 'Failed';
-        }
-      } catch (err) {
-        showAlert('Dry run error: ' + err.message, 'error');
-        status.textContent = 'Error';
-      }
-      btn.disabled = false;
-    }
-
-    function updateCalibrationSteps() {
-      const steps = ['homed', 'jogged', 'originSet', 'verified'];
-      const stepIds = ['calStep1', 'calStep2', 'calStep3', 'calStep4'];
-      let foundActive = false;
-      steps.forEach((key, i) => {
-        const el = document.getElementById(stepIds[i]);
-        if (!el) return;
-        el.classList.remove('complete', 'active');
-        if (calibrationState[key]) {
-          el.classList.add('complete');
-        } else if (!foundActive) {
-          el.classList.add('active');
-          foundActive = true;
-        }
-      });
     }
 
     function updateSpindleVisibility() {
