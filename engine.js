@@ -719,6 +719,44 @@ async function dryRunBoundary(barWidth, barHeight, zSafe, feedRate) {
   }
 }
 
+async function traceJobBoundary(x0, y0, x1, y1, zSafe, feedRate) {
+  if (!port || !isConnected) {
+    return { success: false, error: 'Not connected to GRBL' };
+  }
+  if (printLock || currentJobId) {
+    return { success: false, error: 'Cannot trace while a job is printing' };
+  }
+
+  printLock = true;
+  try {
+    const gcodeLines = [
+      'G54',
+      'G21',
+      'G90',
+      `G0 Z${zSafe}`,
+      `G0 X${x0.toFixed(3)} Y${y0.toFixed(3)}`,
+      `G1 X${x1.toFixed(3)} Y${y0.toFixed(3)} F${feedRate}`,
+      `G1 X${x1.toFixed(3)} Y${y1.toFixed(3)}`,
+      `G1 X${x0.toFixed(3)} Y${y1.toFixed(3)}`,
+      `G1 X${x0.toFixed(3)} Y${y0.toFixed(3)}`,
+      `G0 Z${zSafe}`,
+      'G0 X0 Y0'
+    ];
+
+    await sendGcode(gcodeLines.join('\n'));
+
+    return {
+      success: true,
+      message: 'Job boundary trace complete',
+      boundary: { x0, y0, x1, y1 }
+    };
+  } catch (err) {
+    return { success: false, error: err.message };
+  } finally {
+    printLock = false;
+  }
+}
+
 // Emergency stop — sends GRBL soft reset (Ctrl-X / 0x18) to immediately halt all motion.
 // Clears the motion planner buffer, reverts the active job to Pending, and releases the print lock.
 // The machine must be re-homed after an emergency stop.
@@ -796,5 +834,6 @@ module.exports = {
   jogCancel,
   setWorkOffset,
   dryRunBoundary,
+  traceJobBoundary,
   queryPosition
 };

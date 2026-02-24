@@ -1177,8 +1177,10 @@
             <button class="btn btn-secondary btn-sm" onclick="doUnlock()" id="unlockBtn">Unlock ($X)</button>
             <button class="btn btn-success" onclick="doSetOrigin()" id="setOriginBtn">Set Origin (G54)</button>
             <button class="btn btn-secondary" onclick="doSetOriginRelative(-35.978, -33.420)" id="setOriginRelBtn">Quick Set Print Origin</button>
+            <button class="btn btn-secondary" onclick="doTraceJobArea()" id="traceJobBtn">Trace Print Area</button>
             <span id="homeStatus" style="color: rgba(255,255,255,0.6);"></span>
             <span id="originStatus" style="color: rgba(255,255,255,0.6);"></span>
+            <span id="traceJobStatus" style="color: rgba(255,255,255,0.6);"></span>
           </div>
         </div>
 
@@ -2183,6 +2185,30 @@
         showAlert('Set origin error: ' + err.message, 'error');
         status.textContent = 'Error';
       }
+    }
+
+    async function doTraceJobArea() {
+      const btn = document.getElementById('traceJobBtn');
+      const status = document.getElementById('traceJobStatus');
+      btn.disabled = true;
+      status.textContent = 'Tracing...';
+      try {
+        const response = await fetch(`${API}/calibrate/tracejob`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+          const b = data.boundary;
+          const label = data.jobId ? `Job #${data.jobId}` : 'bar boundary';
+          showAlert(`Print area traced (${label}): X ${b.x0.toFixed(1)}→${b.x1.toFixed(1)}, Y ${b.y0.toFixed(1)}→${b.y1.toFixed(1)}`, 'success');
+          status.textContent = data.jobId ? `Job #${data.jobId}` : 'Bar boundary';
+        } else {
+          showAlert('Trace failed: ' + data.error, 'error');
+          status.textContent = 'Failed';
+        }
+      } catch (err) {
+        showAlert('Trace error: ' + err.message, 'error');
+        status.textContent = 'Error';
+      }
+      btn.disabled = false;
     }
 
     function updateSpindleVisibility() {

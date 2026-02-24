@@ -4,6 +4,7 @@ const express = require('express');
 const database = require('./database');
 const configModule = require('./config');
 const engine = require('./engine');
+const { getFont } = require('./gcode');
 
 const router = express.Router();
 
@@ -1196,6 +1197,118 @@ router.post('/calibrate/dryrun', async (req, res) => {
     }
   } catch (err) {
     console.error('Error running dry run:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/calibrate/tracejob:
+ *   post:
+ *     summary: Trace print area of next pending job
+ *     description: Calculates the minimum bounding rectangle of the next pending job's text layout, adds 1mm padding on each side, and traces it at safe Z height.
+ *     tags: [Calibration]
+ *     responses:
+ *       200:
+ *         description: Trace complete
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 message: { type: string }
+ *                 jobId: { type: integer, nullable: true }
+ *                 boundary:
+ *                   type: object
+ *                   properties:
+ *                     x0: { type: number }
+ *                     y0: { type: number }
+ *                     x1: { type: number }
+ *                     y1: { type: number }
+ *       400:
+ *         description: Not connected or busy
+ */
+router.post('/calibrate/tracejob', async (req, res) => {
+  try {
+    const configData = await configModule.getConfig();
+
+    // Use the next pending job; fall back to an empty job if queue is empty
+    const job = (await database.getNextPendingJob()) || { message_1: '', message_2: '' };
+
+    const barWidth = configData.bar_width;
+    const barHeight = configData.bar_height;
+
+    const templateFont = getFont(configData.template_font);
+    const templateFontSize = configData.template_font_size;
+    const templateAlignment = configData.template_alignment;
+
+    const messageFont = getFont(configData.message_font);
+    const messageAlignment = configData.message_alignment;
+
+    const hasMessage1 = !!(job.message_1 && job.message_1.trim().length > 0);
+    const hasMessage2 = !!(job.message_2 && job.message_2.trim().length > 0);
+    const messageCount = (hasMessage1 ? 1 : 0) + (hasMessage2 ? 1 : 0);
+    const messageFontSize = messageCount <= 1
+      ? configData.message_font_size_1_line
+      : configData.message_font_size_2_lines;
+
+    const calcAlign = (w, bw, align) => {
+      if (align === 'left') return 0;
+      if (align === 'right') return bw - w;
+      return (bw - w) / 2;
+    };
+
+    let currentY = barHeight;
+    let xMin = Infinity, xMax = -Infinity;
+
+    const templateText = configData.template_text || '';
+    if (templateText.length > 0) {
+      const w = templateFont.getTextWidth(templateText, templateFontSize);
+      const bx = calcAlign(w, barWidth, templateAlignment);
+      currentY -= templateFontSize;
+      xMin = Math.min(xMin, bx);
+      xMax = Math.max(xMax, bx + w);
+      currentY -= configData.gap_template_to_message;
+    }
+
+    if (hasMessage1) {
+      const w = messageFont.getTextWidth(job.message_1, messageFontSize);
+      const bx = calcAlign(w, barWidth, messageAlignment);
+      currentY -= messageFontSize;
+      xMin = Math.min(xMin, bx);
+      xMax = Math.max(xMax, bx + w);
+      if (hasMessage2) currentY -= configData.gap_between_lines;
+    }
+
+    if (hasMessage2) {
+      const w = messageFont.getTextWidth(job.message_2, messageFontSize);
+      const bx = calcAlign(w, barWidth, messageAlignment);
+      currentY -= messageFontSize;
+      xMin = Math.min(xMin, bx);
+      xMax = Math.max(xMax, bx + w);
+    }
+
+    // Fall back to full bar if no text was measured
+    if (xMin === Infinity) {
+      xMin = 0; xMax = barWidth;
+      currentY = 0;
+    }
+
+    const PAD = 1;
+    const x0 = xMin - PAD;
+    const y0 = currentY - PAD;
+    const x1 = xMax + PAD;
+    const y1 = barHeight + PAD;
+
+    const result = await engine.traceJobBoundary(x0, y0, x1, y1, configData.z_safe_height, configData.feed_rate);
+    if (result.success) {
+      res.json({ ...result, jobId: job.id || null, boundary: { x0, y0, x1, y1 } });
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error('Error tracing job boundary:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
