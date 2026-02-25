@@ -145,7 +145,7 @@
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Crect fill='%231a5276' width='150' height='150' rx='20'/%3E%3Ctext x='75' y='85' text-anchor='middle' fill='white' font-size='60' font-family='Arial'%3ECNC%3C/text%3E%3C/svg%3E" alt="CNC Logo">
   </div>
   <div class="cover-info">
-    <p><strong>Version:</strong> 1.1</p>
+    <p><strong>Version:</strong> 1.2</p>
     <p><strong>Date:</strong> February 2026</p>
     <p><strong>Project:</strong> FactoryPiCNC / CNCChoco</p>
     <p><strong>Integration:</strong> SAP BTP via Cloud Connector</p>
@@ -318,6 +318,64 @@
     <td>PR-004</td>
     <td>USB Auto-detect</td>
     <td>Automatically scan for USB serial devices</td>
+    <td>High</td>
+  </tr>
+  <tr>
+    <td>PR-005</td>
+    <td>Emergency Stop</td>
+    <td>Immediate hardware halt via GRBL soft reset (Ctrl-X). Reverts active job to Pending. Machine must be re-homed before resuming.</td>
+    <td>Critical</td>
+  </tr>
+  <tr>
+    <td>PR-006</td>
+    <td>G-code Script Download</td>
+    <td>Generate and download the G-code script for any job as a plain-text file without sending to machine</td>
+    <td>Medium</td>
+  </tr>
+</table>
+
+<h3>2.2.4 Calibration Features</h3>
+<table>
+  <tr>
+    <th>Feature ID</th>
+    <th>Feature Name</th>
+    <th>Description</th>
+    <th>Priority</th>
+  </tr>
+  <tr>
+    <td>CAL-001</td>
+    <td>Machine Homing</td>
+    <td>Run $H homing cycle to find limit switches and establish machine zero</td>
+    <td>Critical</td>
+  </tr>
+  <tr>
+    <td>CAL-002</td>
+    <td>Jogging</td>
+    <td>Incrementally move the tool along X/Y/Z axes to position over the chocolate bar</td>
+    <td>High</td>
+  </tr>
+  <tr>
+    <td>CAL-003</td>
+    <td>Set Work Origin</td>
+    <td>Store current machine position as the G54 work coordinate origin (0,0,0)</td>
+    <td>Critical</td>
+  </tr>
+  <tr>
+    <td>CAL-004</td>
+    <td>Dry Run / Bar Trace</td>
+    <td>Trace the chocolate bar boundary rectangle at safe Z to verify calibration alignment</td>
+    <td>High</td>
+  </tr>
+  <tr>
+    <td>CAL-005</td>
+    <td>Job Trace</td>
+    <td>Trace the bounding rectangle of a specific job's text layout before engraving</td>
+    <td>Medium</td>
+  </tr>
+  <tr>
+    <td>CAL-006</td>
+    <td>Alarm Unlock</td>
+    <td>Send $X to clear GRBL alarm state after homing failure or emergency stop</td>
     <td>High</td>
   </tr>
 </table>
@@ -582,7 +640,10 @@ CNCChoco/
 <p>Triggers printing of the next pending job.</p>
 
 <h4>GET /api/print/:id</h4>
-<p>Triggers printing of a specific job.</p>
+<p>Triggers printing of a specific job by ID. Job must be in Pending status.</p>
+
+<h4>GET /api/script/:id</h4>
+<p>Generates and returns the full G-code script for a job as a plain-text file download (<code>Content-Disposition: attachment</code>). Does not send anything to the machine. Useful for inspecting or archiving G-code.</p>
 
 <h3>3.2.3 Configuration Endpoints</h3>
 
@@ -610,16 +671,58 @@ CNCChoco/
 <h3>3.2.5 CNC Control Endpoints</h3>
 
 <h4>GET /api/status</h4>
-<p>Gets CNC connection status and available devices.</p>
+<p>Gets CNC connection status and available devices. Response includes <code>connected</code>, <code>port</code>, <code>currentJobId</code>, <code>isCalibrated</code>, and <code>lastPosition</code>.</p>
 
 <h4>POST /api/connect</h4>
-<p>Connects to CNC device.</p>
+<p>Connects to a CNC device. Optionally accepts <code>{ "path": "/dev/ttyUSB0" }</code>; if omitted, auto-detects the first USB serial device. On successful connection, applies stored GRBL settings from the database.</p>
 
 <h4>POST /api/disconnect</h4>
-<p>Disconnects from CNC device.</p>
+<p>Disconnects from the currently connected CNC device.</p>
+
+<h4>POST /api/estop</h4>
+<p><strong>Emergency Stop.</strong> Sends the GRBL soft reset byte (0x18 / Ctrl-X), immediately halting all motion and clearing the motion planner buffer. Any job currently in <em>Printing</em> status is reverted to <em>Pending</em>. The machine must be re-homed before resuming normal operation.</p>
 
 <h4>POST /api/command</h4>
-<p>Sends raw G-code command.</p>
+<p>Sends a raw G-code command string to the GRBL controller and waits for an <code>ok</code> response.</p>
+<pre>{ "gcode": "G0 X10 Y10" }</pre>
+
+<h3>3.2.6 Calibration Endpoints</h3>
+
+<h4>POST /api/calibrate/home</h4>
+<p>Runs the GRBL <code>$H</code> homing cycle to find limit switches and establish machine zero. Takes up to 60 seconds. Returns final position.</p>
+
+<h4>POST /api/calibrate/unlock</h4>
+<p>Sends <code>$X</code> to clear the GRBL alarm state. Use after a homing failure or after an emergency stop before re-homing.</p>
+
+<h4>POST /api/calibrate/jog</h4>
+<p>Sends a GRBL jog command to move the tool incrementally.</p>
+<table>
+  <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+  <tr><td>axis</td><td>string</td><td>Yes</td><td>Axis to jog: X, Y, or Z</td></tr>
+  <tr><td>distance</td><td>number</td><td>Yes</td><td>Distance in mm (negative = opposite direction)</td></tr>
+  <tr><td>feedRate</td><td>number</td><td>No</td><td>mm/min override; defaults to <code>jog_feed_rate</code> config value</td></tr>
+</table>
+
+<h4>POST /api/calibrate/jog/cancel</h4>
+<p>Sends the GRBL real-time jog cancel byte (0x85) to immediately stop an active jog move.</p>
+
+<h4>POST /api/calibrate/moveto</h4>
+<p>Moves the tool to specific absolute work coordinates (G54). Omit any axis to leave it unchanged.</p>
+<pre>{ "x": 50, "y": 20, "z": 5, "feedRate": 500 }</pre>
+
+<h4>GET /api/calibrate/position</h4>
+<p>Sends a GRBL real-time status query (<code>?</code>) and returns the current machine position (MPos) and work position (WPos).</p>
+
+<h4>POST /api/calibrate/setorigin</h4>
+<p>Sets the current machine position as the G54 work coordinate origin (0,0,0) and stores the offset in GRBL EEPROM. Optional <code>xDelta</code> and <code>yDelta</code> shift the origin by a fixed amount (mm). Requires GRBL <code>$10=1</code> or <code>$10=2</code> for MPos reporting.</p>
+<pre>{ "xDelta": 0, "yDelta": 0 }</pre>
+
+<h4>POST /api/calibrate/dryrun</h4>
+<p>Traces the chocolate bar boundary rectangle at safe Z height using G54 coordinates. Used to verify that calibration is aligned before engraving. Optionally accepts <code>barWidth</code> and <code>barHeight</code> overrides.</p>
+
+<h4>POST /api/calibrate/tracejob</h4>
+<p>Calculates the minimum bounding rectangle of a job's text layout (with 1mm padding) and traces it at safe Z height. If <code>jobId</code> is omitted, uses the next pending job. Returns the traced boundary coordinates.</p>
+<pre>{ "jobId": 5 }</pre>
 
 <h2 id="tech-database">3.3 Database Schema</h2>
 
@@ -1455,9 +1558,16 @@ sudo systemctl start cnc-chocolate
   <tr><td>message_alignment</td><td>enum</td><td>"centered"</td><td>left or centered</td></tr>
   <tr><td>gap_template_to_message</td><td>number</td><td>5</td><td>Gap between template and messages (mm)</td></tr>
   <tr><td>gap_between_lines</td><td>number</td><td>3</td><td>Gap between message lines (mm)</td></tr>
-  <tr><td>z_safe_height</td><td>number</td><td>5</td><td>Z height for travel moves (mm)</td></tr>
-  <tr><td>z_engrave_depth</td><td>number</td><td>-0.5</td><td>Z depth for engraving (mm)</td></tr>
-  <tr><td>feed_rate</td><td>number</td><td>200</td><td>Engraving feed rate (mm/min)</td></tr>
+  <tr><td>z_safe_height</td><td>number</td><td>5</td><td>Z height for travel moves (mm, 0–50)</td></tr>
+  <tr><td>z_engrave_depth</td><td>number</td><td>-0.5</td><td>Z depth for engraving (mm, -10–0)</td></tr>
+  <tr><td>feed_rate</td><td>number</td><td>200</td><td>Engraving feed rate (mm/min, 10–2000)</td></tr>
+  <tr><td>jog_feed_rate</td><td>number</td><td>500</td><td>Jogging feed rate used by calibration moves (mm/min, 10–5000)</td></tr>
+  <tr><td>normalize_glyph_z</td><td>boolean</td><td>false</td><td>When true, overrides Z moves inside each glyph to use z_engrave_depth</td></tr>
+  <tr><td>normalize_glyph_feed</td><td>boolean</td><td>false</td><td>When true, overrides feed rates inside each glyph to use feed_rate</td></tr>
+  <tr><td>decimals</td><td>integer</td><td>3</td><td>Decimal places used for X/Y/Z values in G-code output (0–8)</td></tr>
+  <tr><td>use_g54_calibration</td><td>boolean</td><td>true</td><td>When true, printing uses G54 work coordinate offset set via calibration. When false, uses G92 origin reset.</td></tr>
+  <tr><td>spindle_enabled</td><td>boolean</td><td>false</td><td>When true, inserts M3/M5 spindle on/off commands around engraving moves</td></tr>
+  <tr><td>spindle_speed</td><td>number</td><td>500</td><td>Spindle speed S value used in M3 command (0–1000)</td></tr>
 </table>
 
 <h2>8.2 Error Codes</h2>
@@ -1481,14 +1591,21 @@ sudo systemctl start cnc-chocolate
     <th>Command</th>
     <th>Description</th>
   </tr>
-  <tr><td>G0</td><td>Rapid move (travel)</td></tr>
-  <tr><td>G1</td><td>Linear move (engraving)</td></tr>
+  <tr><td>G0</td><td>Rapid move (travel at max speed)</td></tr>
+  <tr><td>G1</td><td>Linear move (controlled feed rate, used for engraving)</td></tr>
   <tr><td>G21</td><td>Set units to millimeters</td></tr>
-  <tr><td>G90</td><td>Absolute positioning</td></tr>
-  <tr><td>G92</td><td>Set position (define origin)</td></tr>
+  <tr><td>G90</td><td>Absolute positioning mode</td></tr>
+  <tr><td>G54</td><td>Use work coordinate system 1 (set via calibration)</td></tr>
+  <tr><td>G92</td><td>Set position offset (legacy origin definition)</td></tr>
+  <tr><td>G10 L2 P1</td><td>Set G54 work coordinate offset in EEPROM</td></tr>
+  <tr><td>M3 S&lt;n&gt;</td><td>Spindle on at speed S (used when spindle_enabled = true)</td></tr>
+  <tr><td>M5</td><td>Spindle off</td></tr>
   <tr><td>M2</td><td>End program</td></tr>
-  <tr><td>$H</td><td>Home machine</td></tr>
-  <tr><td>?</td><td>Query status</td></tr>
+  <tr><td>$H</td><td>Run homing cycle (finds limit switches)</td></tr>
+  <tr><td>$X</td><td>Kill alarm lock (used after homing failure or e-stop)</td></tr>
+  <tr><td>?</td><td>Real-time status query (returns MPos, WPos, state)</td></tr>
+  <tr><td>0x18 (Ctrl-X)</td><td>Soft reset — immediately halts all motion and clears buffers</td></tr>
+  <tr><td>0x85</td><td>Jog cancel — stops an active jog move without full reset</td></tr>
 </table>
 
 <h2>8.4 Document History</h2>
@@ -1511,6 +1628,12 @@ sudo systemctl start cnc-chocolate
     <td>February 2026</td>
     <td>Claude</td>
     <td>Added SAP Fiori UI section, updated fonts (Calibri, Pristina, Logo), added calibration feature, enhanced file structure</td>
+  </tr>
+  <tr>
+    <td>1.2</td>
+    <td>February 2026</td>
+    <td>Claude</td>
+    <td>Added full Calibration API section (3.2.6), documented POST /api/estop and GET /api/script/:id, added 7 new config keys (jog_feed_rate, normalize_glyph_z, normalize_glyph_feed, decimals, use_g54_calibration, spindle_enabled, spindle_speed), expanded GRBL commands reference, added calibration feature list (CAL-001 to CAL-006)</td>
   </tr>
 </table>
 

@@ -507,6 +507,34 @@ router.get('/print/:id', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/script/{id}:
+ *   get:
+ *     summary: Download G-code script for a job
+ *     description: Generates and returns the full G-code script for a specific job as a plain-text file download. Does not send anything to the machine.
+ *     tags: [Print]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Job ID
+ *     responses:
+ *       200:
+ *         description: G-code script as plain text
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *       400:
+ *         description: Job not found or generation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 router.get('/script/:id', async (req, res) => {
   try {
     const jobId = parseInt(req.params.id);
@@ -1088,8 +1116,22 @@ router.get('/calibrate/position', async (req, res) => {
  * /api/calibrate/setorigin:
  *   post:
  *     summary: Set G54 work coordinate offset
- *     description: Sets the current machine position as the G54 work coordinate origin (0,0,0). Stores the offset in GRBL EEPROM. Requires GRBL $10=1 or $10=2 for MPos reporting.
+ *     description: Sets the current machine position as the G54 work coordinate origin (0,0,0). Stores the offset in GRBL EEPROM. Requires GRBL $10=1 or $10=2 for MPos reporting. Optional xDelta/yDelta shift the origin by a fixed amount (mm).
  *     tags: [Calibration]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               xDelta:
+ *                 type: number
+ *                 description: Shift origin by this amount in X (mm, default 0)
+ *                 example: 0
+ *               yDelta:
+ *                 type: number
+ *                 description: Shift origin by this amount in Y (mm, default 0)
+ *                 example: 0
  *     responses:
  *       200:
  *         description: Origin set successfully
@@ -1205,9 +1247,20 @@ router.post('/calibrate/dryrun', async (req, res) => {
  * @swagger
  * /api/calibrate/tracejob:
  *   post:
- *     summary: Trace print area of next pending job
- *     description: Calculates the minimum bounding rectangle of the next pending job's text layout, adds 1mm padding on each side, and traces it at safe Z height.
+ *     summary: Trace print area of a job
+ *     description: Calculates the minimum bounding rectangle of a job's text layout, adds 1mm padding on each side, and traces it at safe Z height. If no jobId is provided, uses the next pending job.
  *     tags: [Calibration]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               jobId:
+ *                 type: integer
+ *                 nullable: true
+ *                 description: Specific job ID to trace. Omit to use the next pending job.
+ *                 example: 5
  *     responses:
  *       200:
  *         description: Trace complete

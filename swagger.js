@@ -131,7 +131,14 @@ const options = {
             gap_between_lines: { type: 'number', description: 'Gap between message lines in mm', example: 3 },
             z_safe_height: { type: 'number', description: 'Z height for travel moves in mm', example: 5 },
             z_engrave_depth: { type: 'number', description: 'Z depth for engraving in mm (negative)', example: -0.5 },
-            feed_rate: { type: 'number', description: 'Engraving feed rate in mm/min', example: 200 }
+            feed_rate: { type: 'number', description: 'Engraving feed rate in mm/min', example: 200 },
+            jog_feed_rate: { type: 'number', description: 'Jogging feed rate in mm/min', example: 500 },
+            normalize_glyph_z: { type: 'boolean', description: 'Normalise Z moves inside each glyph to z_engrave_depth', example: false },
+            normalize_glyph_feed: { type: 'boolean', description: 'Normalise feed rate inside each glyph to feed_rate', example: false },
+            decimals: { type: 'integer', description: 'Decimal places used in G-code coordinate output', example: 3 },
+            use_g54_calibration: { type: 'boolean', description: 'Use G54 work coordinate offset for printing', example: true },
+            spindle_enabled: { type: 'boolean', description: 'Enable spindle (M3/M5) commands in G-code', example: false },
+            spindle_speed: { type: 'number', description: 'Spindle speed (S value) when spindle is enabled', example: 500 }
           }
         },
         UpdateConfigRequest: {
@@ -148,11 +155,18 @@ const options = {
             message_font_size_1_line: { type: 'number', minimum: 1, maximum: 50, description: 'Font size for single message' },
             message_font_size_2_lines: { type: 'number', minimum: 1, maximum: 50, description: 'Font size for two messages' },
             message_alignment: { type: 'string', enum: ['left', 'centered'], description: 'Message alignment' },
-            gap_template_to_message: { type: 'number', minimum: 0, maximum: 50, description: 'Gap template to messages' },
+            gap_template_to_message: { type: 'number', minimum: -20, maximum: 50, description: 'Gap template to messages' },
             gap_between_lines: { type: 'number', minimum: 0, maximum: 50, description: 'Gap between message lines' },
             z_safe_height: { type: 'number', minimum: 0, maximum: 50, description: 'Z safe height' },
             z_engrave_depth: { type: 'number', minimum: -10, maximum: 0, description: 'Z engrave depth' },
-            feed_rate: { type: 'number', minimum: 10, maximum: 2000, description: 'Feed rate' }
+            feed_rate: { type: 'number', minimum: 10, maximum: 2000, description: 'Feed rate' },
+            jog_feed_rate: { type: 'number', minimum: 10, maximum: 5000, description: 'Jogging feed rate' },
+            normalize_glyph_z: { type: 'boolean', description: 'Normalise Z moves inside each glyph' },
+            normalize_glyph_feed: { type: 'boolean', description: 'Normalise feed rate inside each glyph' },
+            decimals: { type: 'integer', minimum: 0, maximum: 8, description: 'Decimal places in G-code output' },
+            use_g54_calibration: { type: 'boolean', description: 'Use G54 work coordinate offset' },
+            spindle_enabled: { type: 'boolean', description: 'Enable spindle commands' },
+            spindle_speed: { type: 'number', minimum: 0, maximum: 1000, description: 'Spindle speed S value' }
           },
           example: {
             template_text: 'KPMG',
@@ -206,7 +220,13 @@ const options = {
           properties: {
             connected: { type: 'boolean', description: 'Whether CNC is connected', example: true },
             port: { type: 'string', nullable: true, description: 'Connected port path', example: '/dev/ttyUSB0' },
-            currentJobId: { type: 'integer', nullable: true, description: 'Currently printing job ID', example: null }
+            currentJobId: { type: 'integer', nullable: true, description: 'Currently printing job ID', example: null },
+            isCalibrated: { type: 'boolean', description: 'Whether G54 work offset has been set this session', example: false },
+            lastPosition: {
+              nullable: true,
+              description: 'Last known GRBL position report, or null if not yet queried',
+              allOf: [{ '$ref': '#/components/schemas/GrblPosition' }]
+            }
           }
         },
         ConnectRequest: {
