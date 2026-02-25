@@ -69,6 +69,8 @@ sap.ui.define([
                 z_safe_height: 5,
                 z_engrave_depth: -0.3,
                 feed_rate: 800,
+                spindle_enabled: "true",
+                spindle_speed: 500,
                 use_g54_calibration: "true",
                 jog_feed_rate: 1000
             }), "config");
@@ -80,17 +82,12 @@ sap.ui.define([
                 jogStep: "1",
                 homeStatus: "",
                 originStatus: "",
-                dryRunStatus: "",
                 moveToStatus: "",
                 gotoX: "",
                 gotoY: "",
                 gotoZ: "",
-                steps: {
-                    homed: false,
-                    jogged: false,
-                    originSet: false,
-                    verified: false
-                }
+                traceJobId: "",
+                traceStatus: ""
             }), "calibration");
 
             this.getRouter().initialize();

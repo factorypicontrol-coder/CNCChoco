@@ -120,6 +120,7 @@
                                     visible="{= ${view>/selectedCount} > 0}"
                                     class="sapUiSmallMarginEnd">
                                     <core:Item key="Pending" text="{i18n>statusPending}" />
+                                    <core:Item key="Completed" text="{i18n>statusCompleted}" />
                                     <core:Item key="Cancelled_by_Admin" text="{i18n>statusCancelledAdmin}" />
                                 </Select>
                                 <Button id="bulkApplyBtn"
@@ -369,6 +370,35 @@
                                 </Table>
                             </content>
                         </Panel>
+
+                        <!-- Charts 2x2 -->
+                        <l:Grid defaultSpan="XL6 L6 M12 S12" class="sapUiNoMargin">
+                            <Panel headerText="{i18n>statJobsByStatus}" expandable="false" class="sapUiSmallMarginBottom">
+                                <content>
+                                    <core:HTML id="statusChartHtml" sanitizeContent="false" preferDOM="true"
+                                        content="&lt;div style='padding:0.75rem;height:300px'&gt;&lt;canvas id='cncStatusChart'&gt;&lt;/canvas&gt;&lt;/div&gt;" />
+                                </content>
+                            </Panel>
+                            <Panel headerText="{i18n>statDailyActivity30}" expandable="false" class="sapUiSmallMarginBottom">
+                                <content>
+                                    <core:HTML id="dailyChartHtml" sanitizeContent="false" preferDOM="true"
+                                        content="&lt;div style='padding:0.75rem;height:300px'&gt;&lt;canvas id='cncDailyChart'&gt;&lt;/canvas&gt;&lt;/div&gt;" />
+                                </content>
+                            </Panel>
+                            <Panel headerText="{i18n>statCharsActivity30}" expandable="false" class="sapUiSmallMarginBottom">
+                                <content>
+                                    <core:HTML id="charsChartHtml" sanitizeContent="false" preferDOM="true"
+                                        content="&lt;div style='padding:0.75rem;height:300px'&gt;&lt;canvas id='cncCharsChart'&gt;&lt;/canvas&gt;&lt;/div&gt;" />
+                                </content>
+                            </Panel>
+                            <Panel headerText="{i18n>statCompletionRate}" expandable="false" class="sapUiSmallMarginBottom">
+                                <content>
+                                    <core:HTML id="completionChartHtml" sanitizeContent="false" preferDOM="true"
+                                        content="&lt;div style='padding:0.75rem;height:300px'&gt;&lt;canvas id='cncCompletionChart'&gt;&lt;/canvas&gt;&lt;/div&gt;" />
+                                </content>
+                            </Panel>
+                        </l:Grid>
+
                     </VBox>
                 </IconTabFilter>
 
@@ -503,6 +533,24 @@
                                 </content>
                             </Panel>
 
+                            <!-- ── Spindle ─────────────────────────────── -->
+                            <Panel headerText="{i18n>configSpindleSection}" expandable="false" class="cncCfgPanel">
+                                <content>
+                                    <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                                        labelSpanXL="6" labelSpanL="6" labelSpanM="6" labelSpanS="12"
+                                        emptySpanXL="0" emptySpanL="0" emptySpanM="0"
+                                        columnsXL="1" columnsL="1" columnsM="1">
+                                        <Label text="{i18n>configSpindleEnabled}" />
+                                        <Select selectedKey="{config>/spindle_enabled}">
+                                            <core:Item key="true" text="{i18n>configSpindleOn}" />
+                                            <core:Item key="false" text="{i18n>configSpindleOff}" />
+                                        </Select>
+                                        <Label text="{i18n>configSpindleSpeed}" />
+                                        <StepInput value="{config>/spindle_speed}" min="0" max="1000" step="10" />
+                                    </form:SimpleForm>
+                                </content>
+                            </Panel>
+
                         </l:Grid>
 
                         <Toolbar>
@@ -522,54 +570,6 @@
                     icon="sap-icon://target-group">
 
                     <VBox class="sapUiContentPadding cncCalibrationTab">
-
-                            <!-- How to use (collapsible, full width) -->
-                            <Panel id="calHelpPanel"
-                                headerText="{i18n>calHowToUse}"
-                                expandable="true"
-                                expanded="false"
-                                class="sapUiSmallMarginBottom">
-                                <content>
-                                    <VBox class="sapUiSmallMargin">
-                                        <Text text="{i18n>calHelpText}" wrapping="true" class="sapUiSmallMarginBottom" />
-                                        <Title text="{i18n>calHelpInitialSetup}" level="H5" class="sapUiTinyMarginBottom" />
-                                        <Text text="{i18n>calHelpInitialSteps}" wrapping="true" class="sapUiSmallMarginBottom" />
-                                        <Title text="{i18n>calHelpEachSession}" level="H5" class="sapUiTinyMarginBottom" />
-                                        <Text text="{i18n>calHelpSessionSteps}" wrapping="true" />
-                                    </VBox>
-                                </content>
-                            </Panel>
-
-                            <!-- Step Progress (full width) -->
-                            <Panel headerText="{i18n>calProgress}" expandable="false" class="sapUiSmallMarginBottom">
-                                <content>
-                                    <HBox wrap="Wrap" class="sapUiSmallMargin" alignItems="Center">
-                                        <ObjectStatus
-                                            class="sapUiSmallMarginEnd cncCalStep"
-                                            title="{i18n>calStep1Label}"
-                                            text="{= ${calibration>/steps/homed} ? '✓' : '…'}"
-                                            state="{= ${calibration>/steps/homed} ? 'Success' : 'None'}" />
-                                        <core:Icon src="sap-icon://arrow-right" class="sapUiSmallMarginEnd" />
-                                        <ObjectStatus
-                                            class="sapUiSmallMarginEnd cncCalStep"
-                                            title="{i18n>calStep2Label}"
-                                            text="{= ${calibration>/steps/jogged} ? '✓' : '…'}"
-                                            state="{= ${calibration>/steps/jogged} ? 'Success' : 'None'}" />
-                                        <core:Icon src="sap-icon://arrow-right" class="sapUiSmallMarginEnd" />
-                                        <ObjectStatus
-                                            class="sapUiSmallMarginEnd cncCalStep"
-                                            title="{i18n>calStep3Label}"
-                                            text="{= ${calibration>/steps/originSet} ? '✓' : '…'}"
-                                            state="{= ${calibration>/steps/originSet} ? 'Success' : 'None'}" />
-                                        <core:Icon src="sap-icon://arrow-right" class="sapUiSmallMarginEnd" />
-                                        <ObjectStatus
-                                            class="cncCalStep"
-                                            title="{i18n>calStep4Label}"
-                                            text="{= ${calibration>/steps/verified} ? '✓' : '…'}"
-                                            state="{= ${calibration>/steps/verified} ? 'Success' : 'None'}" />
-                                    </HBox>
-                                </content>
-                            </Panel>
 
                             <!-- Two-column body: left = controls, right = jog pad -->
                             <l:Grid defaultSpan="XL6 L6 M12 S12" class="sapUiNoMargin">
@@ -641,26 +641,14 @@
                                                         type="Success"
                                                         icon="sap-icon://map"
                                                         press=".onSetOrigin" />
+                                                    <Button id="setOriginRelBtn"
+                                                        text="{i18n>calQuickSetOriginBtn}"
+                                                        type="Default"
+                                                        icon="sap-icon://locate-me"
+                                                        press=".onSetOriginRelative"
+                                                        class="sapUiSmallMarginBegin" />
                                                     <Text id="originStatus"
                                                         text="{calibration>/originStatus}"
-                                                        class="sapUiSmallMarginBegin" />
-                                                </HBox>
-                                            </VBox>
-                                        </content>
-                                    </Panel>
-
-                                    <!-- Step 4: Verify Alignment -->
-                                    <Panel headerText="{i18n>calStep4}" expandable="false" class="sapUiSmallMarginBottom">
-                                        <content>
-                                            <VBox class="sapUiSmallMargin">
-                                                <HBox alignItems="Center" wrap="Wrap">
-                                                    <Button id="dryRunBtn"
-                                                        text="{i18n>calDryRunBtn}"
-                                                        type="Default"
-                                                        icon="sap-icon://border"
-                                                        press=".onDryRun" />
-                                                    <Text id="dryRunStatus"
-                                                        text="{calibration>/dryRunStatus}"
                                                         class="sapUiSmallMarginBegin" />
                                                 </HBox>
                                             </VBox>
@@ -738,7 +726,54 @@
                                 </VBox>
 
                             </l:Grid>
+
+                            <!-- Trace Print Area (full width) -->
+                            <Panel headerText="{i18n>calTracePrintArea}" expandable="false" class="sapUiSmallMarginBottom">
+                                <content>
+                                    <VBox class="sapUiSmallMargin">
+                                        <Text text="{i18n>calTracePrintAreaDesc}" wrapping="true" class="sapUiSmallMarginBottom" />
+                                        <HBox alignItems="Center" wrap="Wrap">
+                                            <Label text="{i18n>calTraceJobId}" class="sapUiSmallMarginEnd" />
+                                            <Input id="traceJobIdInput"
+                                                value="{calibration>/traceJobId}"
+                                                width="8rem"
+                                                placeholder="next pending"
+                                                class="sapUiSmallMarginEnd" />
+                                            <Button id="traceJobBtn"
+                                                text="{i18n>calTraceBtn}"
+                                                type="Default"
+                                                icon="sap-icon://map"
+                                                press=".onTraceJobArea"
+                                                class="sapUiSmallMarginEnd" />
+                                            <Text text="{calibration>/traceStatus}" />
+                                        </HBox>
+                                    </VBox>
+                                </content>
+                            </Panel>
+
                     </VBox>
+                </IconTabFilter>
+
+                <!-- ═══════════════════════════════════════════════════════
+                     API DOCS TAB
+                ═══════════════════════════════════════════════════════ -->
+                <IconTabFilter id="tabApiDocs"
+                    key="ApiDocs"
+                    text="{i18n>navApiDocs}"
+                    icon="sap-icon://developer-settings">
+                    <core:HTML id="apiDocsHtml" sanitizeContent="false"
+                        content="&lt;iframe src='/api-docs' style='width:100%;height:calc(100vh - 160px);border:none;display:block'&gt;&lt;/iframe&gt;" />
+                </IconTabFilter>
+
+                <!-- ═══════════════════════════════════════════════════════
+                     SPEC TAB
+                ═══════════════════════════════════════════════════════ -->
+                <IconTabFilter id="tabSpec"
+                    key="Spec"
+                    text="{i18n>navSpec}"
+                    icon="sap-icon://document">
+                    <core:HTML id="specHtml" sanitizeContent="false"
+                        content="&lt;iframe src='/docs/CNC_Chocolate_Engraver_Specification.html' style='width:100%;height:calc(100vh - 160px);border:none;display:block;background:#fff'&gt;&lt;/iframe&gt;" />
                 </IconTabFilter>
 
             </items>

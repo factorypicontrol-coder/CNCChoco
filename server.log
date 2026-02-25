@@ -5844,3 +5844,731 @@ Error querying position: Error: Not connected to GRBL
     at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
     at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
 No USB serial devices found
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+Error querying position: Error: Not connected to GRBL
+    at /home/cnccomputer/CNCChoco/engine.js:528:14
+    at new Promise (<anonymous>)
+    at Object.queryPosition (/home/cnccomputer/CNCChoco/engine.js:526:10)
+    at /home/cnccomputer/CNCChoco/api.js:1078:35
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at next (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/cnccomputer/CNCChoco/node_modules/router/lib/route.js:117:3)
+    at handle (/home/cnccomputer/CNCChoco/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/cnccomputer/CNCChoco/node_modules/router/lib/layer.js:152:17)
+    at /home/cnccomputer/CNCChoco/node_modules/router/index.js:295:15
+
+Shutting down...

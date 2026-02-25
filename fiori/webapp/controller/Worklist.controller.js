@@ -32,6 +32,9 @@ sap.ui.define([
             if (this._pollTimer) { clearInterval(this._pollTimer); }
             if (this._connTimer) { clearInterval(this._connTimer); }
             this._stopPositionPolling();
+            ["_chartStatus", "_chartDaily", "_chartChars", "_chartCompletion"].forEach(function (sKey) {
+                if (this[sKey]) { this[sKey].destroy(); this[sKey] = null; }
+            }.bind(this));
         },
 
         // ═══════════════════════════════════════════════════════════════
@@ -49,7 +52,7 @@ sap.ui.define([
             } else if (sKey === "Calibration") {
                 this._startPositionPolling();
             } else {
-                // Queue or anything else
+                // Queue, ApiDocs, Spec, or anything else
                 this._stopPositionPolling();
             }
         },
@@ -440,11 +443,116 @@ sap.ui.define([
                             statusCounts: data.statusCounts || {},
                             dailyStats: (data.dailyStats || []).slice().reverse()
                         });
+                        setTimeout(this._renderCharts.bind(this, data), 50);
                     }
                 }.bind(this))
                 .catch(function () {
                     MessageToast.show(this._getText("statsLoadError"));
                 }.bind(this));
+        },
+
+        _renderCharts: function (data) {
+            if (typeof Chart === "undefined") { return; }
+
+            var counts = data.statusCounts || {};
+            var totals = data.totals || {};
+            var daily = (data.dailyStats || []).slice().reverse();
+
+            // Jobs by Status — doughnut
+            var oStatusCanvas = document.getElementById("cncStatusChart");
+            if (oStatusCanvas) {
+                if (this._chartStatus) { this._chartStatus.destroy(); }
+                this._chartStatus = new Chart(oStatusCanvas, {
+                    type: "doughnut",
+                    data: {
+                        labels: ["Pending", "Printing", "Completed", "Cancelled"],
+                        datasets: [{
+                            data: [
+                                counts.Pending || 0,
+                                counts.Printing || 0,
+                                counts.Completed || 0,
+                                (counts.Cancelled_by_User || 0) + (counts.Cancelled_by_Admin || 0)
+                            ],
+                            backgroundColor: ["#f59e0b", "#3b82f6", "#10b981", "#ef4444"],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+                });
+            }
+
+            // Daily Activity — line
+            var oDailyCanvas = document.getElementById("cncDailyChart");
+            if (oDailyCanvas) {
+                if (this._chartDaily) { this._chartDaily.destroy(); }
+                this._chartDaily = new Chart(oDailyCanvas, {
+                    type: "line",
+                    data: {
+                        labels: daily.map(function (d) { return d.date; }),
+                        datasets: [
+                            {
+                                label: "Created",
+                                data: daily.map(function (d) { return d.jobs_created || 0; }),
+                                borderColor: "#667eea",
+                                backgroundColor: "rgba(102,126,234,0.1)",
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: "Completed",
+                                data: daily.map(function (d) { return d.jobs_completed || 0; }),
+                                borderColor: "#10b981",
+                                backgroundColor: "rgba(16,185,129,0.1)",
+                                fill: true,
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // Characters Printed — bar
+            var oCharsCanvas = document.getElementById("cncCharsChart");
+            if (oCharsCanvas) {
+                if (this._chartChars) { this._chartChars.destroy(); }
+                this._chartChars = new Chart(oCharsCanvas, {
+                    type: "bar",
+                    data: {
+                        labels: daily.map(function (d) { return d.date; }),
+                        datasets: [{
+                            label: "Characters",
+                            data: daily.map(function (d) { return d.chars_printed || 0; }),
+                            backgroundColor: "rgba(233,69,96,0.6)",
+                            borderColor: "#e94560",
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // Completion Rate — pie
+            var oCompletionCanvas = document.getElementById("cncCompletionChart");
+            if (oCompletionCanvas) {
+                if (this._chartCompletion) { this._chartCompletion.destroy(); }
+                this._chartCompletion = new Chart(oCompletionCanvas, {
+                    type: "pie",
+                    data: {
+                        labels: ["Completed", "Cancelled", "In Progress"],
+                        datasets: [{
+                            data: [
+                                totals.total_jobs_completed || 0,
+                                totals.total_jobs_cancelled || 0,
+                                (counts.Pending || 0) + (counts.Printing || 0)
+                            ],
+                            backgroundColor: ["#10b981", "#ef4444", "#f59e0b"],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+                });
+            }
         },
 
         // ═══════════════════════════════════════════════════════════════
@@ -458,8 +566,10 @@ sap.ui.define([
                 .then(function (data) {
                     if (data.success && data.config) {
                         var oConfig = data.config;
-                        // Ensure use_g54_calibration is a string for Select binding
+                        // Ensure boolean-as-string fields work with Select binding
                         oConfig.use_g54_calibration = String(oConfig.use_g54_calibration);
+                        oConfig.spindle_enabled = String(oConfig.spindle_enabled !== undefined ? oConfig.spindle_enabled : true);
+                        if (oConfig.spindle_speed === undefined) { oConfig.spindle_speed = 500; }
                         oConfigModel.setData(oConfig);
                     }
                 }.bind(this))
@@ -553,7 +663,6 @@ sap.ui.define([
                     if (data.success) {
                         MessageToast.show(this._getText("calHomeSuccess"));
                         oCalModel.setProperty("/homeStatus", this._getText("calComplete"));
-                        oCalModel.setProperty("/steps/homed", true);
                     } else {
                         MessageBox.error(this._getText("calHomeFailed") + ": " + data.error);
                         oCalModel.setProperty("/homeStatus", this._getText("calFailed"));
@@ -598,9 +707,7 @@ sap.ui.define([
             })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
-                    if (data.success) {
-                        oCalModel.setProperty("/steps/jogged", true);
-                    } else {
+                    if (!data.success) {
                         MessageToast.show(this._getText("calJogFailed") + ": " + data.error);
                     }
                 }.bind(this))
@@ -702,6 +809,34 @@ sap.ui.define([
                         var sPos = "(" + (mp.x || 0).toFixed(3) + ", " + (mp.y || 0).toFixed(3) + ", " + (mp.z || 0).toFixed(3) + ")";
                         MessageToast.show(this._getText("calOriginSet"));
                         oCalModel.setProperty("/originStatus", this._getText("calOriginAt") + " " + sPos);
+                    } else {
+                        MessageBox.error(this._getText("calOriginFailed") + ": " + data.error);
+                        oCalModel.setProperty("/originStatus", this._getText("calFailed"));
+                    }
+                }.bind(this))
+                .catch(function () {
+                    oCalModel.setProperty("/originStatus", this._getText("calError"));
+                }.bind(this));
+        },
+
+        onSetOriginRelative: function () {
+            var oCalModel = this.getOwnerComponent().getModel("calibration");
+            var xDelta = -35.978;
+            var yDelta = -33.420;
+
+            fetch(API_BASE + "/calibrate/setorigin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ xDelta: xDelta, yDelta: yDelta })
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        var mp = data.machinePosition || {};
+                        MessageToast.show(this._getText("calOriginSet"));
+                        oCalModel.setProperty("/originStatus",
+                            "Quick set (X" + xDelta + ", Y" + yDelta + ") — MPos (" +
+                            (mp.x || 0).toFixed(3) + ", " + (mp.y || 0).toFixed(3) + ", " + (mp.z || 0).toFixed(3) + ")");
                         oCalModel.setProperty("/steps/originSet", true);
                     } else {
                         MessageBox.error(this._getText("calOriginFailed") + ": " + data.error);
@@ -713,28 +848,37 @@ sap.ui.define([
                 }.bind(this));
         },
 
-        onDryRun: function () {
+        onTraceJobArea: function () {
             var oCalModel = this.getOwnerComponent().getModel("calibration");
-            var oBtn = this.byId("dryRunBtn");
-            oBtn.setEnabled(false);
-            oCalModel.setProperty("/dryRunStatus", this._getText("calRunning"));
+            var oBtn = this.byId("traceJobBtn");
+            var sJobId = oCalModel.getProperty("/traceJobId");
+            var oBody = {};
+            if (sJobId !== "") { oBody.jobId = parseInt(sJobId, 10); }
 
-            fetch(API_BASE + "/calibrate/dryrun", { method: "POST" })
+            oBtn.setEnabled(false);
+            oCalModel.setProperty("/traceStatus", this._getText("calTracing"));
+
+            fetch(API_BASE + "/calibrate/tracejob", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(oBody)
+            })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
                     if (data.success) {
                         var b = data.boundary || {};
-                        MessageToast.show(this._getText("calDryRunSuccess"));
-                        oCalModel.setProperty("/dryRunStatus",
-                            this._getText("calComplete") + " (" + b.width + "x" + b.height + "mm)");
-                        oCalModel.setProperty("/steps/verified", true);
+                        var sLabel = data.jobId ? "Job #" + data.jobId : "Next pending";
+                        MessageToast.show(this._getText("calTraceSuccess"));
+                        oCalModel.setProperty("/traceStatus",
+                            sLabel + " — X " + (b.x0 || 0).toFixed(1) + "→" + (b.x1 || 0).toFixed(1) +
+                            ", Y " + (b.y0 || 0).toFixed(1) + "→" + (b.y1 || 0).toFixed(1));
                     } else {
-                        MessageBox.error(this._getText("calDryRunFailed") + ": " + data.error);
-                        oCalModel.setProperty("/dryRunStatus", this._getText("calFailed"));
+                        MessageBox.error(this._getText("calTraceFailed") + ": " + data.error);
+                        oCalModel.setProperty("/traceStatus", this._getText("calFailed"));
                     }
                 }.bind(this))
                 .catch(function () {
-                    oCalModel.setProperty("/dryRunStatus", this._getText("calError"));
+                    oCalModel.setProperty("/traceStatus", this._getText("calError"));
                 }.bind(this))
                 .finally(function () {
                     oBtn.setEnabled(true);
