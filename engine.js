@@ -24,8 +24,7 @@ async function scanForDevice() {
     // Look for USB serial devices
     const usbPorts = ports.filter(p =>
       (p.path && p.path.includes('ttyUSB')) ||
-      (p.path && p.path.includes('ttyACM')) ||
-      (p.path && p.vendorId && p.productId)
+      (p.path && p.path.includes('ttyACM'))
     );
 
     if (usbPorts.length > 0) {
@@ -804,8 +803,7 @@ async function listDevices() {
     const ports = await SerialPort.list();
     return ports.filter(p =>
       (p.path && p.path.includes('ttyUSB')) ||
-      (p.path && p.path.includes('ttyACM')) ||
-      (p.path && p.vendorId && p.productId)
+      (p.path && p.path.includes('ttyACM'))
     );
   } catch (err) {
     console.error('Error listing devices:', err);
