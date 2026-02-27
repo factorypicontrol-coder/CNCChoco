@@ -450,18 +450,11 @@ router.put('/updatejobs/:id', async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/print', async (req, res) => {
-  try {
-    const result = await engine.printNext();
-    if (result.success) {
-      res.json(result);
-    } else {
-      res.status(400).json(result);
-    }
-  } catch (err) {
-    console.error('Error printing:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
+router.get('/print', (req, res) => {
+  res.json({ success: true, message: 'Print Request Received' });
+  engine.printNext().then(result => {
+    if (!result.success) console.warn('Print next failed:', result.error);
+  }).catch(err => console.error('Error printing:', err));
 });
 
 /**
@@ -492,19 +485,12 @@ router.get('/print', async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/print/:id', async (req, res) => {
-  try {
-    const jobId = parseInt(req.params.id);
-    const result = await engine.printJob(jobId);
-    if (result.success) {
-      res.json(result);
-    } else {
-      res.status(400).json(result);
-    }
-  } catch (err) {
-    console.error('Error printing job:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
+router.get('/print/:id', (req, res) => {
+  const jobId = parseInt(req.params.id);
+  res.json({ success: true, message: 'Print Request Received' });
+  engine.printJob(jobId).then(result => {
+    if (!result.success) console.warn(`Print job ${jobId} failed:`, result.error);
+  }).catch(err => console.error(`Error printing job ${jobId}:`, err));
 });
 
 /**
