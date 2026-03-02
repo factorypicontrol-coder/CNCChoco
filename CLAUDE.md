@@ -1,167 +1,113 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working in this repository.
+Technical reference (stack, file structure, API endpoints, config keys): [@ARCHITECTURE.md](./ARCHITECTURE.md)
+
+---
 
 ## Project Overview
 
-CNC Chocolate Engraver - A Node.js/Express server for engraving personalized messages on chocolate bars via a GRBL-controlled CNC router. Features a job queue system, web-based management interface, statistics dashboard, and configurable text templates. Designed for integration with SAP BTP via SAP Cloud Connector.
+CNC Chocolate Engraver — a Node.js/Express server that drives a GRBL-controlled CNC router to engrave personalised messages on chocolate bars. Features a job queue, web-based management interface, statistics dashboard, and configurable text templates.
+
+### Purpose
+
+The project serves two overlapping goals:
+
+**1. Conference and event demo piece**
+A tangible, end-to-end demonstration of a combined hardware/software stack for use at conferences and marketing events. Visitors submit a personalised message, watch it engraved in real time, and leave with the chocolate. The experience is designed to be immediately understandable and memorable — the hardware makes the software visible.
+
+**2. SAP technology showcase**
+The team's core practice is SAP. The project is intentionally built to incorporate SAP tooling — currently SAP BTP and SAP Cloud Connector — and should be treated as a platform for demonstrating SAP capabilities in a tangible context. When evaluating new features or architectural changes, consider whether there is a natural opportunity to bring in additional SAP stack components (e.g. SAP Integration Suite, SAP Build, CAP, SAP Event Mesh). These opportunities should be surfaced and discussed rather than defaulted away from.
+
+### Design Constraints
+
+- The system runs on-premise (local machine at an event booth), not as a hosted cloud service.
+- Reliability and recoverability matter more than scalability — a crashed machine at a live event is a visible failure.
+- The UI must be operable by non-technical staff running the booth.
 
 ## Commands
 
 ```bash
-npm install              # Install dependencies (including sqlite3)
-npm start               # Run the main server (cncserver.js)
-npm run server:old      # Run the legacy test server (server.js)
+npm install     # Install dependencies (including sqlite3)
+npm start       # Run the main server (cncserver.js)
 ```
 
-## Architecture
+---
 
-### File Structure
+## Working Guidelines
 
-**Backend:**
+### Development Workflow
 
-| File | Purpose |
-|------|---------|
-| `cncserver.js` | Main entry point - Express server setup, initialization |
-| `api.js` | REST API endpoints for jobs, config, stats, CNC control, and calibration |
-| `database.js` | SQLite operations for jobs, config, and statistics storage (WAL mode) |
-| `config.js` | Configuration management with validation and typed defaults |
-| `engine.js` | Job queue processing, serial communication, USB scanning, jog/home/trace |
-| `gcode.js` | G-code generation from text using fonts |
-| `swagger.js` | OpenAPI/Swagger spec definition |
-| `server.js` | Legacy test server (original GRBL skeleton) |
+**Every change follows this four-step cycle — in order, without skipping steps:**
 
-**Fonts:**
+```
+1. Document  →  2. Build  →  3. Test  →  4. Verify
+```
 
-| File | Purpose |
-|------|---------|
-| `fontHershey.js` | Hershey single-stroke font paths |
-| `fontBlock.js` | Block geometric font paths |
-| `fontScript.js` | Script cursive font paths |
-| `fontPristina.js` | Pristina TrueType-derived stroke font |
-| `fontCalibri.js` | Calibri TrueType-derived stroke font |
-| `fontLogo.js` | Custom logo/brand font |
-| `gcodeconverter.js` | Utility for converting font data |
+| Step | What it means |
+|------|--------------|
+| **1. Document** | Write or update the relevant documentation *before* writing any code. If the change isn't reflected in the spec, API docs, README, or ARCHITECTURE.md, it isn't ready to build. |
+| **2. Build** | Code to match exactly what was documented. The documentation is the contract — not the other way around. |
+| **3. Test** | Verify the code works and matches the documentation. Test unhappy paths, not just the happy path. |
+| **4. Verify** | Confirm the documentation still accurately reflects the final implementation. Correct any drift before closing the work. |
 
-**Frontend:**
+> Code that precedes documentation accumulates ambiguity and debt. Steps 1 and 4 are not optional.
 
-| Path | Purpose |
-|------|---------|
-| `public/index.html` | Standalone dark-theme web UI (queue, stats, config, calibration, API docs) |
-| `fiori/webapp/` | SAP Fiori UI5 app (production interface) |
-| `fiori/webapp/view/Worklist.view.xml` | Single-view app — all tabs in one IconTabBar |
-| `fiori/webapp/controller/Worklist.controller.js` | All UI logic |
-| `fiori/webapp/Component.js` | Model initialization (queue, cnc, view, stats, config, calibration) |
-| `fiori/webapp/model/formatter.js` | Value formatters for UI binding |
-| `fiori/webapp/fragment/JobDetailDialog.fragment.xml` | Job edit dialog |
-| `fiori/webapp/fragment/JobViewDialog.fragment.xml` | Job view dialog |
-| `fiori/webapp/css/style.css` | Custom SAP UI5 overrides |
-| `fiori/webapp/i18n/i18n.properties` | All UI text strings |
+---
 
-**Docs:**
+### Root Cause
 
-| Path | Purpose |
-|------|---------|
-| `docs/CNC_Chocolate_Engraver_Specification.html` | Full product specification |
-| `docs/architecture.drawio` | Architecture diagram |
+- Never apply quick fixes, patches, or workarounds unless the user explicitly requests one.
+- Always diagnose to the root cause before proposing a solution.
+- Fix hacky code immediately, or create a tracked issue with a deadline — "fix later" never happens.
+- Don't skip fundamentals or best practices just because the code compiles and runs.
 
-### Data Flow
+---
 
-1. Web UI / SAP BTP → API endpoints (`/api/*`)
-2. Jobs stored in SQLite (`cncchoco.db`, WAL mode)
-3. Statistics tracked on job creation, completion, and cancellation
-4. Print triggered → Engine fetches pending job → G-code generated → Serial output
-5. Job marked complete after GRBL finishes (polling completion signal)
+### Security & Secrets
 
-### API Endpoints
+- Never hardcode secrets or credentials — use environment variables.
+- Validate all input server-side — never trust client data.
+- Set CORS to specific allowed origins — never `*`.
+- Rate limit write operations (guiding principle for this deployment context).
 
-**Jobs:**
-- `POST /api/createjob` - Create new job with form data
-- `GET /api/getqueue?status=Pending` - Get jobs (optional status filter)
-- `GET /api/getjob/:id` - Get single job
-- `PATCH /api/updatejobs/:id` - Update job attributes
-- `PUT /api/updatejobs/:id` - Replace job attributes
-- `PATCH /api/updatejobs/bulk` - Bulk update job statuses
-- `GET /api/print` - Trigger print of next pending job
-- `GET /api/print/:id` - Print a specific job by ID
-- `GET /api/script/:id` - Get generated G-code script for a job
+---
 
-**Config:**
-- `GET /api/getConfig` - Get all configuration
-- `PATCH /api/updateConfig` - Update one or more config values
+### Architecture & Code Quality
 
-**Statistics:**
-- `GET /api/stats` - Get all statistics (totals, daily, status counts)
-- `GET /api/queue/live` - Get live queue data for real-time updates
+- Design architecture before building, if potential conflicts occur with the stated intent of the project, consult the user for further clarification
+- Architectural changes require manual review before implementation. Present options starting with the fuller/more complex approach, then walk through with the user which areas can be simplified and what the downstream effects of each decision are.
+- Break up large controllers/components early — don't wait for them to become unmanageable.
+- Wrap external service calls (serial port, SQLite, GRBL) in a clean service layer.
+- Version database schema changes through migration scripts.
+- Use real feature flags, not commented-out code.
 
-**CNC:**
-- `GET /api/status` - Connection status and available devices
-- `POST /api/connect` - Connect to CNC
-- `POST /api/disconnect` - Disconnect from CNC
-- `POST /api/estop` - **Emergency stop** — sends GRBL soft reset (Ctrl-X/0x18), halts all motion immediately, reverts active job to Pending. Machine must be re-homed after use.
-- `POST /api/command` - Send raw G-code
+---
 
-**Calibration:**
-- `POST /api/calibrate/home` - Home the machine (G28)
-- `POST /api/calibrate/unlock` - Send GRBL unlock ($X)
-- `POST /api/calibrate/jog` - Jog by axis/distance/feed
-- `POST /api/calibrate/jog/cancel` - Cancel active jog (0x85)
-- `POST /api/calibrate/moveto` - Move to absolute position
-- `GET /api/calibrate/position` - Get current machine position
-- `POST /api/calibrate/setorigin` - Set G54 work coordinate origin (optional xDelta/yDelta shift)
-- `POST /api/calibrate/dryrun` - Trace bar boundary at safe Z (verify alignment)
-- `POST /api/calibrate/tracejob` - Trace bounding box of a job's text layout at safe Z
+### Observability
 
-### Job Status Values
+- Log all errors persistently to `server.log` — not just to the console.
+- Every service exposes a `/health` endpoint for uptime monitoring and SAP Cloud Connector verification.
 
-`Pending`, `Printing`, `Completed`, `Cancelled_by_User`, `Cancelled_by_Admin`
+---
 
-### Configuration Keys
+### Documentation
 
-Template: `template_text`, `template_font`, `template_font_size`, `template_alignment`
-Bar: `bar_width`, `bar_height`
-Message: `message_font`, `message_font_size_1_line`, `message_font_size_2_lines`, `message_alignment`
-Spacing: `gap_template_to_message`, `gap_between_lines`
-CNC: `z_safe_height`, `z_engrave_depth`, `feed_rate`, `jog_feed_rate`
-G-code: `normalize_glyph_z`, `normalize_glyph_feed`, `decimals`, `use_g54_calibration`
-Spindle: `spindle_enabled`, `spindle_speed`
+- Update documentation as part of the same logical change — not after the fact, especially for larger changes.
+- Keep `README.md`, `ARCHITECTURE.md`, `swagger.js`, and `docs/CNC_Chocolate_Engraver_Specification.html` in sync with each other and with the running code.
+- Document how to run, build, and deploy the project.
 
-### Statistics Tracked
+---
 
-- `total_jobs_created`, `total_jobs_completed`, `total_jobs_cancelled`
-- `total_lines_printed`, `total_chars_printed`
-- Daily stats: `jobs_created`, `jobs_completed`, `jobs_cancelled`, `lines_printed`, `chars_printed`
+### Testing & Resilience
 
-### Fonts
+- Test framework to be selected when the first tests are written — document the intent now.
+- Test unhappy paths: network failures, unexpected API responses, malformed G-code, lost serial connection, concurrent print requests.
+- Don't assume the happy path is sufficient.
 
-Six fonts available: `hershey` (classic CNC single-stroke), `block` (geometric), `script` (cursive stroke), `pristina` (TrueType-derived), `calibri` (TrueType-derived), `logo` (custom brand)
+---
 
-## Web UI Features
+### Time Handling
 
-Both `public/index.html` and the Fiori app provide:
-- **Queue Tab**: Live-updating job list with bulk selection, status filtering, per-job print/view/edit buttons
-- **Statistics Tab**: Real-time charts (Chart.js) — job status distribution, daily activity, character counts, completion rate
-- **Configuration Tab**: All engraving parameters configurable via web interface
-- **Calibrate Tab**: Jog controls, home, set origin, dry run, trace job area
-- **API Docs Tab**: Embedded Swagger UI (`/api-docs`)
-- **Spec Tab**: Embedded product specification (`/docs/CNC_Chocolate_Engraver_Specification.html`)
-
-## API Documentation
-
-Swagger/OpenAPI documentation available at:
-- Interactive UI: http://localhost:3000/api-docs
-- JSON spec: http://localhost:3000/api-docs.json
-
-## Hardware
-
-- USB serial connection to GRBL controller (auto-scanned from `/dev/ttyUSB*` or `/dev/ttyACM*`)
-- Baud rate: 115200
-- Default chocolate bar size: 100mm x 40mm
-- G54 work coordinates used for calibration offsets (stored in GRBL EEPROM)
-
-## SAP Integration
-
-This engine is designed to be called from SAP BTP screens via:
-- SAP Cloud Connector (for secure on-premise connectivity)
-- SAP JDK running on this machine
-- REST API endpoints exposed on port 3000
+- Store all timestamps in UTC.
+- Convert to local time only at the display layer.
