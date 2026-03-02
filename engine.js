@@ -1,5 +1,6 @@
 // CNC Engine - Job queue processing and serial communication
 
+const fs = require('fs');
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 const database = require('./database');
@@ -62,7 +63,6 @@ async function connect(devicePath = null) {
     parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
 
     parser.on('data', (data) => {
-      console.log('GRBL:', data);
       handleGrblResponse(data);
     });
 
@@ -333,19 +333,7 @@ async function printNext() {
   }
 }
 
-async function _printNext() {
-  // Check if already printing
-  const isPrinting = await database.isAnyJobPrinting();
-  if (isPrinting) {
-    return { success: false, error: 'A job is already printing' };
-  }
-
-  // Get next pending job (oldest first)
-  const job = await database.getNextPendingJob();
-  if (!job) {
-    return { success: false, error: 'No pending jobs in queue' };
-  }
-
+async function _executePrint(job) {
   // Ensure we're connected
   if (!isConnected) {
     const connectResult = await connect();
@@ -375,8 +363,7 @@ async function _printNext() {
     // Send G-code to CNC
     await sendGcode(gcodeString);
 
-    // For now, mark as completed after 10 seconds (placeholder)
-    // This will be updated later when we know the actual completion signal
+    // Mark as completed after 10 seconds (placeholder for actual GRBL completion signal)
     setTimeout(async () => {
       await completeJob(job.id, linesPrinted, charsPrinted);
     }, 10000);
@@ -390,11 +377,24 @@ async function _printNext() {
     };
   } catch (err) {
     console.error('Print error:', err);
-    // Revert to pending status on error
     await database.updateJob(job.id, { status: 'Pending' });
     currentJobId = null;
     return { success: false, error: err.message };
   }
+}
+
+async function _printNext() {
+  const isPrinting = await database.isAnyJobPrinting();
+  if (isPrinting) {
+    return { success: false, error: 'A job is already printing' };
+  }
+
+  const job = await database.getNextPendingJob();
+  if (!job) {
+    return { success: false, error: 'No pending jobs in queue' };
+  }
+
+  return _executePrint(job);
 }
 
 // Print a specific job by ID
@@ -411,13 +411,11 @@ async function printJob(jobId) {
 }
 
 async function _printJob(jobId) {
-  // Check if already printing
   const isPrinting = await database.isAnyJobPrinting();
   if (isPrinting) {
     return { success: false, error: 'A job is already printing' };
   }
 
-  // Get the specific job
   const job = await database.getJobById(jobId);
   if (!job) {
     return { success: false, error: 'Job not found' };
@@ -427,54 +425,7 @@ async function _printJob(jobId) {
     return { success: false, error: 'Job is not in Pending status' };
   }
 
-  // Ensure we're connected
-
-  if (!isConnected) {
-    const connectResult = await connect();
-    if (!connectResult.success) {
-      return { success: false, error: 'Failed to connect to CNC: ' + connectResult.error };
-    }
-  }
-
-  // Update job status to Printing
-  await database.updateJob(job.id, { status: 'Printing' });
-  currentJobId = job.id;
-
-  try {
-    // Get config and generate G-code
-    const configData = await config.getConfig();
-    const gcodeString = gcode.generateGcode(job, configData);
-
-    // Calculate statistics
-    const linesPrinted = (job.message_1 ? 1 : 0) + (job.message_2 ? 1 : 0) + 1;
-    const charsPrinted = (configData.template_text || '').length +
-      (job.message_1 || '').length +
-      (job.message_2 || '').length;
-
-    console.log('Starting print job:', job.id);
-    console.log('G-code:\n', gcodeString);
-
-    // Send G-code to CNC
-    await sendGcode(gcodeString);
-
-    // For now, mark as completed after 10 seconds (placeholder)
-    setTimeout(async () => {
-      await completeJob(job.id, linesPrinted, charsPrinted);
-    }, 10000);
-
-    return {
-      success: true,
-      jobId: job.id,
-      message: 'Print job started',
-      gcode: gcodeString,
-      stats: { linesPrinted, charsPrinted }
-    };
-  } catch (err) {
-    console.error('Print error:', err);
-    await database.updateJob(job.id, { status: 'Pending' });
-    currentJobId = null;
-    return { success: false, error: err.message };
-  }
+  return _executePrint(job);
 }
 
 // Print only the gcode of a print job to script.txt
@@ -487,7 +438,6 @@ async function printScript(jobId) {
 
   const configData = await config.getConfig();
   const gcodeString = gcode.generateGcode(job, configData);
-  const fs = require('fs');
   fs.writeFileSync("script.txt", gcodeString.toString(), 'utf8');
       return {
       success: true,
@@ -505,13 +455,15 @@ async function completeJob(jobId, linesPrinted = 0, charsPrinted = 0) {
     completed_at: completedAt
   });
 
-  // Update statistics
-  await database.incrementStat('total_jobs_completed');
-  await database.incrementStat('total_lines_printed', linesPrinted);
-  await database.incrementStat('total_chars_printed', charsPrinted);
-  await database.updateDailyStat('jobs_completed');
-  await database.updateDailyStat('lines_printed', linesPrinted);
-  await database.updateDailyStat('chars_printed', charsPrinted);
+  // Update statistics in parallel
+  await Promise.all([
+    database.incrementStat('total_jobs_completed'),
+    database.incrementStat('total_lines_printed', linesPrinted),
+    database.incrementStat('total_chars_printed', charsPrinted),
+    database.updateDailyStat('jobs_completed'),
+    database.updateDailyStat('lines_printed', linesPrinted),
+    database.updateDailyStat('chars_printed', charsPrinted)
+  ]);
 
   console.log('Job completed:', jobId);
   currentJobId = null;

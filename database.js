@@ -13,6 +13,10 @@ function init() {
       }
 
       db.serialize(() => {
+        // Performance: WAL mode allows concurrent reads during writes
+        db.run('PRAGMA journal_mode=WAL');
+        db.run('PRAGMA synchronous=NORMAL');
+
         // Jobs table
         db.run(`
           CREATE TABLE IF NOT EXISTS jobs (
@@ -62,7 +66,11 @@ function init() {
             lines_printed INTEGER DEFAULT 0,
             chars_printed INTEGER DEFAULT 0
           )
-        `, (err) => {
+        `);
+
+        // Indexes for frequently-queried columns
+        db.run('CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)');
+        db.run('CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at)', (err) => {
           if (err) {
             reject(err);
           } else {
