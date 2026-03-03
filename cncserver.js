@@ -7,6 +7,7 @@ const path = require('path');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 
+const logger = require('./logger');
 const database = require('./database');
 const api = require('./api');
 const engine = require('./engine');
@@ -78,44 +79,45 @@ app.get('/{*splat}', (req, res) => {
 // Initialize and start server
 async function start() {
   try {
+    logger.sessionStart();
+
     // Initialize database
-    console.log('Initializing database...');
+    logger.log('Initializing database...');
     await database.init();
-    console.log('Database initialized');
+    logger.log('Database initialized');
 
     // Try to auto-connect to CNC
-    console.log('Scanning for CNC device...');
+    logger.log('Scanning for CNC device...');
     const connectResult = await engine.connect();
     if (connectResult.success) {
-      console.log('Connected to CNC at', connectResult.path);
+      logger.log('Connected to CNC at', connectResult.path);
     } else {
-      console.log('CNC not connected:', connectResult.error);
-      console.log('You can connect manually via the web interface');
+      logger.log('CNC not connected:', connectResult.error);
+      logger.log('You can connect manually via the web interface');
     }
 
     // Start HTTP server (bind to localhost only - Tailscale proxies to it)
     const server = await app.listen(PORT, '127.0.0.1');
-    console.log(`CNC Chocolate Engraver running at http://localhost:${PORT}`);
+    logger.log(`CNC Chocolate Engraver running at http://localhost:${PORT}`);
   } catch (err) {
-    console.error('Failed to start server:', err);
+    logger.error('Failed to start server:', err);
     process.exit(1);
   }
 }
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('\nShutting down...');
+// Graceful shutdown — guard ensures only one shutdown runs if both signals fire
+let shuttingDown = false;
+async function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  logger.log('Shutting down...');
   engine.disconnect();
   await database.close();
   process.exit(0);
-});
+}
 
-process.on('SIGTERM', async () => {
-  console.log('\nShutting down...');
-  engine.disconnect();
-  await database.close();
-  process.exit(0);
-});
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
 // Start the server
 start();

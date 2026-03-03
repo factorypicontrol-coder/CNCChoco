@@ -10,7 +10,7 @@ A Node.js application for engraving personalized messages on chocolate bars usin
 - **Statistics Dashboard** - Visual charts showing job counts, completion rates, daily activity
 - **Web Interface** - Modern, responsive browser-based UI
 - **Configurable Templates** - Customizable template text with two message lines
-- **Multiple Fonts** - Three CNC-optimized stroke fonts: Hershey, Block, and Script
+- **Multiple Fonts** - Six CNC-optimized stroke fonts: Hershey, Block, Script, Pristina, Calibri, and Logo
 - **Auto USB Detection** - Automatically scans for connected CNC devices
 - **SAP BTP Ready** - REST API designed for integration via SAP Cloud Connector
 
@@ -27,6 +27,14 @@ git clone <repository>
 cd CNCChoco
 npm install
 ```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | HTTP port to listen on | `3000` |
+
+Set these in your shell environment or systemd unit file before starting the server.
 
 ## Usage
 
@@ -138,12 +146,12 @@ Interactive API documentation is available at:
 | Key | Description | Default |
 |-----|-------------|---------|
 | template_text | Template text to engrave | KPMG |
-| template_font | Template font (hershey/block/script) | hershey |
+| template_font | Template font (hershey/block/script/pristina/calibri/logo) | hershey |
 | template_font_size | Template font size in mm | 12 |
 | template_alignment | Template alignment (left/centered/right) | centered |
 | bar_width | Chocolate bar width in mm | 100 |
 | bar_height | Chocolate bar height in mm | 40 |
-| message_font | Message font | hershey |
+| message_font | Message font (hershey/block/script/pristina/calibri/logo) | hershey |
 | message_font_size_1_line | Font size when 1 message line | 10 |
 | message_font_size_2_lines | Font size when 2 message lines | 7 |
 | message_alignment | Message alignment (left/centered) | centered |
@@ -152,6 +160,8 @@ Interactive API documentation is available at:
 | z_safe_height | Z height for travel moves (mm) | 5 |
 | z_engrave_depth | Z depth for engraving (mm) | -0.5 |
 | feed_rate | Engraving feed rate (mm/min) | 200 |
+| spindle_enabled | Enable spindle (M3/M5) commands in G-code | false |
+| spindle_speed | Spindle speed S value when enabled | 500 |
 
 ## Statistics Tracked
 
@@ -170,6 +180,9 @@ Daily statistics are also tracked for the last 30 days.
 - **Hershey** - Classic single-stroke CNC font, clean and readable
 - **Block** - Modern geometric font with straight lines only
 - **Script** - Elegant cursive style for branding
+- **Pristina** - TrueType-derived stroke font
+- **Calibri** - TrueType-derived stroke font
+- **Logo** - Custom brand font
 
 ## Database
 

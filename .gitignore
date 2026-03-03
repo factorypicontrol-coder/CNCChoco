@@ -4,3 +4,5 @@ node_modules
 output.txt
 script.txt
 cncchoco.db
+.env
+server.log
