@@ -3,6 +3,7 @@
 const fs = require('fs');
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
+const logger = require('./logger');
 const database = require('./database');
 const config = require('./config');
 const gcode = require('./gcode');
@@ -29,14 +30,14 @@ async function scanForDevice() {
     );
 
     if (usbPorts.length > 0) {
-      console.log('Found USB devices:', usbPorts.map(p => p.path));
+      logger.log('Found USB devices:', usbPorts.map(p => p.path));
       return usbPorts[0].path;
     }
 
-    console.log('No USB serial devices found');
+    logger.log('No USB serial devices found');
     return null;
   } catch (err) {
-    console.error('Error scanning for devices:', err);
+    logger.error('Error scanning for devices:', err);
     return null;
   }
 }
@@ -44,7 +45,7 @@ async function scanForDevice() {
 // Connect to GRBL controller
 async function connect(devicePath = null) {
   if (isConnected && port) {
-    console.log('Already connected to', port.path);
+    logger.log('Already connected to', port.path);
     return { success: true, path: port.path };
   }
 
@@ -67,17 +68,17 @@ async function connect(devicePath = null) {
     });
 
     port.on('open', () => {
-      console.log('Connected to GRBL at', path);
+      logger.log('Connected to GRBL at', path);
       isConnected = true;
     });
 
     port.on('error', (err) => {
-      console.error('Serial error:', err);
+      logger.error('Serial error:', err);
       isConnected = false;
     });
 
     port.on('close', () => {
-      console.log('Serial connection closed');
+      logger.log('Serial connection closed');
       isConnected = false;
     });
 
@@ -95,7 +96,7 @@ async function connect(devicePath = null) {
 
     return { success: true, path: path, appliedSettings };
   } catch (err) {
-    console.error('Failed to connect:', err);
+    logger.error('Failed to connect:', err);
     return { success: false, error: err.message };
   }
 }
@@ -111,32 +112,15 @@ async function applyGrblSettings() {
   for (const { cmd, desc } of settings) {
     try {
       await sendCommandAndWait(cmd, 5000);
-      console.log(`Applied GRBL setting: ${cmd} (${desc})`);
+      logger.log(`Applied GRBL setting: ${cmd} (${desc})`);
       results.push({ setting: cmd, success: true });
     } catch (err) {
-      console.warn(`Failed to apply GRBL setting ${cmd}: ${err.message}`);
+      logger.warn(`Failed to apply GRBL setting ${cmd}: ${err.message}`);
       results.push({ setting: cmd, success: false, error: err.message });
     }
   }
   return results;
 }
-/*
-// Handle GRBL responses
-function handleGrblResponse(data) {
-  const response = data.trim();
-
-  // Check for completion signals
-  if (response === 'ok' || response.includes('Grbl')) {
-    // Normal response, continue
-  } else if (response.startsWith('error:')) {
-    console.error('GRBL Error:', response);
-  } else if (response.startsWith('<') && response.endsWith('>')) {
-    // Status response
-    console.log('GRBL Status:', response);
-  }
-}
-*/
-
 // Parse GRBL status report string like <Idle|MPos:0.000,0.000,0.000|FS:0,0>
 function parseStatusReport(raw) {
   const inner = raw.slice(1, -1);
@@ -157,11 +141,10 @@ function parseStatusReport(raw) {
   return result;
 }
 
-//Status based
 function handleGrblResponse(data) {
   const response = data.trim();
 
-  console.log('GRBL:', response);
+  logger.log('GRBL:', response);
 
   // --- Flow control FIRST ---
   if (responseResolvers.length > 0) {
@@ -189,12 +172,12 @@ function handleGrblResponse(data) {
 
   if (response.includes('Grbl')) {
     // Startup banner
-    console.log('GRBL Startup:', response);
+    logger.log('GRBL Startup:', response);
     return;
   }
 
   if (response.startsWith('ALARM')) {
-    console.error('GRBL Alarm:', response);
+    logger.error('GRBL Alarm:', response);
     return;
   }
 
@@ -219,7 +202,6 @@ function disconnect() {
   isConnected = false;
 }
 
-//Status based response start
 function sendCommandAndWait(command, timeoutMs = 30000) {
   return new Promise((resolve, reject) => {
     if (!port || !isConnected) {
@@ -278,46 +260,6 @@ async function sendGcode(gcodeString) {
   }
 }
 
-//Status based send end.
-
-/*
-//Time based send
-// Send G-code command
-function sendCommand(command) {
-        const fs = require('fs');
-      fs.appendFileSync('sent_gcode.txt', command + '\n', 'utf8');
-      
-  return new Promise((resolve, reject) => {
-    if (!port || !isConnected) {
-      reject(new Error('Not connected to GRBL'));
-      return;
-    }
-
-    port.write(command + '\n', (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
-  });
-  
-}
-
-// Send G-code line by line with small delay
-async function sendGcode(gcodeString) {
-  const lines = gcodeString.split('\n').filter(line => {
-    const trimmed = line.trim();
-    return trimmed.length > 0 && !trimmed.startsWith(';');
-  });
-
-  for (const line of lines) {
-    await sendCommand(line);
-    // Small delay between commands for GRBL buffer
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
-}
-*/
 
 
 // Print next job in queue
@@ -357,8 +299,8 @@ async function _executePrint(job) {
       (job.message_1 || '').length +
       (job.message_2 || '').length;
 
-    console.log('Starting print job:', job.id);
-    console.log('G-code:\n', gcodeString);
+    logger.log('Starting print job:', job.id);
+    logger.log('G-code:\n', gcodeString);
 
     // Send G-code to CNC
     await sendGcode(gcodeString);
@@ -376,7 +318,7 @@ async function _executePrint(job) {
       stats: { linesPrinted, charsPrinted }
     };
   } catch (err) {
-    console.error('Print error:', err);
+    logger.error('Print error:', err);
     await database.updateJob(job.id, { status: 'Pending' });
     currentJobId = null;
     return { success: false, error: err.message };
@@ -465,7 +407,7 @@ async function completeJob(jobId, linesPrinted = 0, charsPrinted = 0) {
     database.updateDailyStat('chars_printed', charsPrinted)
   ]);
 
-  console.log('Job completed:', jobId);
+  logger.log('Job completed:', jobId);
   currentJobId = null;
 }
 
@@ -731,7 +673,7 @@ function emergencyStop() {
 
   if (jobId) {
     database.updateJob(jobId, { status: 'Pending' }).catch(err => {
-      console.error('Error reverting job after emergency stop:', err);
+      logger.error('Error reverting job after emergency stop:', err);
     });
   }
 
@@ -758,7 +700,7 @@ async function listDevices() {
       (p.path && p.path.includes('ttyACM'))
     );
   } catch (err) {
-    console.error('Error listing devices:', err);
+    logger.error('Error listing devices:', err);
     return [];
   }
 }
