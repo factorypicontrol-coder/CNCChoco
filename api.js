@@ -6,7 +6,19 @@ const configModule = require('./config');
 const engine = require('./engine');
 const { generateGcode } = require('./gcode');
 
+const logger = require('./logger');
+
 const router = express.Router();
+
+// Parses a route parameter as a positive integer ID.
+// Returns the integer, or null if the value is not a valid positive integer.
+function parseId(raw) {
+  const id = parseInt(raw, 10);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+const VALID_AXES = ['X', 'Y', 'Z'];
+const MESSAGE_MAX_LENGTH = 50;
 
 // ============================================
 // Job APIs
@@ -51,20 +63,29 @@ const router = express.Router();
  */
 router.post('/createjob', async (req, res) => {
   try {
+    const { first_name, last_name, email_address, phone_number,
+            question_1, question_2, question_3, best_contact,
+            contact_details, reach_out_next_month, message_1,
+            message_2, agreement } = req.body;
+
+    if (!first_name || typeof first_name !== 'string' || !first_name.trim()) {
+      return res.status(400).json({ success: false, error: 'first_name is required' });
+    }
+    if (!last_name || typeof last_name !== 'string' || !last_name.trim()) {
+      return res.status(400).json({ success: false, error: 'last_name is required' });
+    }
+    if (message_1 != null && String(message_1).length > MESSAGE_MAX_LENGTH) {
+      return res.status(400).json({ success: false, error: `message_1 must be ${MESSAGE_MAX_LENGTH} characters or fewer` });
+    }
+    if (message_2 != null && String(message_2).length > MESSAGE_MAX_LENGTH) {
+      return res.status(400).json({ success: false, error: `message_2 must be ${MESSAGE_MAX_LENGTH} characters or fewer` });
+    }
+
     const jobData = {
-      first_name: req.body.first_name,
-      last_name: req.body.last_name,
-      email_address: req.body.email_address,
-      phone_number: req.body.phone_number,
-      question_1: req.body.question_1,
-      question_2: req.body.question_2,
-      question_3: req.body.question_3,
-      best_contact: req.body.best_contact,
-      contact_details: req.body.contact_details,
-      reach_out_next_month: req.body.reach_out_next_month,
-      message_1: req.body.message_1,
-      message_2: req.body.message_2,
-      agreement: req.body.agreement
+      first_name, last_name, email_address, phone_number,
+      question_1, question_2, question_3, best_contact,
+      contact_details, reach_out_next_month, message_1,
+      message_2, agreement
     };
 
     const result = await database.createJob(jobData);
@@ -79,7 +100,7 @@ router.post('/createjob', async (req, res) => {
       message: 'Job created successfully'
     });
   } catch (err) {
-    console.error('Error creating job:', err);
+    logger.error('Error creating job:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -142,7 +163,7 @@ router.get('/getqueue', async (req, res) => {
       jobs: jobs
     });
   } catch (err) {
-    console.error('Error getting queue:', err);
+    logger.error('Error getting queue:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -183,13 +204,16 @@ router.get('/getqueue', async (req, res) => {
  */
 router.get('/getjob/:id', async (req, res) => {
   try {
-    const job = await database.getJobById(req.params.id);
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ success: false, error: 'Invalid job ID' });
+
+    const job = await database.getJobById(id);
     if (!job) {
       return res.status(404).json({ success: false, error: 'Job not found' });
     }
     res.json({ success: true, job: job });
   } catch (err) {
-    console.error('Error getting job:', err);
+    logger.error('Error getting job:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -238,6 +262,9 @@ router.patch('/updatejobs/bulk', async (req, res) => {
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ success: false, error: 'No job IDs provided' });
     }
+    if (ids.some(id => parseId(id) === null)) {
+      return res.status(400).json({ success: false, error: 'All IDs must be positive integers' });
+    }
 
     if (!status || !configModule.JOB_STATUSES.includes(status)) {
       return res.status(400).json({
@@ -260,7 +287,7 @@ router.patch('/updatejobs/bulk', async (req, res) => {
       message: `${result.changes} jobs updated`
     });
   } catch (err) {
-    console.error('Error bulk updating jobs:', err);
+    logger.error('Error bulk updating jobs:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -317,7 +344,9 @@ router.patch('/updatejobs/bulk', async (req, res) => {
  */
 router.patch('/updatejobs/:id', async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const jobId = parseId(req.params.id);
+    if (!jobId) return res.status(400).json({ success: false, error: 'Invalid job ID' });
+
     const updates = req.body;
 
     // Validate status if being updated
@@ -348,7 +377,7 @@ router.patch('/updatejobs/:id', async (req, res) => {
       message: 'Job updated successfully'
     });
   } catch (err) {
-    console.error('Error updating job:', err);
+    logger.error('Error updating job:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -397,7 +426,9 @@ router.patch('/updatejobs/:id', async (req, res) => {
  */
 router.put('/updatejobs/:id', async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const jobId = parseId(req.params.id);
+    if (!jobId) return res.status(400).json({ success: false, error: 'Invalid job ID' });
+
     const updates = req.body;
 
     // Validate status if being updated
@@ -420,7 +451,7 @@ router.put('/updatejobs/:id', async (req, res) => {
       message: 'Job updated successfully'
     });
   } catch (err) {
-    console.error('Error updating job:', err);
+    logger.error('Error updating job:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -453,8 +484,8 @@ router.put('/updatejobs/:id', async (req, res) => {
 router.get('/print', (req, res) => {
   res.json({ success: true, message: 'Print Request Received' });
   engine.printNext().then(result => {
-    if (!result.success) console.warn('Print next failed:', result.error);
-  }).catch(err => console.error('Error printing:', err));
+    if (!result.success) logger.warn('Print next failed:', result.error);
+  }).catch(err => logger.error('Error printing:', err));
 });
 
 /**
@@ -486,11 +517,12 @@ router.get('/print', (req, res) => {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/print/:id', (req, res) => {
-  const jobId = parseInt(req.params.id);
+  const jobId = parseId(req.params.id);
+  if (!jobId) return res.status(400).json({ success: false, error: 'Invalid job ID' });
   res.json({ success: true, message: 'Print Request Received' });
   engine.printJob(jobId).then(result => {
-    if (!result.success) console.warn(`Print job ${jobId} failed:`, result.error);
-  }).catch(err => console.error(`Error printing job ${jobId}:`, err));
+    if (!result.success) logger.warn(`Print job ${jobId} failed:`, result.error);
+  }).catch(err => logger.error(`Error printing job ${jobId}:`, err));
 });
 
 /**
@@ -533,7 +565,7 @@ router.get('/script/:id', async (req, res) => {
       res.status(400).json(result);
     }
   } catch (err) {
-    console.error('Error scripting job:', err);
+    logger.error('Error scripting job:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -596,7 +628,7 @@ router.get('/getConfig', async (req, res) => {
       jobStatuses: configModule.JOB_STATUSES
     });
   } catch (err) {
-    console.error('Error getting config:', err);
+    logger.error('Error getting config:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -658,7 +690,7 @@ router.patch('/updateConfig', async (req, res) => {
       config: config
     });
   } catch (err) {
-    console.error('Error updating config:', err);
+    logger.error('Error updating config:', err);
     res.status(400).json({ success: false, error: err.message });
   }
 });
@@ -710,7 +742,7 @@ router.get('/status', async (req, res) => {
       availableDevices: devices
     });
   } catch (err) {
-    console.error('Error getting status:', err);
+    logger.error('Error getting status:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -754,7 +786,7 @@ router.post('/connect', async (req, res) => {
     const result = await engine.connect(devicePath);
     res.json(result);
   } catch (err) {
-    console.error('Error connecting:', err);
+    logger.error('Error connecting:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -779,7 +811,7 @@ router.post('/disconnect', async (req, res) => {
     engine.disconnect();
     res.json({ success: true, message: 'Disconnected' });
   } catch (err) {
-    console.error('Error disconnecting:', err);
+    logger.error('Error disconnecting:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -814,7 +846,7 @@ router.post('/estop', (req, res) => {
     const result = engine.emergencyStop();
     res.json(result);
   } catch (err) {
-    console.error('Error during emergency stop:', err);
+    logger.error('Error during emergency stop:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -862,7 +894,7 @@ router.post('/command', async (req, res) => {
     await engine.sendCommandAndWait(gcode);
     res.json({ success: true, message: 'Command sent' });
   } catch (err) {
-    console.error('Error sending command:', err);
+    logger.error('Error sending command:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -908,7 +940,7 @@ router.post('/calibrate/home', async (req, res) => {
       res.status(400).json(result);
     }
   } catch (err) {
-    console.error('Error homing:', err);
+    logger.error('Error homing:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -943,7 +975,7 @@ router.post('/calibrate/unlock', async (req, res) => {
       res.status(400).json(result);
     }
   } catch (err) {
-    console.error('Error unlocking:', err);
+    logger.error('Error unlocking:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -984,21 +1016,27 @@ router.post('/calibrate/jog', async (req, res) => {
   try {
     const { axis, distance, feedRate } = req.body;
 
-    if (!axis || distance === undefined || distance === null) {
-      return res.status(400).json({ success: false, error: 'axis and distance are required' });
+    if (!axis || !VALID_AXES.includes(String(axis).toUpperCase())) {
+      return res.status(400).json({ success: false, error: `axis must be one of: ${VALID_AXES.join(', ')}` });
+    }
+    if (distance === undefined || distance === null || !Number.isFinite(Number(distance))) {
+      return res.status(400).json({ success: false, error: 'distance must be a finite number' });
+    }
+    if (feedRate !== undefined && feedRate !== null && !(Number.isFinite(Number(feedRate)) && Number(feedRate) > 0)) {
+      return res.status(400).json({ success: false, error: 'feedRate must be a positive number' });
     }
 
     const configData = await configModule.getConfig();
-    const jogFeed = feedRate ? Number(feedRate) : configData.jog_feed_rate;
+    const jogFeed = feedRate != null ? Number(feedRate) : configData.jog_feed_rate;
 
-    const result = await engine.jog(axis, Number(distance), jogFeed);
+    const result = await engine.jog(String(axis).toUpperCase(), Number(distance), jogFeed);
     if (result.success) {
       res.json(result);
     } else {
       res.status(400).json(result);
     }
   } catch (err) {
-    console.error('Error jogging:', err);
+    logger.error('Error jogging:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -1050,6 +1088,19 @@ router.post('/calibrate/jog/cancel', (req, res) => {
 router.post('/calibrate/moveto', async (req, res) => {
   try {
     const { x, y, z, feedRate } = req.body;
+
+    if (x === undefined && y === undefined && z === undefined) {
+      return res.status(400).json({ success: false, error: 'At least one of x, y, z is required' });
+    }
+    for (const [name, val] of [['x', x], ['y', y], ['z', z]]) {
+      if (val !== undefined && val !== null && !Number.isFinite(Number(val))) {
+        return res.status(400).json({ success: false, error: `${name} must be a finite number` });
+      }
+    }
+    if (feedRate !== undefined && feedRate !== null && !(Number.isFinite(Number(feedRate)) && Number(feedRate) > 0)) {
+      return res.status(400).json({ success: false, error: 'feedRate must be a positive number' });
+    }
+
     const result = await engine.moveTo(x, y, z, feedRate);
     if (result.success) {
       res.json(result);
@@ -1088,11 +1139,14 @@ router.post('/calibrate/moveto', async (req, res) => {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/calibrate/position', async (req, res) => {
+  if (!engine.getStatus().connected) {
+    return res.json({ success: false, connected: false });
+  }
   try {
     const position = await engine.queryPosition();
     res.json({ success: true, position });
   } catch (err) {
-    console.error('Error querying position:', err);
+    logger.error('Error querying position:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -1159,6 +1213,14 @@ router.post('/calibrate/setorigin', async (req, res) => {
   try {
     const xDelta = req.body?.xDelta ?? 0;
     const yDelta = req.body?.yDelta ?? 0;
+
+    if (!Number.isFinite(Number(xDelta))) {
+      return res.status(400).json({ success: false, error: 'xDelta must be a finite number' });
+    }
+    if (!Number.isFinite(Number(yDelta))) {
+      return res.status(400).json({ success: false, error: 'yDelta must be a finite number' });
+    }
+
     const result = await engine.setWorkOffset(xDelta, yDelta);
     if (result.success) {
       res.json(result);
@@ -1166,7 +1228,7 @@ router.post('/calibrate/setorigin', async (req, res) => {
       res.status(400).json(result);
     }
   } catch (err) {
-    console.error('Error setting origin:', err);
+    logger.error('Error setting origin:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -1212,10 +1274,17 @@ router.post('/calibrate/setorigin', async (req, res) => {
 router.post('/calibrate/dryrun', async (req, res) => {
   try {
     const configData = await configModule.getConfig();
-    const barWidth = req.body?.barWidth || configData.bar_width;
-    const barHeight = req.body?.barHeight || configData.bar_height;
+    const barWidth = req.body?.barWidth ?? configData.bar_width;
+    const barHeight = req.body?.barHeight ?? configData.bar_height;
     const zSafe = configData.z_safe_height;
     const feedRate = configData.feed_rate;
+
+    if (!Number.isFinite(Number(barWidth)) || Number(barWidth) <= 0) {
+      return res.status(400).json({ success: false, error: 'barWidth must be a positive number' });
+    }
+    if (!Number.isFinite(Number(barHeight)) || Number(barHeight) <= 0) {
+      return res.status(400).json({ success: false, error: 'barHeight must be a positive number' });
+    }
 
     const result = await engine.dryRunBoundary(barWidth, barHeight, zSafe, feedRate);
     if (result.success) {
@@ -1224,7 +1293,7 @@ router.post('/calibrate/dryrun', async (req, res) => {
       res.status(400).json(result);
     }
   } catch (err) {
-    console.error('Error running dry run:', err);
+    logger.error('Error running dry run:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -1276,7 +1345,9 @@ router.post('/calibrate/tracejob', async (req, res) => {
     let job;
     const requestedId = req.body?.jobId;
     if (requestedId !== undefined && requestedId !== null && requestedId !== '') {
-      job = await database.getJobById(Number(requestedId));
+      const parsedId = parseId(requestedId);
+      if (!parsedId) return res.status(400).json({ success: false, error: 'jobId must be a positive integer' });
+      job = await database.getJobById(parsedId);
       if (!job) {
         return res.status(404).json({ success: false, error: `Job #${requestedId} not found` });
       }
@@ -1332,7 +1403,7 @@ router.post('/calibrate/tracejob', async (req, res) => {
       res.status(400).json(result);
     }
   } catch (err) {
-    console.error('Error tracing job boundary:', err);
+    logger.error('Error tracing job boundary:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -1418,7 +1489,7 @@ router.get('/stats', async (req, res) => {
       isPrinting: isPrinting
     });
   } catch (err) {
-    console.error('Error getting statistics:', err);
+    logger.error('Error getting statistics:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -1472,7 +1543,7 @@ router.get('/queue/live', async (req, res) => {
       timestamp: Date.now()
     });
   } catch (err) {
-    console.error('Error getting live queue:', err);
+    logger.error('Error getting live queue:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
