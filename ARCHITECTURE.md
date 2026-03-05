@@ -162,7 +162,6 @@ Technical reference for the CNC Chocolate Engraver. For working guidelines and w
 | CNC | `feed_rate` | Engraving feed rate (mm/min) |
 | CNC | `jog_feed_rate` | Jog feed rate (mm/min) |
 | G-code | `normalize_glyph_z` | Normalise Z per glyph |
-| G-code | `normalize_glyph_feed` | Normalise feed per glyph |
 | G-code | `decimals` | Decimal precision in G-code output |
 | G-code | `use_g54_calibration` | Apply G54 work coordinate offset |
 | Spindle | `spindle_enabled` | Enable spindle output |

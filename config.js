@@ -26,7 +26,6 @@ const CONFIG_KEYS = {
   z_engrave_depth: { type: 'number', min: -10, max: 0, default: '-0.5' },
   feed_rate: { type: 'number', min: 10, max: 2000, default: '200' },
   normalize_glyph_z: { type: 'boolean', default: 'false' },
-  normalize_glyph_feed: { type: 'boolean', default: 'false' },
   decimals: { type: 'number', min: 0, max: 8, default: '3' },
   use_g54_calibration: { type: 'boolean', default: 'true' },
   jog_feed_rate: { type: 'number', min: 10, max: 5000, default: '500' },

@@ -85,11 +85,10 @@ function generateGcode(job, config) {
   // Options for glyph transformation
   const glyphOpts = {
     decimals,
-    // Enable these if you want glyph Z and F replaced by config values
     normalizeZ: !!config.normalize_glyph_z,
     zSafe,
     zEngrave,
-    normalizeFeed: !!config.normalize_glyph_feed,
+    normalizeFeed: true,
     feedRate
   };
 
